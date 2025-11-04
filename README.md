@@ -27,7 +27,7 @@ https://github.com/user-attachments/assets/your-demo-video.mp4
 
 ## What This Does
 
-AI assistants invoke tools that render interactive web apps. Those apps can register new tools back to the AI.
+AI assistants invoke tools that render interactive web apps. Those apps can register new tools back to the AI. This combines [MCP UI resources](https://mcpui.dev/guide/introduction) with [WebMCP bidirectional tool registration](https://github.com/webmachinelearning/webmcp/blob/main/docs/explainer.md).
 
 **Flow:**
 1. AI calls `showTicTacToeGame`
@@ -95,7 +95,7 @@ Open http://localhost:5173 and ask the AI to show you a TicTacToe game.
 
 ### MCP UI Resources
 
-Three resource types supported:
+Three resource types supported ([learn more](https://mcpui.dev/guide/protocol-details)):
 
 | Type | Use Case | Implementation |
 |------|----------|----------------|
@@ -103,9 +103,11 @@ Three resource types supported:
 | `rawHtml` | Simple markup | Sanitized HTML |
 | `remoteDom` | Dynamic content | JavaScript-generated DOM |
 
+[→ MCP-UI Server SDK](https://mcpui.dev/guide/server/typescript/overview) | [→ MCP-UI Client SDK](https://mcpui.dev/guide/client/overview)
+
 ### WebMCP Tool Registration
 
-Mini-apps register tools using the `useWebMCP` hook:
+Mini-apps register tools using the `useWebMCP` hook ([documentation](https://docs.mcp-b.ai/introduction)):
 
 ```typescript
 import { useWebMCP } from '@mcp-b/react-webmcp';
@@ -129,6 +131,8 @@ useWebMCP({
 ```
 
 The AI can immediately invoke `tictactoe_move` as if it were a native MCP tool.
+
+[→ MCP-B Quick Start](https://docs.mcp-b.ai/quickstart) | [→ MCP-B Examples](https://docs.mcp-b.ai/examples) | [→ NPM Packages](https://github.com/WebMCP-org/npm-packages)
 
 ## Packages
 
@@ -228,9 +232,31 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for development standards.
 
 ## Resources
 
-- [Model Context Protocol](https://modelcontextprotocol.io/)
-- [MCP Specification](https://spec.modelcontextprotocol.io/)
-- [Cloudflare Workers](https://developers.cloudflare.com/workers/)
+### MCP-UI (UI Resources)
+- [MCP-UI Introduction](https://mcpui.dev/guide/introduction) - Overview of MCP UI resources
+- [Protocol Details](https://mcpui.dev/guide/protocol-details) - Resource types and implementation
+- [Server SDK (TypeScript)](https://mcpui.dev/guide/server/typescript/overview) - Build MCP servers with UI support
+- [Client SDK](https://mcpui.dev/guide/client/overview) - Render UI resources in your client
+- [GitHub](https://github.com/idosal/mcp-ui) - Source code and examples
+
+### MCP-B (WebMCP / Bidirectional Tools)
+- [MCP-B Documentation](https://docs.mcp-b.ai/introduction) - Getting started with WebMCP
+- [Quick Start](https://docs.mcp-b.ai/quickstart) - Get WebMCP running in minutes
+- [Core Concepts](https://docs.mcp-b.ai/concepts) - Architecture and system design
+- [Examples](https://docs.mcp-b.ai/examples) - Ready-to-use implementations
+- [NPM Packages](https://github.com/WebMCP-org/npm-packages) - `@mcp-b/react-webmcp` and more
+- [WebMCP Explainer](https://github.com/webmachinelearning/webmcp/blob/main/docs/explainer.md) - W3C proposal and specification
+- [Live Demo](https://mcp-b.ai) - Interactive examples
+
+### Model Context Protocol
+- [MCP Documentation](https://modelcontextprotocol.io/) - Official protocol documentation
+- [MCP Specification](https://spec.modelcontextprotocol.io/) - Technical specification
+- [MCP GitHub](https://github.com/modelcontextprotocol/modelcontextprotocol) - Specification repository
+
+### Deployment & Infrastructure
+- [Cloudflare Workers](https://developers.cloudflare.com/workers/) - Serverless runtime
+- [Cloudflare Durable Objects](https://developers.cloudflare.com/durable-objects/) - Stateful coordination
+- [Playwright](https://playwright.dev/) - E2E testing framework
 
 ## License
 
