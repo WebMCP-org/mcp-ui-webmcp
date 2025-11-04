@@ -245,7 +245,8 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for development standards.
 - [Core Concepts](https://docs.mcp-b.ai/concepts) - Architecture and system design
 - [Examples](https://docs.mcp-b.ai/examples) - Ready-to-use implementations
 - [NPM Packages](https://github.com/WebMCP-org/npm-packages) - `@mcp-b/react-webmcp` and more
-- [WebMCP Explainer](https://github.com/webmachinelearning/webmcp/blob/main/docs/explainer.md) - W3C proposal and specification
+- [WebMCP Specification](https://github.com/webmachinelearning/webmcp) - W3C Web Machine Learning Community Group
+- [WebMCP Explainer](https://github.com/webmachinelearning/webmcp/blob/main/docs/explainer.md) - Technical proposal and API details
 - [Live Demo](https://mcp-b.ai) - Interactive examples
 
 ### Model Context Protocol
