@@ -8,7 +8,6 @@ import {
   useAssistantRuntime,
   useMessage,
 } from '@assistant-ui/react';
-import { IframeParentTransport } from '@mcp-b/transports';
 import {
   basicComponentLibrary,
   type RemoteElementConfiguration,
@@ -18,8 +17,6 @@ import {
   type UIActionResult,
   UIResourceRenderer,
 } from '@mcp-ui/client';
-import { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import { ToolListChangedNotificationSchema } from '@modelcontextprotocol/sdk/types.js';
 import {
   Activity,
   ArrowDownIcon,
@@ -30,28 +27,31 @@ import {
   CopyIcon,
   FileText,
   Info,
-  MessageSquare,
   Paperclip,
   PencilIcon,
   RefreshCwIcon,
   SendHorizontalIcon,
   Trash2,
   Wrench,
-  X as XIcon,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import type { FC } from 'react';
-import { createContext, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createContext, useCallback, useMemo, useRef, useState } from 'react';
 import { MarkdownText } from '@/components/assistant-ui/markdown-text';
+import { MobileViewToggle } from '@/components/assistant-ui/mobile-view-toggle';
+import { TabSelector } from '@/components/assistant-ui/tab-selector';
 import { TooltipIconButton } from '@/components/assistant-ui/tooltip-icon-button';
 
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useUIResources } from '@/contexts/UIResourceContext';
 import { useMCP } from '@/hooks/useMCP';
-import { useIsMobile, usePrefersReducedMotion } from '@/hooks/useMediaQuery';
+import { useIframeLifecycle } from '@/hooks/useIframeLifecycle';
+import { useIframeResize } from '@/hooks/useIframeResize';
+import { usePrefersReducedMotion } from '@/hooks/useMediaQuery';
+import { useMobileViewToggle } from '@/hooks/useMobileViewToggle';
+import { useThreadReset } from '@/hooks/useThreadReset';
 import { cn } from '@/lib/utils';
-import { getStoredServerUrl } from '../../lib/storage';
 import { NotifyMessage } from './notify-message';
 import { StreamingOverlay } from './streaming-overlay';
 import { ToolExecutionPanel } from './tool-execution-panel';
@@ -85,164 +85,24 @@ const formatTimestamp = (value: Date) => {
   }
 };
 
-interface TabSelectorProps {
-  openToolsPanelId: string | null;
-  setOpenToolsPanelId: (id: string | null) => void;
-}
-
-const TabSelector: FC<TabSelectorProps> = ({ openToolsPanelId, setOpenToolsPanelId }) => {
-  const { resources, selectedResourceId, selectResource, removeResource } = useUIResources();
-  const { tools } = useMCP();
-
-  if (resources.length === 0) return null;
-
-  return (
-    <div className="flex items-center gap-1 px-2 py-1.5 border-b border-border/40 bg-muted/10 overflow-x-auto sm:px-3 sm:py-2">
-      {resources.map((resource) => {
-        const isSelected = resource.id === selectedResourceId;
-        // Filter tools for this specific iframe
-        const iframeTools = tools.filter((tool) => {
-          const toolWithSource = tool as { _sourceId?: string };
-          return toolWithSource._sourceId === resource.id;
-        });
-        const toolCount = iframeTools.length;
-        const isToolsPanelOpen = openToolsPanelId === resource.id;
-
-        return (
-          <div
-            key={resource.id}
-            className={cn(
-              'group flex items-center gap-1 px-2 py-1 rounded-t-lg border-t border-x transition-colors whitespace-nowrap text-xs sm:gap-1.5 sm:px-3 sm:py-1.5',
-              isSelected
-                ? 'bg-background border-border text-foreground'
-                : 'bg-muted/50 border-transparent text-muted-foreground hover:bg-muted hover:text-foreground'
-            )}
-          >
-            <button
-              onClick={() => selectResource(resource.id)}
-              className="font-medium hover:opacity-80 transition-opacity"
-            >
-              {resource.toolName}
-            </button>
-
-            {/* Tools button */}
-            {toolCount > 0 && (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setOpenToolsPanelId(isToolsPanelOpen ? null : resource.id);
-                    }}
-                    className={cn(
-                      'flex items-center gap-0.5 px-1.5 py-0.5 rounded text-xs font-medium transition-colors',
-                      isToolsPanelOpen
-                        ? 'bg-primary/20 text-primary'
-                        : 'bg-muted text-muted-foreground hover:bg-muted-foreground/20 hover:text-foreground'
-                    )}
-                    aria-label={`View ${toolCount} tools from ${resource.toolName}`}
-                  >
-                    <Wrench className="h-2.5 w-2.5" />
-                    <span>{toolCount}</span>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  <p className="text-xs">
-                    This iframe exposes {toolCount} tool{toolCount !== 1 ? 's' : ''} that can be
-                    executed by the model
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            )}
-
-            <button
-              onClick={async (e) => {
-                e.stopPropagation();
-                await removeResource(resource.id);
-              }}
-              className="opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive p-2 -m-2"
-              aria-label={`Close ${resource.toolName}`}
-            >
-              <XIcon className="h-3 w-3" />
-            </button>
-          </div>
-        );
-      })}
-    </div>
-  );
-};
-
 export const Thread: FC = () => {
   return <ThreadContent />;
 };
 
-type MobileView = 'chat' | 'ui';
-
 const ThreadContent: FC = () => {
   const { resources } = useUIResources();
-  const [mobileView, setMobileView] = useState<MobileView>('chat');
-
   const hasToolSurface = resources.length > 0;
 
-  // Detect screen size for responsive animations
-  const isMobile = useIsMobile();
+  // Use custom hook for mobile view management
+  const { mobileView, setMobileView, viewportRef, handlePanEnd, isMobile } =
+    useMobileViewToggle(hasToolSurface);
+
   const isLargeScreen = !isMobile;
   const prefersReducedMotion = usePrefersReducedMotion();
 
-  // Auto-switch to UI view on mobile when tool surface first appears
-  useEffect(() => {
-    if (isMobile && hasToolSurface) {
-      setMobileView('ui');
-    }
-  }, [isMobile, hasToolSurface]);
-
-  // Refs for gesture targets and scroll preservation
+  // Refs for gesture targets
   const chatPanelRef = useRef<HTMLDivElement>(null);
   const uiPanelRef = useRef<HTMLDivElement>(null);
-  const viewportRef = useRef<HTMLDivElement>(null);
-
-  // Store scroll position when switching views on mobile
-  const [savedScrollPosition, setSavedScrollPosition] = useState(0);
-
-  // Save scroll position when leaving chat view, restore when returning
-  useEffect(() => {
-    if (!isMobile || !hasToolSurface) return;
-
-    const viewport = viewportRef.current;
-    if (!viewport) return;
-
-    if (mobileView === 'ui') {
-      // Switching away from chat - save scroll position
-      setSavedScrollPosition(viewport.scrollTop);
-    } else if (mobileView === 'chat') {
-      // Switching back to chat - restore scroll position
-      viewport.scrollTop = savedScrollPosition;
-    }
-  }, [mobileView, isMobile, hasToolSurface, savedScrollPosition]);
-
-  // Pan gesture handlers for swipe navigation
-  const handlePanEnd = useCallback(
-    (
-      _event: PointerEvent | MouseEvent | TouchEvent,
-      info: { offset: { x: number; y: number } }
-    ) => {
-      // Only handle swipe on mobile when tool surface is visible
-      if (!isMobile || !hasToolSurface) return;
-
-      const swipeThreshold = 50; // Minimum distance for swipe detection
-      const { x } = info.offset;
-
-      // Swipe left (negative x): Chat → UI
-      if (x < -swipeThreshold && mobileView === 'chat') {
-        setMobileView('ui');
-      }
-      // Swipe right (positive x): UI → Chat
-      else if (x > swipeThreshold && mobileView === 'ui') {
-        setMobileView('chat');
-      }
-    },
-    [isMobile, hasToolSurface, mobileView]
-  );
 
   const toolSurfaceValue = useMemo(
     () => ({
@@ -377,45 +237,7 @@ const ThreadContent: FC = () => {
 
         {/* Mobile View Toggle Bar */}
         {isMobile && hasToolSurface && (
-          <motion.div
-            initial={{ y: 100 }}
-            animate={{ y: 0 }}
-            exit={{ y: 100 }}
-            transition={{ duration: prefersReducedMotion ? 0 : 0.3, ease: [0.42, 0, 0.58, 1] }}
-            className="pointer-events-auto absolute bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-sm shadow-lg"
-            style={{
-              paddingBottom: 'env(safe-area-inset-bottom)',
-              paddingLeft: 'env(safe-area-inset-left)',
-              paddingRight: 'env(safe-area-inset-right)',
-            }}
-          >
-            <div className="flex items-center justify-around p-1 gap-1 max-[500px]:p-0.5 max-[500px]:gap-0.5">
-              <button
-                onClick={() => setMobileView('chat')}
-                className={cn(
-                  'flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg transition-all max-[500px]:py-1.5 max-[500px]:px-2',
-                  mobileView === 'chat'
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:bg-muted'
-                )}
-              >
-                <MessageSquare className="h-4 w-4 max-[500px]:h-3.5 max-[500px]:w-3.5" />
-                <span className="text-sm font-medium max-[500px]:text-xs">Chat</span>
-              </button>
-              <button
-                onClick={() => setMobileView('ui')}
-                className={cn(
-                  'flex-1 flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-lg transition-all max-[500px]:py-1.5 max-[500px]:px-2',
-                  mobileView === 'ui'
-                    ? 'bg-primary text-primary-foreground shadow-sm'
-                    : 'text-muted-foreground hover:bg-muted'
-                )}
-              >
-                <Wrench className="h-4 w-4 max-[500px]:h-3.5 max-[500px]:w-3.5" />
-                <span className="text-sm font-medium max-[500px]:text-xs">Embedded UI</span>
-              </button>
-            </div>
-          </motion.div>
+          <MobileViewToggle mobileView={mobileView} setMobileView={setMobileView} />
         )}
 
         {/* Streaming Overlay - shows assistant response on mobile chat view */}
@@ -494,16 +316,21 @@ const ThreadWelcomeSuggestions: FC = () => {
 // Removed: ThreadWelcomeTicTacToeDemo - now using real tool from MCP server
 
 const ToolResponsePanel: FC = () => {
-  const { resources, selectedResourceId, setResourceCleanup } = useUIResources();
-  const { tools, callTool, registerWebMcpClient, registerWebMcpTools, unregisterWebMcpClient } =
-    useMCP();
+  const { resources, selectedResourceId } = useUIResources();
+  const { tools, callTool } = useMCP();
   const [lastUIAction, setLastUIAction] = useState<UIActionResult | null>(null);
   const [openToolsPanelId, setOpenToolsPanelId] = useState<string | null>(null);
   const runtime = useAssistantRuntime();
 
+  // Custom hooks for iframe management
+  const { setupIframe } = useIframeLifecycle();
+
   const selectedResource = useMemo(() => {
     return resources.find((r) => r.id === selectedResourceId);
   }, [resources, selectedResourceId]);
+
+  // Use iframe resize hook
+  useIframeResize(selectedResource?.iframeRef);
 
   // Filter tools for the currently open tool panel
   const iframeTools = useMemo(() => {
@@ -531,62 +358,6 @@ const ToolResponsePanel: FC = () => {
     },
     [runtime]
   );
-
-  /**
-   * Handle iframe resize events
-   *
-   * Listens for ui-size-change messages from iframes and updates their dimensions.
-   * This is part of the embeddable UI protocol but handled separately from user actions
-   * since it's not included in the @mcp-ui/client UIActionResult type yet.
-   */
-  useEffect(() => {
-    const handleMessage = (event: MessageEvent) => {
-      if (event.data?.type === 'ui-size-change') {
-        const payload = event.data.payload as { height?: number; width?: number };
-
-        if (selectedResource?.iframeRef?.current) {
-          const iframe = selectedResource.iframeRef.current;
-          const container = iframe.parentElement;
-
-          if (payload.width !== undefined && payload.height !== undefined && container) {
-            const containerWidth = container.clientWidth;
-
-            // Scale based on width only - mobile users expect vertical scrolling
-            // Leave a bit of padding (95% of container width)
-            const targetWidth = containerWidth * 0.95;
-            const scale = Math.min(targetWidth / payload.width, 1); // Don't scale up, only down
-
-            // Set natural dimensions
-            iframe.style.width = `${payload.width}px`;
-            iframe.style.height = `${payload.height}px`;
-
-            // Apply scaling if needed (on mobile/small screens)
-            if (scale < 1) {
-              iframe.style.transform = `scale(${scale})`;
-              iframe.style.transformOrigin = 'top center';
-              // Adjust container to account for scaled size
-              iframe.style.marginBottom = `${payload.height * (scale - 1)}px`;
-            } else {
-              iframe.style.transform = 'none';
-              iframe.style.marginBottom = '0';
-            }
-
-            console.log(
-              `📏 Iframe resized: ${payload.width}x${payload.height} (scale: ${scale.toFixed(2)})`
-            );
-          } else if (payload.width !== undefined) {
-            iframe.style.width = `${payload.width}px`;
-            iframe.style.maxWidth = '100%';
-          } else if (payload.height !== undefined) {
-            iframe.style.height = `${payload.height}px`;
-          }
-        }
-      }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, [selectedResource]);
 
   const handleToolCall = useCallback(
     async (toolName: string, args: Record<string, unknown>, sourceId?: string) => {
@@ -651,72 +422,7 @@ const ToolResponsePanel: FC = () => {
                 iframeProps: {
                   ref: selectedResource.iframeRef as React.RefObject<HTMLIFrameElement>,
                   onLoad: async (e) => {
-                    const iframe = e.currentTarget;
-                    const sourceId = selectedResource.id;
-
-                    // UI Lifecycle Protocol Handler
-                    // Listen for iframe ready signal and respond to enable UI interaction
-                    const handleIframeLifecycleMessage = (event: MessageEvent) => {
-                      // Basic origin check - accept messages from the iframe
-                      if (event.source !== iframe.contentWindow) {
-                        return;
-                      }
-
-                      // Respond to iframe ready signal
-                      if (event.data?.type === 'ui-lifecycle-iframe-ready') {
-                        console.log('[UI Lifecycle] Iframe ready, sending parent-ready signal');
-                        iframe.contentWindow?.postMessage(
-                          { type: 'parent-ready', payload: {} },
-                          '*'
-                        );
-                      }
-                    };
-
-                    window.addEventListener('message', handleIframeLifecycleMessage);
-
-                    // Create Client + Transport pair (1-to-1 relationship)
-                    const client = new Client({
-                      name: 'WebMCP Client',
-                      version: '1.0.0',
-                    });
-                    const transport = new IframeParentTransport({
-                      targetOrigin: new URL(getStoredServerUrl()).origin,
-                      iframe: iframe,
-                    });
-
-                    try {
-                      await client.connect(transport);
-
-                      // Register client for tool routing
-                      registerWebMcpClient(sourceId, client);
-
-                      // Fetch and register tools with app
-                      const toolsResponse = await client.listTools();
-                      registerWebMcpTools(toolsResponse.tools, sourceId);
-
-                      // Listen for tool list changes
-                      client.setNotificationHandler(ToolListChangedNotificationSchema, async () => {
-                        const updated = await client.listTools();
-                        registerWebMcpTools(updated.tools, sourceId);
-                      });
-
-                      // Store cleanup function in the resource (properly via context method)
-                      setResourceCleanup(sourceId, async () => {
-                        try {
-                          // Clean up UI lifecycle listener
-                          window.removeEventListener('message', handleIframeLifecycleMessage);
-
-                          await client.close();
-                          await transport.close();
-                        } catch (error) {
-                          console.error(`Error closing client/transport for ${sourceId}:`, error);
-                        }
-                        // Trigger App-level cleanup (removes tools from state)
-                        unregisterWebMcpClient(sourceId);
-                      });
-                    } catch (error) {
-                      console.error('WebMCP connection failed:', error);
-                    }
+                    await setupIframe(e.currentTarget, selectedResource.id);
                   },
                 },
               }}
@@ -863,9 +569,8 @@ const ResourcesList: FC<{
 
 const Composer: FC = () => {
   const { tools, resources, callTool } = useMCP();
-  const { resources: uiResources, removeResource } = useUIResources();
   const [showTools, setShowTools] = useState(false);
-  const assistantRuntime = useAssistantRuntime();
+  const { handleResetThread } = useThreadReset();
 
   const handleToolCall = useCallback(
     async (toolName: string, args: Record<string, unknown>, sourceId?: string) => {
@@ -873,25 +578,6 @@ const Composer: FC = () => {
     },
     [callTool]
   );
-
-  const handleResetThread = useCallback(async () => {
-    // Clear the conversation by creating a new thread
-    const currentState = assistantRuntime.thread.getState();
-    if (currentState.isRunning) {
-      assistantRuntime.thread.cancelRun();
-    }
-
-    // Close all UI resources (iframes)
-    for (const resource of uiResources) {
-      await removeResource(resource.id);
-    }
-
-    // Start a new thread by switching to a new thread ID
-    // This will clear all messages and start fresh
-    assistantRuntime.thread.import({
-      messages: [],
-    });
-  }, [assistantRuntime, uiResources, removeResource]);
 
   return (
     <div className="flex w-full flex-col gap-2 sm:gap-3">

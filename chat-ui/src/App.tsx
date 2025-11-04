@@ -1,17 +1,13 @@
-import { AssistantRuntimeProvider, useAssistantTool } from '@assistant-ui/react';
+import { AssistantRuntimeProvider } from '@assistant-ui/react';
 import { AssistantChatTransport, useChatRuntime } from '@assistant-ui/react-ai-sdk';
-import type { Client } from '@modelcontextprotocol/sdk/client/index.js';
-import type { Transport } from '@modelcontextprotocol/sdk/shared/transport.js';
 import type {
   CallToolRequest,
   CallToolResult,
-  Prompt as MCPPrompt,
-  Resource as MCPResource,
-  Tool as MCPTool,
 } from '@modelcontextprotocol/sdk/types.js';
 import { AlertCircle, ExternalLink, Loader2, Menu, Plug, PlugZap, Settings } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ApiKeyInput } from '@/components/ApiKeyInput';
+import { MCPToolRegistry } from '@/components/assistant-ui/mcp-tool-registry';
 import { Thread } from '@/components/assistant-ui/thread';
 import { ToolSourceBadge } from '@/components/assistant-ui/tool-source-badge';
 import { Badge } from '@/components/ui/badge';
@@ -20,287 +16,62 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MCPContext, type MCPContextValue } from '@/contexts/MCPContext';
-import { useUIResources } from '@/contexts/UIResourceContext';
+import { useAPIKeyModal } from '@/hooks/useAPIKeyModal';
+import { useMCPConnection } from '@/hooks/useMCPConnection';
+import { useWebMCPIntegration } from '@/hooks/useWebMCPIntegration';
 
-type ToolWithSource = MCPTool & { _sourceId: string };
-
-import { isUIResource } from '@mcp-ui/client';
 import { lastAssistantMessageIsCompleteWithToolCalls } from 'ai';
-import { clearStoredServerUrl, getStoredApiKey, setStoredServerUrl } from '@/lib/storage';
-import { createClient } from './MCP';
-
-function McpToolBridge({
-  toolName,
-  toolDescription,
-  inputSchema,
-  callTool,
-}: {
-  toolName: string;
-  toolDescription: string;
-  inputSchema: unknown;
-  callTool: (name: string, args: Record<string, unknown>) => Promise<unknown>;
-}) {
-  const { addResource } = useUIResources();
-
-  useAssistantTool({
-    toolName,
-    description: toolDescription,
-    parameters: inputSchema as Record<string, unknown>,
-    execute: async (args) => {
-      try {
-        const result: CallToolResult = (await callTool(toolName, args)) as CallToolResult;
-        result.content.forEach((content) => {
-          if (isUIResource(content) && content.resource) {
-            addResource({
-              toolName: toolName,
-              resource: content.resource,
-            });
-          }
-        });
-        return result;
-      } catch (error) {
-        console.error('[Client] Tool execution failed:', error);
-        throw error;
-      }
-    },
-  });
-
-  return null; // This component only registers the tool
-}
+import { getStoredApiKey } from '@/lib/storage';
 
 function App() {
-  const [mcpState, setMCPState] = useState<
-    'disconnected' | 'connecting' | 'loading' | 'ready' | 'failed'
-  >('disconnected');
-  const [showApiKeyDialog, setShowApiKeyDialog] = useState(
-    !getStoredApiKey() || mcpState !== 'ready'
-  );
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [mcpTools, setMcpTools] = useState<MCPTool[]>([]);
-  const [mcpPrompts, setMcpPrompts] = useState<MCPPrompt[]>([]);
-  const [mcpResources, setMcpResources] = useState<MCPResource[]>([]);
 
-  const clientRef = useRef<Client | null>(null);
-  const transportRef = useRef<Transport | null>(null);
+  // Custom hooks extract all complex logic
+  const mcpConnection = useMCPConnection();
+  const webMcpIntegration = useWebMCPIntegration();
+  const apiKeyModal = useAPIKeyModal(mcpConnection.mcpState);
 
-  const [webMcpTools, setWebMcpTools] = useState<MCPTool[]>([]);
-  const webMcpClients = useRef<Map<string, Client>>(new Map());
-
-  const disconnectFromServer = useCallback(async () => {
-    if (clientRef.current) {
-      try {
-        await clientRef.current.close();
-      } catch (error) {
-        console.error('[App] Error closing client:', error);
-      }
-      clientRef.current = null;
-    }
-
-    if (transportRef.current) {
-      try {
-        await transportRef.current.close();
-      } catch (error) {
-        console.error('[App] Error closing transport:', error);
-      }
-      transportRef.current = null;
-    }
-
-    setMcpTools([]);
-    setMcpPrompts([]);
-    setMcpResources([]);
-    setMCPState('disconnected');
-
-    clearStoredServerUrl();
-  }, []);
-
-  const connectToServer = useCallback(
-    async (url: string) => {
-      try {
-        new URL(url);
-      } catch (error) {
-        console.error('[App] Invalid URL:', error);
-        setMCPState('failed');
-        return;
-      }
-
-      await disconnectFromServer();
-
-      setMCPState('connecting');
-
-      try {
-        const { client, transport } = createClient(
-          {
-            _clientInfo: {
-              name: 'MCP-UI Demo',
-              version: '1.0.0',
-            },
-          },
-          {
-            url: new URL(url),
-          }
-        );
-
-        clientRef.current = client;
-        transportRef.current = transport;
-
-        await client.connect(transport);
-        setMCPState('loading');
-
-        const [toolsResponse, promptsResponse, resourcesResponse] = await Promise.all([
-          client.listTools(),
-          client.listPrompts().catch(() => ({ prompts: [] })),
-          client.listResources().catch(() => ({ resources: [] })),
-        ]);
-
-        setMcpTools(toolsResponse.tools || []);
-        setMcpPrompts(promptsResponse.prompts || []);
-        setMcpResources(resourcesResponse.resources || []);
-
-        setStoredServerUrl(url);
-
-        setMCPState('ready');
-      } catch (error) {
-        console.error('MCP connection failed:', error);
-        setMCPState('failed');
-
-        clientRef.current = null;
-        transportRef.current = null;
-      }
-    },
-    [disconnectFromServer]
-  );
-
-  const callPrompt = useCallback(async (name: string, args?: Record<string, string>) => {
-    if (!clientRef.current) {
-      throw new Error('MCP client not connected');
-    }
-    try {
-      const result = await clientRef.current.getPrompt({ name, arguments: args });
-      return result;
-    } catch (error) {
-      console.error('[Client] Prompt call failed:', error);
-      throw error;
-    }
-  }, []);
-
-  const readResource = useCallback(async (uri: string) => {
-    if (!clientRef.current) {
-      throw new Error('MCP client not connected');
-    }
-    try {
-      const result = await clientRef.current.readResource({ uri });
-      return result;
-    } catch (error) {
-      console.error('[Client] Resource read failed:', error);
-      throw error;
-    }
-  }, []);
-
-  const registerWebMcpClient = useCallback((sourceId: string, webMcpClient: Client) => {
-    webMcpClients.current.set(sourceId, webMcpClient);
-  }, []);
-
-  const registerWebMcpTools = useCallback((tools: MCPTool[], sourceId: string) => {
-    setWebMcpTools((prev) => {
-      const filtered = prev.filter((t) => (t as ToolWithSource)._sourceId !== sourceId);
-      const tagged = tools.map((t) => ({ ...t, _sourceId: sourceId }) as ToolWithSource);
-      return [...filtered, ...tagged];
-    });
-  }, []);
-
-  const unregisterWebMcpClient = useCallback((sourceId: string) => {
-    const webMcpClient = webMcpClients.current.get(sourceId);
-    if (webMcpClient) {
-      webMcpClient.close?.();
-      webMcpClients.current.delete(sourceId);
-    }
-    setWebMcpTools((prev) => prev.filter((t) => (t as ToolWithSource)._sourceId !== sourceId));
-  }, []);
-
+  // Unified tool calling function that routes to HTTP or WebMCP client
   const callTool = useCallback(
     async (request: CallToolRequest['params'], sourceId?: string): Promise<CallToolResult> => {
       if (sourceId) {
-        const webMcpClient = webMcpClients.current.get(sourceId);
-        if (!webMcpClient) {
-          throw new Error(`WebMCP client not found for source: ${sourceId}`);
-        }
-        try {
-          const result = await webMcpClient.callTool(request);
-          return result as CallToolResult;
-        } catch (error) {
-          console.error(`[WebMCP Client ${sourceId}] Tool call failed:`, error);
-          throw error;
-        }
+        // WebMCP tool call
+        return webMcpIntegration.callTool(request, sourceId);
       }
 
-      if (!clientRef.current) {
+      // HTTP MCP tool call
+      if (!mcpConnection.clientRef.current) {
         throw new Error('MCP client not connected');
       }
       try {
-        const result = await clientRef.current.callTool(request);
+        const result = await mcpConnection.clientRef.current.callTool(request);
         return result as CallToolResult;
       } catch (error) {
         console.error('[HTTP Client] Tool call failed:', error);
         throw error;
       }
     },
-    []
+    [mcpConnection.clientRef, webMcpIntegration]
   );
 
   const mcpContextValue: MCPContextValue = useMemo(
     () => ({
-      tools: [...mcpTools, ...webMcpTools], // Merge HTTP and WebMCP tools
-      prompts: mcpPrompts,
-      resources: mcpResources,
-      state: mcpState,
-      callPrompt,
-      readResource,
+      tools: [...mcpConnection.mcpTools, ...webMcpIntegration.webMcpTools], // Merge HTTP and WebMCP tools
+      prompts: mcpConnection.mcpPrompts,
+      resources: mcpConnection.mcpResources,
+      state: mcpConnection.mcpState,
+      callPrompt: mcpConnection.callPrompt,
+      readResource: mcpConnection.readResource,
       callTool,
-      serverUrl: mcpState === 'ready' ? 'connected' : null, // Simplified - just indicate if connected
-      connectServer: connectToServer,
-      disconnectServer: disconnectFromServer,
-      registerWebMcpClient,
-      registerWebMcpTools,
-      unregisterWebMcpClient,
+      serverUrl: mcpConnection.mcpState === 'ready' ? 'connected' : null, // Simplified - just indicate if connected
+      connectServer: mcpConnection.connectToServer,
+      disconnectServer: mcpConnection.disconnectFromServer,
+      registerWebMcpClient: webMcpIntegration.registerWebMcpClient,
+      registerWebMcpTools: webMcpIntegration.registerWebMcpTools,
+      unregisterWebMcpClient: webMcpIntegration.unregisterWebMcpClient,
     }),
-    [
-      mcpTools,
-      webMcpTools,
-      mcpPrompts,
-      mcpResources,
-      mcpState,
-      callPrompt,
-      readResource,
-      callTool,
-      connectToServer,
-      disconnectFromServer,
-      registerWebMcpClient,
-      registerWebMcpTools,
-      unregisterWebMcpClient,
-    ]
+    [mcpConnection, webMcpIntegration, callTool]
   );
-
-  useEffect(() => {
-    return () => {
-      webMcpClients.current.forEach((client) => {
-        client.close().catch(console.error);
-      });
-      webMcpClients.current.clear();
-
-      if (clientRef.current) {
-        clientRef.current.close().catch(console.error);
-      }
-      if (transportRef.current) {
-        transportRef.current.close().catch(console.error);
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    if (mcpState === 'failed' || mcpState === 'disconnected') {
-      setShowApiKeyDialog(true);
-    }
-  }, [mcpState]);
 
   const runtime = useChatRuntime({
     sendAutomaticallyWhen: (messages) => {
@@ -325,41 +96,12 @@ function App() {
   return (
     <MCPContext.Provider value={mcpContextValue}>
       <AssistantRuntimeProvider runtime={runtime}>
-        {mcpTools.map((tool) => {
-          const sourceId = (tool as ToolWithSource)._sourceId;
-          return (
-            <McpToolBridge
-              key={`${sourceId || 'http'}-${tool.name}`}
-              toolName={tool.name}
-              toolDescription={tool.description || ''}
-              inputSchema={tool.inputSchema}
-              callTool={(name, args) => {
-                if (!clientRef.current) {
-                  throw new Error('MCP client not connected');
-                }
-                return clientRef.current.callTool({ name, arguments: args });
-              }}
-            />
-          );
-        })}
-        {webMcpTools.map((tool) => {
-          const sourceId = (tool as ToolWithSource)._sourceId;
-          return (
-            <McpToolBridge
-              key={`${sourceId || 'http'}-${tool.name}`}
-              toolName={tool.name}
-              toolDescription={tool.description || ''}
-              inputSchema={tool.inputSchema}
-              callTool={(name, args) => {
-                const webMcpClient = webMcpClients.current.get(sourceId);
-                if (!webMcpClient) {
-                  throw new Error(`WebMCP client not found for source: ${sourceId}`);
-                }
-                return webMcpClient.callTool({ name, arguments: args });
-              }}
-            />
-          );
-        })}
+        <MCPToolRegistry
+          mcpTools={mcpConnection.mcpTools}
+          webMcpTools={webMcpIntegration.webMcpTools}
+          clientRef={mcpConnection.clientRef}
+          webMcpClients={webMcpIntegration.webMcpClients}
+        />
 
         <div className="flex min-h-dvh w-full flex-col bg-gradient-to-br from-background via-background to-muted/20">
           {/* Header */}
@@ -518,7 +260,7 @@ function App() {
 
                 {/* MCP Connection Button and Status */}
                 <TooltipProvider>
-                  {mcpState === 'ready' ? (
+                  {mcpConnection.mcpState === 'ready' ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <output
@@ -531,22 +273,22 @@ function App() {
                           </span>
                           <div className="hidden gap-1 sm:flex">
                             <Badge variant="secondary" className="h-5 px-1.5 text-xs">
-                              {mcpTools.length}
+                              {mcpConnection.mcpTools.length}
                             </Badge>
                           </div>
                           {/* Mobile: Just show tool count */}
                           <span className="text-xs font-medium text-green-700 dark:text-green-400 sm:hidden">
-                            {mcpTools.length}
+                            {mcpConnection.mcpTools.length}
                           </span>
                         </output>
                       </TooltipTrigger>
                       <TooltipContent>
                         <p className="text-xs">
-                          MCP server connected ({mcpTools.length} tools available)
+                          MCP server connected ({mcpConnection.mcpTools.length} tools available)
                         </p>
                       </TooltipContent>
                     </Tooltip>
-                  ) : mcpState === 'connecting' || mcpState === 'loading' ? (
+                  ) : mcpConnection.mcpState === 'connecting' || mcpConnection.mcpState === 'loading' ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <output
@@ -555,7 +297,7 @@ function App() {
                         >
                           <Loader2 className="h-3 w-3 shrink-0 animate-spin text-blue-500 sm:h-4 sm:w-4" />
                           <span className="text-xs font-medium text-blue-700 dark:text-blue-400 sm:text-sm">
-                            {mcpState === 'connecting' ? 'Connecting...' : 'Loading...'}
+                            {mcpConnection.mcpState === 'connecting' ? 'Connecting...' : 'Loading...'}
                           </span>
                         </output>
                       </TooltipTrigger>
@@ -563,7 +305,7 @@ function App() {
                         <p className="text-xs">Establishing connection to MCP server...</p>
                       </TooltipContent>
                     </Tooltip>
-                  ) : mcpState === 'failed' ? (
+                  ) : mcpConnection.mcpState === 'failed' ? (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <output
@@ -607,7 +349,7 @@ function App() {
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => setShowApiKeyDialog(true)}
+                        onClick={() => apiKeyModal.setShowApiKeyDialog(true)}
                         className="shrink-0 rounded-full shadow-sm"
                       >
                         <Settings className="h-4 w-4" />
@@ -639,7 +381,7 @@ function App() {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setShowApiKeyDialog(true)}
+                    onClick={() => apiKeyModal.setShowApiKeyDialog(true)}
                     className="w-full sm:w-auto"
                   >
                     Add Key
@@ -657,11 +399,11 @@ function App() {
           </div>
 
           <ApiKeyInput
-            open={showApiKeyDialog}
-            onClose={() => setShowApiKeyDialog(false)}
-            onConnectServer={connectToServer}
-            onDisconnectServer={disconnectFromServer}
-            connectionState={mcpState}
+            open={apiKeyModal.showApiKeyDialog}
+            onClose={() => apiKeyModal.setShowApiKeyDialog(false)}
+            onConnectServer={mcpConnection.connectToServer}
+            onDisconnectServer={mcpConnection.disconnectFromServer}
+            connectionState={mcpConnection.mcpState}
           />
         </div>
       </AssistantRuntimeProvider>
