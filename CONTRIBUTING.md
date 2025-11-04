@@ -201,8 +201,29 @@ export function useWebMCP<T>(config: ToolConfig<T>) {
 ```bash
 pnpm check     # Lint and typecheck
 pnpm build     # Ensure builds succeed
-pnpm test      # Run tests (if applicable)
+pnpm test      # Run E2E tests locally (REQUIRED before submitting PR)
 ```
+
+**IMPORTANT - Running E2E Tests Before PR Submission:**
+
+E2E tests require Cloudflare Workers runtime and do **NOT** run in CI due to network restrictions. You **MUST** run them locally before submitting a PR:
+
+```bash
+# Run all E2E tests (REQUIRED)
+pnpm test
+
+# Or run specific test suites
+pnpm test:chat-ui          # Chat UI tests only
+pnpm test:remote-mcp       # Remote MCP tests only
+pnpm test:integration      # Integration tests
+
+# Useful for debugging
+pnpm test:ui               # Run with Playwright UI
+pnpm test:headed           # See browser while testing
+pnpm test:report           # View test results
+```
+
+The E2E tests will automatically start the dev servers for both applications. All tests must pass before your PR can be merged.
 
 ### Modifying Existing Code
 
@@ -259,7 +280,9 @@ Before submitting changes, verify:
 - [ ] **No duplication**: Information lives in one place
 - [ ] **Modularity**: Functions/components have single responsibility
 - [ ] **Clean code**: JSDoc on public APIs, no inline comments
-- [ ] **Tests pass**: `pnpm check` and `pnpm build` succeed
+- [ ] **Lint & typecheck pass**: `pnpm check` succeeds with no errors
+- [ ] **Build succeeds**: `pnpm build` completes without errors
+- [ ] **E2E tests pass**: `pnpm test` runs successfully (REQUIRED - tests don't run in CI)
 - [ ] **Documentation updated**: If changing APIs or architecture
 - [ ] **Follows patterns**: Matches existing code style and structure
 

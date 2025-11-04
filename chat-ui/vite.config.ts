@@ -14,7 +14,8 @@ export default defineConfig((env) => {
       },
     }),
     tailwindcss(),
-    cloudflare(),
+    // Only use Cloudflare plugin in dev mode, not in preview
+    ...(env.command === 'serve' && !process.env.CI ? [cloudflare()] : []),
   ];
 
   // Upload source maps to Sentry in production builds
@@ -42,6 +43,10 @@ export default defineConfig((env) => {
     },
     build: {
       sourcemap: true, // Always generate source maps for Sentry
+    },
+    preview: {
+      port: 5173,
+      strictPort: true,
     },
   };
 });
