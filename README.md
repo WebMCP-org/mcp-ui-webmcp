@@ -1,6 +1,10 @@
-# E2E Tests for MCP Tab Transports
+# MCP UI WebMCP
 
-This directory contains end-to-end tests for the `@mcp-b/transports` package using Playwright.
+A monorepo containing MCP (Model Context Protocol) UI applications and end-to-end tests.
+
+## Repository
+
+🔗 [https://github.com/WebMCP-org/mcp-ui-webmcp](https://github.com/WebMCP-org/mcp-ui-webmcp)
 
 ## Overview
 
@@ -35,36 +39,57 @@ The test app (`test-app/`) is a simple Vite + TypeScript application that:
 3. Provides a UI for manually testing the transports
 4. Exposes a `testApp` API for programmatic testing
 
-## Running Tests
+## Getting Started
 
-### From Root Directory
+### Prerequisites
+
+- Node.js 18 or later
+- pnpm 8 or later
+
+### Installation
 
 ```bash
-# Run all E2E tests
-pnpm test
-
-# Run with Playwright UI (recommended for development)
-pnpm test:e2e:ui
-
-# Run in headed mode (see browser)
-pnpm test:e2e:headed
-
-# Debug mode (step through tests)
-pnpm test:e2e:debug
+# Install dependencies
+pnpm install
 ```
 
-### From E2E Directory
+### Development
 
 ```bash
-cd e2e
+# Run all apps in development mode
+pnpm dev
 
-# Run tests
+# Build all apps
+pnpm build
+
+# Run chat-ui only
+cd chat-ui && pnpm dev
+
+# Run remote-mcp-with-ui-starter only
+cd remote-mcp-with-ui-starter && pnpm dev
+```
+
+## Testing
+
+### Running Tests
+
+```bash
+# Run all E2E tests (starts both servers)
 pnpm test
 
-# Open Playwright UI
+# Run integration tests
+pnpm test:integration
+
+# Run chat-ui tests only
+pnpm test:chat-ui
+
+# Run remote-mcp tests only
+pnpm test:remote-mcp
+
+# Run with Playwright UI
 pnpm test:ui
 
-# Run in headed mode
+# Run in headed mode (see browser)
 pnpm test:headed
 
 # Debug tests
@@ -73,6 +98,8 @@ pnpm test:debug
 # View test report
 pnpm test:report
 ```
+
+See [e2e-tests/README.md](e2e-tests/README.md) for detailed testing documentation.
 
 ## Test Scenarios
 
