@@ -282,7 +282,7 @@ Before submitting changes, verify:
 - [ ] **Clean code**: JSDoc on public APIs, no inline comments
 - [ ] **Lint & typecheck pass**: `pnpm check` succeeds with no errors
 - [ ] **Build succeeds**: `pnpm build` completes without errors
-- [ ] **E2E tests pass**: `pnpm test` runs successfully (REQUIRED - tests don't run in CI)
+- [ ] **E2E tests pass**: `pnpm test` runs successfully (REQUIRED - the GitHub `e2e.yml` workflow is manual, so run locally and share the results)
 - [ ] **Documentation updated**: If changing APIs or architecture
 - [ ] **Follows patterns**: Matches existing code style and structure
 
