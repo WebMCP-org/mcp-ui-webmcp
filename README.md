@@ -52,7 +52,7 @@ mcp-ui-webmcp/
 ### Prerequisites
 
 - **Node.js 24.3.0** (specified in `.nvmrc`)
-- **pnpm 9.15.4+** (for workspace management)
+- **pnpm 10.14.0+** (for workspace management)
 
 ### Installation
 
@@ -232,7 +232,7 @@ For local overrides (gitignored):
 - **React 19.1.1** with React Compiler
 - **TypeScript 5.8.3** with project references
 - **Vite 7.1.12** for building
-- **pnpm 9.15.4** for package management
+- **pnpm 10.14.0** for package management
 - **Turborepo 2.5.6** for monorepo orchestration
 
 ### MCP & AI

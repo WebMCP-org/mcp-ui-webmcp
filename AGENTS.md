@@ -60,7 +60,7 @@ See **[CONTRIBUTING.md](./CONTRIBUTING.md)** for detailed development standards.
 - **React 19.1.1** - UI framework with React Compiler
 - **Vite 7.1.12** - Build tool and dev server
 - **Turborepo 2.5.6** - Monorepo task orchestration
-- **pnpm 9.15.4** - Package management
+- **pnpm 10.14.0** - Package management
 - **Playwright 1.49.2** - E2E testing
 
 ## Critical Patterns
