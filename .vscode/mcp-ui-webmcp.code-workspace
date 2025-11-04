@@ -1,0 +1,38 @@
+{
+  "folders": [
+    {
+      "name": "🏠 Root",
+      "path": ".."
+    },
+    {
+      "name": "💬 chat-ui",
+      "path": "../chat-ui"
+    },
+    {
+      "name": "🔧 remote-mcp-with-ui-starter",
+      "path": "../remote-mcp-with-ui-starter"
+    },
+    {
+      "name": "🧪 e2e-tests",
+      "path": "../e2e-tests"
+    }
+  ],
+  "settings": {
+    "typescript.tsdk": "node_modules/typescript/lib",
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/dist": true,
+      "**/.turbo": true,
+      "**/.wrangler": true
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "dbaeumer.vscode-eslint",
+      "esbenp.prettier-vscode",
+      "bradlc.vscode-tailwindcss",
+      "ms-playwright.playwright",
+      "vitest.explorer"
+    ]
+  }
+}
