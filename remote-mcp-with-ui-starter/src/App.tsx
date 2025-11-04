@@ -62,13 +62,11 @@ export interface AppProps {
  * ```
  */
 export default function App({ animated = true }: AppProps) {
-  // Business logic hooks
   const game = useGameState();
   const { isParentReady, postNotifyMarkdown, notifyParentOfCurrentDocumentSize } =
     useParentCommunication();
   const { stats, notifyGameComplete } = useGameStats();
 
-  // UI state
   const [showRoleModal, setShowRoleModal] = useState(true);
   const [isAIThinking, setIsAIThinking] = useState(false);
 
@@ -88,12 +86,10 @@ export default function App({ animated = true }: AppProps) {
         return;
       }
 
-      // Block UI if AI's turn next
       if (result.nextPlayer === game.aiPlayer) {
         setIsAIThinking(true);
       }
 
-      // Notify parent of the move
       postNotifyMarkdown(
         formatMoveNotification({
           index,
@@ -140,7 +136,6 @@ export default function App({ animated = true }: AppProps) {
       setIsAIThinking(false);
       setShowRoleModal(false);
 
-      // Notify parent of new game
       postNotifyMarkdown(
         formatNewGameNotification({
           board: game.board,
@@ -203,13 +198,11 @@ export default function App({ animated = true }: AppProps) {
         throw new Error('Cannot move yet: waiting for the human to start a new game.');
       }
 
-      // Use the same makeMove logic as UI!
       const result = game.makeMove(position, game.aiPlayer);
       if (!result.success) {
         throw new Error(result.error);
       }
 
-      // Unblock UI after AI move completes
       setIsAIThinking(false);
 
       return formatMoveMarkdown(
@@ -238,7 +231,6 @@ export default function App({ animated = true }: AppProps) {
       idempotentHint: true,
     },
     handler: async () => {
-      // Use the same reset logic as UI!
       game.reset();
       setIsAIThinking(false);
       setShowRoleModal(true);

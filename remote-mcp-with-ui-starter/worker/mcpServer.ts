@@ -140,8 +140,6 @@ Use this tool when the user wants to play Tic-Tac-Toe. After the UI loads, use t
       {},
       async () => {
         try {
-          // Dynamically construct the iframe URL based on the current deployment
-          // This ensures the URL works in both development and production environments
           const iframeUrl = `${this.env.APP_URL}/`;
           const uiResource = createUIResource({
             uri: 'ui://tictactoe-game',
@@ -207,7 +205,6 @@ Wait for the human player to make the first move, then check the state and respo
             lastUpdated: string;
           }>();
 
-          // Calculate win percentages
           const totalCompleted = stats.totalGames;
           const clankersWinRate =
             totalCompleted > 0 ? ((stats.clankersWins / totalCompleted) * 100).toFixed(1) : '0.0';
