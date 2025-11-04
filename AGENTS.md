@@ -100,8 +100,8 @@ Verify with: `pnpm exec tsc -b`
 ### Adding MCP Tools
 Edit: [remote-mcp-with-ui-starter/worker/mcpServer.ts](./remote-mcp-with-ui-starter/worker/mcpServer.ts)
 
-### Creating Mini-Apps
-1. Create directory: `remote-mcp-with-ui-starter/mini-apps/your-app/`
+### Creating Embedded Apps
+1. Add your app to: `remote-mcp-with-ui-starter/src/`
 2. Add entry point: `main.tsx` and `index.html`
 3. Update: [remote-mcp-with-ui-starter/vite.config.ts](./remote-mcp-with-ui-starter/vite.config.ts)
 4. Add MCP tool to display it

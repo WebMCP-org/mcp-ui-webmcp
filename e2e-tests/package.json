@@ -1,8 +1,16 @@
 {
   "name": "@mcp-b/e2e-tests",
-  "version": "0.0.0",
+  "version": "1.0.0",
+  "description": "End-to-end tests for MCP UI + WebMCP demo using Playwright",
   "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WebMCP-org/mcp-ui-webmcp.git",
+    "directory": "e2e-tests"
+  },
+  "author": "WebMCP-org",
+  "license": "MIT",
   "scripts": {
     "test": "playwright test",
     "test:ui": "playwright test --ui",

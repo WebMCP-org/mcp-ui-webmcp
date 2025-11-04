@@ -388,7 +388,7 @@ try {
 If you're unsure about a pattern or approach:
 1. Check existing code for similar patterns
 2. Review [ARCHITECTURE.md](./remote-mcp-with-ui-starter/ARCHITECTURE.md) for design decisions
-3. Look at [remote-mcp-with-ui-starter/mini-apps/tictactoe/](./remote-mcp-with-ui-starter/mini-apps/tictactoe/) for a complete example
+3. Look at [remote-mcp-with-ui-starter/src/TicTacToeWithWebMCP.tsx](./remote-mcp-with-ui-starter/src/TicTacToeWithWebMCP.tsx) for a complete example
 4. When in doubt, prioritize clarity and type safety
 
 ---

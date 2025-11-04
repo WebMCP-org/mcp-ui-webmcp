@@ -1,8 +1,16 @@
 {
-  "name": "@mcp-b/mcp-ui-webmcp-monorepo",
+  "name": "@mcp-b/mcp-ui-webmcp",
   "version": "1.0.0",
+  "description": "MCP UI + WebMCP Demo Monorepo - Bidirectional AI and embedded web app integration",
   "private": true,
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WebMCP-org/mcp-ui-webmcp.git"
+  },
+  "author": "WebMCP-org",
+  "homepage": "https://github.com/WebMCP-org/mcp-ui-webmcp#readme",
+  "license": "MIT",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
