@@ -12,7 +12,6 @@ import { cn } from '@/lib/utils';
 import { ToolSourceBadge } from './tool-source-badge';
 import { type ToolStatus, ToolStatusBadge } from './tool-status-badge';
 
-// Type for tool call result that may contain UI resources
 type ToolResultContent = {
   content?: Array<{
     type: string;
@@ -22,7 +21,6 @@ type ToolResultContent = {
   [key: string]: unknown;
 };
 
-// Type guard to check if an item is a UI resource
 function isUIResource(item: unknown): item is { type: string; resource: UIEmbeddedResource } {
   return (
     typeof item === 'object' &&
@@ -91,27 +89,22 @@ export const ToolExecutionPanel: FC<ToolExecutionPanelProps> = ({
 
   const handleToolCall = useCallback(
     async (toolName: string, args: Record<string, unknown>) => {
-      // Set loading state with params
       setToolStates((prev) => ({
         ...prev,
         [toolName]: { status: 'loading', params: args },
       }));
 
       try {
-        // Extract sourceId from the tool to route to correct client
         const tool = tools.find((t) => t.name === toolName);
         const sourceId = tool ? (tool as Tool & { _sourceId?: string })._sourceId : undefined;
 
         const result = await onToolCall(toolName, args, sourceId);
 
-        // Set success state with params and result
         setToolStates((prev) => ({
           ...prev,
           [toolName]: { status: 'success', params: args, result },
         }));
 
-        // Extract and add UI resources to side panel
-        // Note: Deduplication is handled by UIResourceContext to prevent duplicates
         if (result && typeof result === 'object') {
           const resultObj = result as ToolResultContent;
           if (resultObj.content && Array.isArray(resultObj.content)) {
@@ -126,7 +119,6 @@ export const ToolExecutionPanel: FC<ToolExecutionPanelProps> = ({
           }
         }
 
-        // Clear success state after 3 seconds
         setTimeout(() => {
           setToolStates((prev) => {
             const newState = { ...prev };
@@ -137,7 +129,6 @@ export const ToolExecutionPanel: FC<ToolExecutionPanelProps> = ({
           });
         }, 3000);
       } catch (error) {
-        // Set error state with params
         const errorMessage = error instanceof Error ? error.message : 'Failed to call tool';
         setToolStates((prev) => ({
           ...prev,
@@ -183,12 +174,10 @@ export const ToolExecutionPanel: FC<ToolExecutionPanelProps> = ({
           const isError = toolState.status === 'error';
           const hasExecuted = isLoading || isSuccess || isError;
 
-          // Parse MCP result if success
           const formattedResult =
             isSuccess && 'result' in toolState ? formatMcpResult(toolState.result) : null;
           const resultIsError = formattedResult?.isError || isError;
 
-          // Map internal status to ToolStatus type
           const displayStatus: ToolStatus = isLoading
             ? 'running'
             : isError || resultIsError

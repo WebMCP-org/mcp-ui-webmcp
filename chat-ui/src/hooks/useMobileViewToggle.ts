@@ -32,14 +32,12 @@ export function useMobileViewToggle(hasToolSurface: boolean) {
   const isMobile = useIsMobile();
   const viewportRef = useRef<HTMLDivElement>(null);
 
-  // Auto-switch to UI view on mobile when tool surface first appears
   useEffect(() => {
     if (isMobile && hasToolSurface) {
       setMobileView('ui');
     }
   }, [isMobile, hasToolSurface]);
 
-  // Save scroll position when leaving chat view, restore when returning
   useEffect(() => {
     if (!isMobile || !hasToolSurface) return;
 
@@ -47,31 +45,25 @@ export function useMobileViewToggle(hasToolSurface: boolean) {
     if (!viewport) return;
 
     if (mobileView === 'ui') {
-      // Switching away from chat - save scroll position
       setSavedScrollPosition(viewport.scrollTop);
     } else if (mobileView === 'chat') {
-      // Switching back to chat - restore scroll position
       viewport.scrollTop = savedScrollPosition;
     }
   }, [mobileView, isMobile, hasToolSurface, savedScrollPosition]);
 
-  // Pan gesture handler for swipe navigation
   const handlePanEnd = useCallback(
     (
       _event: PointerEvent | MouseEvent | TouchEvent,
       info: { offset: { x: number; y: number } }
     ) => {
-      // Only handle swipe on mobile when tool surface is visible
       if (!isMobile || !hasToolSurface) return;
 
       const swipeThreshold = 50; // Minimum distance for swipe detection
       const { x } = info.offset;
 
-      // Swipe left (negative x): Chat → UI
       if (x < -swipeThreshold && mobileView === 'chat') {
         setMobileView('ui');
       }
-      // Swipe right (positive x): UI → Chat
       else if (x > swipeThreshold && mobileView === 'ui') {
         setMobileView('chat');
       }

@@ -28,20 +28,15 @@ export function useIframeResize(iframeRef: RefObject<HTMLIFrameElement | null> |
           if (payload.width !== undefined && payload.height !== undefined && container) {
             const containerWidth = container.clientWidth;
 
-            // Scale based on width only - mobile users expect vertical scrolling
-            // Leave a bit of padding (95% of container width)
             const targetWidth = containerWidth * 0.95;
             const scale = Math.min(targetWidth / payload.width, 1); // Don't scale up, only down
 
-            // Set natural dimensions
             iframe.style.width = `${payload.width}px`;
             iframe.style.height = `${payload.height}px`;
 
-            // Apply scaling if needed (on mobile/small screens)
             if (scale < 1) {
               iframe.style.transform = `scale(${scale})`;
               iframe.style.transformOrigin = 'top center';
-              // Adjust container to account for scaled size
               iframe.style.marginBottom = `${payload.height * (scale - 1)}px`;
             } else {
               iframe.style.transform = 'none';

@@ -55,7 +55,6 @@ export function getToolStatusInfo(status: ToolStatus, isError?: boolean): ToolSt
     };
   }
 
-  // completed
   return {
     label: 'Completed',
     variant: 'default',

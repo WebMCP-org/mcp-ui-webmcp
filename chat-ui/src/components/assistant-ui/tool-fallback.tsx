@@ -28,7 +28,6 @@ function mapToToolStatus(status: ToolCallStatus, isError?: boolean): ToolStatus 
   if (status.type === 'incomplete') {
     return status.reason === 'cancelled' ? 'cancelled' : 'error';
   }
-  // status.type === "complete"
   return isError ? 'error' : 'completed';
 }
 
@@ -51,7 +50,6 @@ function getBorderColor(status: ToolCallStatus, isError?: boolean): string {
   if (status.type === 'incomplete') {
     return status.reason === 'cancelled' ? 'border-gray-500' : 'border-destructive';
   }
-  // complete
   return isError ? 'border-destructive' : 'border-green-500';
 }
 
@@ -62,16 +60,13 @@ export const ToolFallback: ToolCallMessagePartComponent = ({
   status,
   isError,
 }) => {
-  // Get tool metadata from MCP context to extract sourceId
   const { tools } = useMCP();
   const tool = tools.find((t) => t.name === toolName);
   const sourceId = tool ? (tool as typeof tool & { _sourceId?: string })._sourceId : undefined;
 
-  // Parse MCP result if available
   const formattedResult = result !== undefined ? formatMcpResult(result) : null;
   const resultIsError = formattedResult?.isError || isError;
 
-  // Determine if should auto-expand
   const shouldExpand = shouldAutoExpandStatus(status) || resultIsError;
   const [isCollapsed, setIsCollapsed] = useState(!shouldExpand);
 

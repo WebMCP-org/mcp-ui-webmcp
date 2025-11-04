@@ -15,7 +15,6 @@ interface ServerSettingsProps {
 export function ServerSettings({ onDisconnect, connectionState }: ServerSettingsProps) {
   const serverUrlId = useId();
 
-  // Access form context from parent FormProvider
   const {
     register,
     formState: { errors },

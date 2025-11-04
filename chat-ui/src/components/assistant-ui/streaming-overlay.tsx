@@ -9,23 +9,18 @@ export function StreamingOverlay() {
   const [displayText, setDisplayText] = useState('');
   const [toolNames, setToolNames] = useState<string | null>(null);
 
-  // Subscribe to thread state updates
   useEffect(() => {
     const unsubscribe = runtime.thread.subscribe(() => {
       const threadState = runtime.thread.getState();
       const messages = threadState.messages;
       const lastMessage = messages[messages.length - 1];
 
-      // Only show overlay if last message is from assistant
       if (lastMessage?.role === 'assistant') {
-        // Extract text content from message parts
         const textParts = lastMessage.content.filter((part) => part.type === 'text');
         const textContent = textParts.map((part) => part.text).join(' ');
 
-        // Extract tool calls if present
         const toolCalls = lastMessage.content.filter((part) => part.type === 'tool-call');
 
-        // If there are tool calls, show them
         if (toolCalls.length > 0) {
           const names = toolCalls.map((tc) => tc.toolName || 'tool').join(', ');
           setToolNames(names);
@@ -33,18 +28,15 @@ export function StreamingOverlay() {
           setToolNames(null);
         }
 
-        // Add text content (last 40 chars)
         if (textContent.trim()) {
           const last40 = textContent.slice(-40);
           setDisplayText(last40);
           setVisible(true);
         } else if (toolCalls.length > 0) {
-          // Show something even if there's no text yet
           setDisplayText('');
           setVisible(true);
         }
       } else {
-        // Hide overlay if last message is not from assistant
         setVisible(false);
       }
     });
@@ -52,7 +44,6 @@ export function StreamingOverlay() {
     return () => unsubscribe();
   }, [runtime.thread]);
 
-  // Separate effect for fade-out timer
   useEffect(() => {
     if (!visible) return;
 

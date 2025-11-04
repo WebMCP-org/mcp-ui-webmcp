@@ -89,17 +89,14 @@ export const UIResourceProvider: React.FC<UIResourceProviderProps> = ({ children
 
   const addResource = useCallback(
     (item: Omit<UIResourceItem, 'id' | 'timestamp' | 'iframeRef'>) => {
-      // Check if a resource with the same URI already exists
       setResources((prev) => {
         const existingResource = prev.find((r) => r.resource.uri === item.resource.uri);
 
         if (existingResource) {
-          // Resource with same URI exists, just select it instead of creating duplicate
           setSelectedResourceId(existingResource.id);
           return prev; // No state change needed
         }
 
-        // Create new resource since no duplicate found
         const newResource: UIResourceItem = {
           ...item,
           id: `${item.toolName}-${Date.now()}-${Math.random()}`,
@@ -115,14 +112,12 @@ export const UIResourceProvider: React.FC<UIResourceProviderProps> = ({ children
 
   const removeResource = useCallback(
     async (id: string) => {
-      // Extract resource from state to avoid stale closure
       let resourceToCleanup: UIResourceItem | undefined;
       setResources((prev) => {
         resourceToCleanup = prev.find((r) => r.id === id);
         return prev; // Don't modify yet, just capture the resource
       });
 
-      // Call cleanup if it exists
       if (resourceToCleanup?.cleanup) {
         try {
           await resourceToCleanup.cleanup();
@@ -131,10 +126,8 @@ export const UIResourceProvider: React.FC<UIResourceProviderProps> = ({ children
         }
       }
 
-      // Now remove the resource
       setResources((prev) => {
         const filtered = prev.filter((r) => r.id !== id);
-        // If we're removing the selected resource, select another one
         if (selectedResourceId === id) {
           setSelectedResourceId(filtered.length > 0 ? filtered[filtered.length - 1].id : null);
         }
@@ -153,14 +146,12 @@ export const UIResourceProvider: React.FC<UIResourceProviderProps> = ({ children
   }, []);
 
   const clearAll = useCallback(async () => {
-    // Extract resources from state to avoid stale closure
     let resourcesToCleanup: UIResourceItem[] = [];
     setResources((prev) => {
       resourcesToCleanup = prev;
       return prev; // Don't modify yet, just capture the resources
     });
 
-    // Call cleanup on all resources
     await Promise.all(
       resourcesToCleanup.map(async (resource) => {
         if (resource.cleanup) {
@@ -198,17 +189,14 @@ export const UIResourceProvider: React.FC<UIResourceProviderProps> = ({ children
     ]
   );
 
-  // Cleanup all resources on unmount
   useEffect(() => {
     return () => {
-      // Extract resources from state for cleanup
       let resourcesToCleanup: UIResourceItem[] = [];
       setResources((prev) => {
         resourcesToCleanup = prev;
         return prev;
       });
 
-      // Cleanup all resources asynchronously (don't await in cleanup)
       Promise.all(
         resourcesToCleanup.map(async (resource) => {
           if (resource.cleanup) {

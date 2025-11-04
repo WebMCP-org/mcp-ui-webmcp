@@ -36,7 +36,6 @@ export const TabSelector: FC<{
     <div className="flex items-center gap-1 px-2 py-1.5 border-b border-border/40 bg-muted/10 overflow-x-auto sm:px-3 sm:py-2">
       {resources.map((resource) => {
         const isSelected = resource.id === selectedResourceId;
-        // Filter tools for this specific iframe
         const iframeTools = tools.filter((tool) => {
           const toolWithSource = tool as { _sourceId?: string };
           return toolWithSource._sourceId === resource.id;

@@ -35,15 +35,11 @@ export function useIframeLifecycle() {
 
   const setupIframe = useCallback(
     async (iframe: HTMLIFrameElement, sourceId: string) => {
-      // UI Lifecycle Protocol Handler
-      // Listen for iframe ready signal and respond to enable UI interaction
       const handleIframeLifecycleMessage = (event: MessageEvent) => {
-        // Basic origin check - accept messages from the iframe
         if (event.source !== iframe.contentWindow) {
           return;
         }
 
-        // Respond to iframe ready signal
         if (event.data?.type === 'ui-lifecycle-iframe-ready') {
           console.log('[useIframeLifecycle] Iframe ready, sending parent-ready signal');
           iframe.contentWindow?.postMessage({ type: 'parent-ready', payload: {} }, '*');
@@ -52,7 +48,6 @@ export function useIframeLifecycle() {
 
       window.addEventListener('message', handleIframeLifecycleMessage);
 
-      // Create Client + Transport pair (1-to-1 relationship)
       const client = new Client({
         name: 'WebMCP Client',
         version: '1.0.0',
@@ -65,23 +60,18 @@ export function useIframeLifecycle() {
       try {
         await client.connect(transport);
 
-        // Register client for tool routing
         registerWebMcpClient(sourceId, client);
 
-        // Fetch and register tools with app
         const toolsResponse = await client.listTools();
         registerWebMcpTools(toolsResponse.tools, sourceId);
 
-        // Listen for tool list changes
         client.setNotificationHandler(ToolListChangedNotificationSchema, async () => {
           const updated = await client.listTools();
           registerWebMcpTools(updated.tools, sourceId);
         });
 
-        // Store cleanup function in the resource (properly via context method)
         setResourceCleanup(sourceId, async () => {
           try {
-            // Clean up UI lifecycle listener
             window.removeEventListener('message', handleIframeLifecycleMessage);
 
             await client.close();
@@ -89,7 +79,6 @@ export function useIframeLifecycle() {
           } catch (error) {
             console.error(`[useIframeLifecycle] Error closing client/transport for ${sourceId}:`, error);
           }
-          // Trigger App-level cleanup (removes tools from state)
           unregisterWebMcpClient(sourceId);
         });
       } catch (error) {

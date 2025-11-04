@@ -20,7 +20,6 @@ import { ServerSettings } from './ServerSettings';
 interface ApiKeyInputProps {
   open: boolean;
   onClose: () => void;
-  // Server connection callbacks
   onConnectServer: (url: string) => Promise<void>;
   onDisconnectServer: () => Promise<void>;
   connectionState: 'disconnected' | 'connecting' | 'loading' | 'ready' | 'failed';
@@ -35,7 +34,6 @@ export function ApiKeyInput({
 }: ApiKeyInputProps) {
   const apiKeyId = useId();
 
-  // Initialize form with values from localStorage
   const form = useForm<SettingsFormData>({
     // @ts-expect-error zodResolver type issue
     resolver: zodResolver(settingsFormSchema),
@@ -46,7 +44,6 @@ export function ApiKeyInput({
     mode: 'onChange', // Validate on change for real-time feedback
   });
 
-  // Reset form to current localStorage values when dialog opens
   useEffect(() => {
     if (open) {
       form.reset({
@@ -58,21 +55,15 @@ export function ApiKeyInput({
 
   const onSubmit = async (data: SettingsFormData) => {
     try {
-      // Save API key to localStorage
       setStoredApiKey(data.apiKey);
 
-      // Connect to server (server URL is saved by connectToServer function)
       await onConnectServer(data.serverUrl);
-
-      // Dialog will close automatically via parent's useEffect when connection succeeds
     } catch (error) {
-      // Connection errors are handled by parent component
       console.error('Form submission error:', error);
     }
   };
 
   const handleClose = () => {
-    // Only allow close if connected (enforced by parent)
     if (connectionState === 'ready') {
       onClose();
     }

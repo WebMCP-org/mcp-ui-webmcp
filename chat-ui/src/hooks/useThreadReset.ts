@@ -23,19 +23,15 @@ export function useThreadReset() {
   const { resources, removeResource } = useUIResources();
 
   const handleResetThread = useCallback(async () => {
-    // Clear the conversation by creating a new thread
     const currentState = assistantRuntime.thread.getState();
     if (currentState.isRunning) {
       assistantRuntime.thread.cancelRun();
     }
 
-    // Close all UI resources (iframes)
     for (const resource of resources) {
       await removeResource(resource.id);
     }
 
-    // Start a new thread by switching to a new thread ID
-    // This will clear all messages and start fresh
     assistantRuntime.thread.import({
       messages: [],
     });

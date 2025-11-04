@@ -42,7 +42,6 @@ export type FormattedMcpResult = {
  * ```
  */
 export function formatMcpResult(result: unknown): FormattedMcpResult {
-  // Handle null/undefined
   if (result === null || result === undefined) {
     return {
       displayText: '',
@@ -51,7 +50,6 @@ export function formatMcpResult(result: unknown): FormattedMcpResult {
     };
   }
 
-  // Handle non-object results (strings, numbers, etc.)
   if (typeof result !== 'object') {
     return {
       displayText: String(result),
@@ -60,11 +58,9 @@ export function formatMcpResult(result: unknown): FormattedMcpResult {
     };
   }
 
-  // Type guard for MCP response
   const mcpResponse = result as McpToolResponse;
   const isError = Boolean(mcpResponse.isError);
 
-  // Extract text content from content array
   if (mcpResponse.content && Array.isArray(mcpResponse.content)) {
     const textContent = mcpResponse.content
       .filter((item) => item.type === 'text' && item.text)
@@ -79,7 +75,6 @@ export function formatMcpResult(result: unknown): FormattedMcpResult {
       };
     }
 
-    // If no text content, try to show other content types
     const otherContent = mcpResponse.content
       .filter((item) => item.type !== 'text')
       .map((item) => `[${item.type}]`)
@@ -94,7 +89,6 @@ export function formatMcpResult(result: unknown): FormattedMcpResult {
     }
   }
 
-  // Fallback: stringify the entire result
   return {
     displayText: JSON.stringify(result, null, 2),
     isError,

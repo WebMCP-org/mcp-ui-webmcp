@@ -6,7 +6,6 @@ import { type DayButton, DayPicker, getDefaultClassNames } from 'react-day-picke
 import { Button, buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-// Custom component definitions moved outside Calendar to avoid recreation on every render
 const CalendarRoot = ({
   className,
   rootRef,

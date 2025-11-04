@@ -15,10 +15,8 @@ export interface NotifyMessageProps {
  * Get preview text (first line or truncated)
  */
 function getPreviewText(message: string, maxLength = 80): string {
-  // Get first line
   const firstLine = message.split('\n')[0];
 
-  // Truncate if too long
   if (firstLine.length > maxLength) {
     return `${firstLine.substring(0, maxLength)}...`;
   }
@@ -31,7 +29,6 @@ function getPreviewText(message: string, maxLength = 80): string {
  * Displays notification messages from iframe resources in a collapsible format
  */
 export const NotifyMessage: React.FC<NotifyMessageProps> = ({ message, timestamp, className }) => {
-  // Collapsed by default
   const [isCollapsed, setIsCollapsed] = useState(true);
 
   const previewText = getPreviewText(message);

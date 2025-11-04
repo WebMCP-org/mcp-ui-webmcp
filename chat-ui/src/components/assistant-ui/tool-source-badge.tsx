@@ -41,7 +41,6 @@ export const ToolSourceBadge: FC<ToolSourceBadgeProps> = ({
     ? 'Tool from HTTP MCP server'
     : 'Tool that runs in client JavaScript (no external server required)';
 
-  // Color classes for badges
   const badgeClassName = isRemote
     ? 'bg-blue-500/10 text-blue-700 border-blue-500/20 hover:bg-blue-500/20 dark:bg-blue-500/20 dark:text-blue-300 dark:border-blue-500/30'
     : 'bg-green-500/10 text-green-700 border-green-500/20 hover:bg-green-500/20 dark:bg-green-500/20 dark:text-green-300 dark:border-green-500/30';
