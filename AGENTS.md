@@ -1,6 +1,5 @@
-# AI Agent Development Guide
-
-Welcome! This file serves as the entry point for AI assistants working on this codebase. All detailed information is maintained in dedicated documentation files to ensure a single source of truth.
+## FOR AGENTS
+- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Development standards and best practices for AI agents
 
 ## Quick Navigation
 

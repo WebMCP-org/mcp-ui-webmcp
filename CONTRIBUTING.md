@@ -4,6 +4,12 @@ This guide outlines the development standards and best practices for AI assistan
 
 ## Core Principles
 
+### 0. Adhere to the principals of working with legacy codebases
+ * Deeply investigate and understand existing code before making changes.
+ * Adhere to existing coding styles and patterns.
+ * Minimize changes to working code; prioritize stability.
+ * Read documentation, check that it is accurate, and update it if it is not
+
 ### 1. Type Safety First
 
 **Always leverage TypeScript's type system fully:**
