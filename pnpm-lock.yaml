@@ -432,6 +432,40 @@ importers:
         specifier: ^4.45.3
         version: 4.45.4(@cloudflare/workers-types@4.20251014.0)
 
+  webmcp-template-vanilla:
+    dependencies:
+      '@mcp-ui/server':
+        specifier: ^5.2.0
+        version: 5.13.1
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.20.2
+        version: 1.21.0
+      agents:
+        specifier: ^0.2.20
+        version: 0.2.20(@cloudflare/workers-types@4.20251014.0)(react@19.2.0)(typescript@5.8.3)
+      hono:
+        specifier: ^4.10.4
+        version: 4.10.4
+    devDependencies:
+      '@eslint/js':
+        specifier: ^9.33.0
+        version: 9.39.1
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.1(jiti@2.6.1)
+      globals:
+        specifier: ^16.3.0
+        version: 16.5.0
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+      typescript-eslint:
+        specifier: ^8.39.1
+        version: 8.46.3(eslint@9.39.1(jiti@2.6.1))(typescript@5.8.3)
+      wrangler:
+        specifier: ^4.45.3
+        version: 4.45.4(@cloudflare/workers-types@4.20251014.0)
+
 packages:
 
   '@adobe/css-tools@4.4.4':

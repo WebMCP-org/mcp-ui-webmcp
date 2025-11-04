@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WebMCP Template - Vanilla</title>
+
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- @mcp-b/global - IIFE version (no build required!) -->
+  <script src="https://unpkg.com/@mcp-b/global@latest/dist/index.iife.js"></script>
+
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div id="app" class="flex min-h-screen flex-col items-center justify-center gap-6 p-8">
+    <div class="text-center max-w-2xl">
+      <h1 class="mb-4 text-3xl font-bold text-gray-900">WebMCP Template (Vanilla)</h1>
+
+      <!-- Connection status -->
+      <div id="status" class="mb-6">
+        <div class="inline-flex items-center gap-2 rounded-full bg-yellow-100 px-4 py-2 text-sm text-yellow-800">
+          <span class="h-2 w-2 rounded-full bg-yellow-600"></span>
+          Initializing...
+        </div>
+      </div>
+
+      <!-- Current message display -->
+      <div class="rounded-lg bg-blue-50 p-6 mb-6">
+        <p id="message" class="text-xl text-gray-700">Hello from WebMCP Template!</p>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="flex gap-4 justify-center">
+        <button
+          id="btn-update"
+          class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        >
+          Update Message
+        </button>
+        <button
+          id="btn-reset"
+          class="rounded-md bg-gray-600 px-4 py-2 text-white hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        >
+          Reset
+        </button>
+      </div>
+
+      <!-- Info about registered tools -->
+      <div class="mt-8 rounded-lg bg-gray-50 p-4 text-left text-sm text-gray-600 border border-gray-200">
+        <h2 class="font-semibold mb-2">Registered WebMCP Tools:</h2>
+        <ul class="space-y-1">
+          <li>• <code class="text-xs bg-gray-200 px-1 py-0.5 rounded">template_get_message</code> - Get current message</li>
+          <li>• <code class="text-xs bg-gray-200 px-1 py-0.5 rounded">template_update_message</code> - Update message</li>
+          <li>• <code class="text-xs bg-gray-200 px-1 py-0.5 rounded">template_reset</code> - Reset to default</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Application Logic -->
+  <script>
+    // App state
+    let isReady = false;
+    let message = 'Hello from WebMCP Template!';
+
+    // DOM elements
+    const statusEl = document.getElementById('status');
+    const messageEl = document.getElementById('message');
+    const btnUpdate = document.getElementById('btn-update');
+    const btnReset = document.getElementById('btn-reset');
+
+    // Update UI based on state
+    function updateUI() {
+      messageEl.textContent = message;
+
+      if (isReady) {
+        statusEl.innerHTML = `
+          <div class="inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-2 text-sm text-green-800">
+            <span class="h-2 w-2 rounded-full bg-green-600"></span>
+            Connected to parent
+          </div>
+        `;
+        btnUpdate.disabled = false;
+        btnReset.disabled = false;
+      } else {
+        statusEl.innerHTML = `
+          <div class="inline-flex items-center gap-2 rounded-full bg-yellow-100 px-4 py-2 text-sm text-yellow-800">
+            <span class="h-2 w-2 rounded-full bg-yellow-600"></span>
+            Connecting...
+          </div>
+        `;
+        btnUpdate.disabled = true;
+        btnReset.disabled = true;
+      }
+    }
+
+    // Listen for parent ready event
+    window.addEventListener('message', (event) => {
+      if (event.data?.type === 'parent_ready') {
+        isReady = true;
+        updateUI();
+        console.log('[App] Parent is ready');
+      }
+    });
+
+    // Notify parent we're ready
+    window.parent.postMessage({ type: 'iframe_ready' }, '*');
+
+    // Button event handlers
+    btnUpdate.addEventListener('click', () => {
+      const newMessage = prompt('Enter new message:');
+      if (newMessage) {
+        message = newMessage;
+        updateUI();
+      }
+    });
+
+    btnReset.addEventListener('click', () => {
+      message = 'Hello from WebMCP Template!';
+      updateUI();
+    });
+
+    // Register WebMCP tools using the W3C API
+    // window.navigator.modelContext is already available via the IIFE script!
+    window.navigator.modelContext.provideContext({
+      tools: [
+        {
+          name: 'template_get_message',
+          description: 'Get the current message displayed in the app',
+          inputSchema: {
+            type: 'object',
+            properties: {}
+          },
+          async execute() {
+            console.log('[Tool] template_get_message called');
+            return {
+              content: [{
+                type: 'text',
+                text: `Current message: ${message}`
+              }]
+            };
+          }
+        },
+        {
+          name: 'template_update_message',
+          description: 'Update the message displayed in the app',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              newMessage: {
+                type: 'string',
+                description: 'The new message to display'
+              }
+            },
+            required: ['newMessage']
+          },
+          async execute({ newMessage }) {
+            console.log('[Tool] template_update_message called with:', newMessage);
+            message = newMessage;
+            updateUI();
+            return {
+              content: [{
+                type: 'text',
+                text: `Message updated to: ${message}`
+              }]
+            };
+          }
+        },
+        {
+          name: 'template_reset',
+          description: 'Reset the message to its default value',
+          inputSchema: {
+            type: 'object',
+            properties: {}
+          },
+          async execute() {
+            console.log('[Tool] template_reset called');
+            const defaultMessage = 'Hello from WebMCP Template!';
+            message = defaultMessage;
+            updateUI();
+            return {
+              content: [{
+                type: 'text',
+                text: `Message reset to: ${message}`
+              }]
+            };
+          }
+        }
+      ]
+    });
+
+    // Initial UI update
+    updateUI();
+
+    console.log('[App] WebMCP tools registered successfully');
+    console.log('[App] Tools:', window.navigator.modelContext);
+  </script>
+</body>
+</html>
