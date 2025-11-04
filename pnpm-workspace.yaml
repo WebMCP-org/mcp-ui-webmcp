@@ -1,0 +1,11 @@
+packages:
+  - chat-ui
+  - remote-mcp-with-ui-starter
+  - e2e-tests
+
+catalog:
+  "@types/node": ^24.9.2
+  typescript: ~5.8.3
+  zod: ^3.25.1
+
+onlyBuiltDependencies:

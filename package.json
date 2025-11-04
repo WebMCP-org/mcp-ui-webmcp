@@ -1,0 +1,32 @@
+{
+  "name": "@mcp-b/mcp-ui-webmcp-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "test": "pnpm --filter @mcp-b/e2e-tests test",
+    "test:integration": "pnpm --filter @mcp-b/e2e-tests test:integration",
+    "test:chat-ui": "pnpm --filter @mcp-b/e2e-tests test:chat-ui",
+    "test:remote-mcp": "pnpm --filter @mcp-b/e2e-tests test:remote-mcp",
+    "test:ui": "pnpm --filter @mcp-b/e2e-tests test:ui",
+    "test:debug": "pnpm --filter @mcp-b/e2e-tests test:debug",
+    "test:headed": "pnpm --filter @mcp-b/e2e-tests test:headed",
+    "test:report": "pnpm --filter @mcp-b/e2e-tests test:report",
+    "apps:build": "pnpm --filter chat-ui build && pnpm --filter remote-mcp-with-ui-starter build",
+    "lint": "turbo run lint",
+    "clean": "turbo run clean"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.2",
+    "@types/node": "catalog:",
+    "turbo": "^2.5.6",
+    "typescript": "catalog:"
+  },
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=8"
+  },
+  "packageManager": "pnpm@9.15.4"
+}
