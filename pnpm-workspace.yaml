@@ -1,6 +1,7 @@
 packages:
   - chat-ui
   - remote-mcp-with-ui-starter
+  - webmcp-template
   - e2e-tests
 
 catalog:

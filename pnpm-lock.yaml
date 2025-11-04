@@ -347,6 +347,91 @@ importers:
         specifier: ^4.45.3
         version: 4.45.4(@cloudflare/workers-types@4.20251014.0)
 
+  webmcp-template:
+    dependencies:
+      '@mcp-b/global':
+        specifier: ^1.1.0
+        version: 1.1.0(@modelcontextprotocol/sdk@1.21.0)
+      '@mcp-b/react-webmcp':
+        specifier: ^0.1.3
+        version: 0.1.3(react@19.2.0)(zod@3.25.76)
+      '@mcp-ui/server':
+        specifier: ^5.2.0
+        version: 5.13.1
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.20.2
+        version: 1.21.0
+      '@tailwindcss/vite':
+        specifier: ^4.1.10
+        version: 4.1.16(vite@7.1.12(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2))
+      agents:
+        specifier: ^0.2.20
+        version: 0.2.20(@cloudflare/workers-types@4.20251014.0)(react@19.2.0)(typescript@5.8.3)
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      hono:
+        specifier: ^4.10.4
+        version: 4.10.4
+      react:
+        specifier: ^19.1.1
+        version: 19.2.0
+      react-dom:
+        specifier: ^19.1.1
+        version: 19.2.0(react@19.2.0)
+      tailwind-merge:
+        specifier: ^3.3.1
+        version: 3.3.1
+      tailwindcss:
+        specifier: ^4.1.10
+        version: 4.1.16
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
+    devDependencies:
+      '@cloudflare/vite-plugin':
+        specifier: ^1.13.18
+        version: 1.13.19(vite@7.1.12(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2))(workerd@1.20251011.0)(wrangler@4.45.4(@cloudflare/workers-types@4.20251014.0))
+      '@eslint/js':
+        specifier: ^9.33.0
+        version: 9.39.1
+      '@types/react':
+        specifier: ^19.1.10
+        version: 19.2.2
+      '@types/react-dom':
+        specifier: ^19.1.7
+        version: 19.2.2(@types/react@19.2.2)
+      '@vitejs/plugin-react':
+        specifier: ^5.1.0
+        version: 5.1.0(vite@7.1.12(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2))
+      babel-plugin-react-compiler:
+        specifier: ^1.0.0
+        version: 1.0.0
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.1(jiti@2.6.1)
+      eslint-plugin-react-hooks:
+        specifier: ^5.2.0
+        version: 5.2.0(eslint@9.39.1(jiti@2.6.1))
+      eslint-plugin-react-refresh:
+        specifier: ^0.4.24
+        version: 0.4.24(eslint@9.39.1(jiti@2.6.1))
+      globals:
+        specifier: ^16.3.0
+        version: 16.5.0
+      typescript:
+        specifier: ~5.8.3
+        version: 5.8.3
+      typescript-eslint:
+        specifier: ^8.39.1
+        version: 8.46.3(eslint@9.39.1(jiti@2.6.1))(typescript@5.8.3)
+      vite:
+        specifier: ^7.1.12
+        version: 7.1.12(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2)
+      wrangler:
+        specifier: ^4.45.3
+        version: 4.45.4(@cloudflare/workers-types@4.20251014.0)
+
 packages:
 
   '@adobe/css-tools@4.4.4':
