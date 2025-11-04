@@ -1,248 +1,333 @@
-# MCP UI WebMCP
+# MCP UI + WebMCP Demo Monorepo
 
-A monorepo containing MCP (Model Context Protocol) UI applications and end-to-end tests.
+A demonstration monorepo showcasing the powerful combination of **MCP UI** (Model Context Protocol with UI resources) and **WebMCP** (bidirectional tool registration between AI and embedded web apps).
 
-## Repository
+🔗 **Repository**: [https://github.com/WebMCP-org/mcp-ui-webmcp](https://github.com/WebMCP-org/mcp-ui-webmcp)
 
-🔗 [https://github.com/WebMCP-org/mcp-ui-webmcp](https://github.com/WebMCP-org/mcp-ui-webmcp)
+## What Makes This Special?
 
-## Overview
+This monorepo demonstrates a **dual-direction integration pattern**:
 
-The E2E test suite validates that the Tab Transport implementation works correctly in a real browser environment. It tests:
+1. **MCP Server → UI**: AI assistants invoke tools that display interactive web applications
+2. **UI → MCP Server**: Embedded web apps dynamically register tools back to the AI
 
-- **TabServerTransport**: Server-side transport for accepting MCP connections
-- **TabClientTransport**: Client-side transport for connecting to MCP servers
-- **Full MCP protocol**: Tool registration, listing, and execution
-- **Connection lifecycle**: Connect, disconnect, reconnect scenarios
+This creates a powerful feedback loop where AI can show UIs, and those UIs can extend the AI's capabilities.
 
-## Structure
+### Example: Interactive TicTacToe Game
+
+When the AI calls `showTicTacToeGame`:
+- The game UI appears in the assistant's side panel
+- The game automatically registers 3 new tools for the AI to use
+- The AI can now play the game by calling these dynamically registered tools
+- All communication happens seamlessly through iframe postMessage
+
+## Monorepo Structure
+
+Three main packages managed by **Turborepo** + **pnpm**:
 
 ```
-e2e/
-├── test-app/           # Test application using Tab Transports
-│   ├── src/
-│   │   └── main.ts     # MCP server & client implementation
-│   ├── index.html      # Test UI
-│   └── package.json
-├── tests/
-│   └── tab-transport.spec.ts  # Playwright E2E tests
-├── playwright.config.ts
-└── package.json
+mcp-ui-webmcp/
+├── chat-ui/                    # Modern React chat interface
+│   ├── src/                    # Chat UI components
+│   ├── .env.development        # Dev environment (committed)
+│   └── .env.production         # Prod environment (committed)
+│
+├── remote-mcp-with-ui-starter/ # MCP server with embedded UIs
+│   ├── worker/                 # Cloudflare Worker code
+│   ├── mini-apps/              # Self-contained mini-apps
+│   ├── .dev.vars              # Dev environment (committed)
+│   └── .prod.vars             # Prod environment (committed)
+│
+├── e2e-tests/                  # Playwright E2E tests
+│   ├── tests/                  # Test suites
+│   └── playwright.config.ts    # Playwright configuration
+│
+├── turbo.json                  # Turborepo configuration
+├── pnpm-workspace.yaml         # Workspace definition
+└── CLAUDE.md                   # Development guidance
 ```
 
-## Test Application
-
-The test app (`test-app/`) is a simple Vite + TypeScript application that:
-
-1. Creates an MCP server with counter tools (increment, decrement, reset, get)
-2. Connects an MCP client to the server in the same browser context
-3. Provides a UI for manually testing the transports
-4. Exposes a `testApp` API for programmatic testing
-
-## Getting Started
+## Quick Start
 
 ### Prerequisites
 
-- Node.js 18 or later
-- pnpm 8 or later
+- **Node.js 24.3.0** (specified in `.nvmrc`)
+- **pnpm 9.15.4+** (for workspace management)
 
 ### Installation
 
 ```bash
-# Install dependencies
+# Install all dependencies
 pnpm install
 ```
 
 ### Development
 
-```bash
-# Run all apps in development mode
-pnpm dev
+Run both apps together for the full integration experience:
 
-# Build all apps
+**Terminal 1 - MCP Server:**
+```bash
+cd remote-mcp-with-ui-starter
+pnpm dev
+# → http://localhost:8888
+# → MCP endpoint: http://localhost:8888/mcp
+```
+
+**Terminal 2 - Chat UI:**
+```bash
+cd chat-ui
+pnpm dev
+# → http://localhost:5173
+# → Automatically connects to localhost:8888/mcp
+```
+
+Or from the root:
+```bash
+pnpm dev  # Runs both apps in parallel
+```
+
+### Building
+
+```bash
+# Build all packages
 pnpm build
 
-# Run chat-ui only
-cd chat-ui && pnpm dev
-
-# Run remote-mcp-with-ui-starter only
-cd remote-mcp-with-ui-starter && pnpm dev
+# Build specific packages
+pnpm --filter chat-ui build
+pnpm --filter remote-mcp-with-ui-starter build
 ```
 
-## Testing
+## Key Features
 
-### Running Tests
+### MCP UI Resources
 
-```bash
-# Run all E2E tests (starts both servers)
-pnpm test
+The MCP server can return three types of UI resources:
 
-# Run integration tests
-pnpm test:integration
+1. **externalUrl** - Embeds an iframe with a URL (used for mini-apps)
+2. **rawHtml** - Renders sanitized HTML directly
+3. **remoteDom** - Executes JavaScript to build DOM elements
 
-# Run chat-ui tests only
-pnpm test:chat-ui
+### WebMCP Dynamic Tool Registration
 
-# Run remote-mcp tests only
-pnpm test:remote-mcp
-
-# Run with Playwright UI
-pnpm test:ui
-
-# Run in headed mode (see browser)
-pnpm test:headed
-
-# Debug tests
-pnpm test:debug
-
-# View test report
-pnpm test:report
-```
-
-See [e2e-tests/README.md](e2e-tests/README.md) for detailed testing documentation.
-
-## Test Scenarios
-
-The test suite covers:
-
-### Basic Functionality
-- ✅ Load test application
-- ✅ Start MCP server
-- ✅ Connect MCP client to server
-- ✅ List available tools
-
-### Tool Execution
-- ✅ Increment counter via MCP tool
-- ✅ Decrement counter via MCP tool
-- ✅ Reset counter via MCP tool
-- ✅ Get counter value via MCP tool
-
-### Advanced Scenarios
-- ✅ Multiple rapid tool calls (concurrency)
-- ✅ Disconnect and reconnect client
-- ✅ Stop and restart server
-- ✅ Programmatic API testing
-
-## Manual Testing
-
-You can also run the test app manually:
-
-```bash
-# Start the test app
-pnpm --filter mcp-tab-transport-test-app dev
-
-# Open http://localhost:5173 in your browser
-```
-
-Use the UI to:
-1. Start the MCP server
-2. Connect the client
-3. List available tools
-4. Execute counter operations
-5. View the event log
-
-## Debugging
-
-### Playwright UI Mode
-
-The best way to debug tests is using Playwright's UI mode:
-
-```bash
-pnpm test:e2e:ui
-```
-
-This provides:
-- Visual test execution
-- Time travel debugging
-- DOM snapshots
-- Network logs
-- Console output
-
-### Debug Mode
-
-For step-by-step debugging:
-
-```bash
-pnpm test:e2e:debug
-```
-
-This opens Playwright Inspector where you can:
-- Set breakpoints
-- Step through tests
-- Inspect selectors
-- View page state
-
-### Screenshots and Traces
-
-Failed tests automatically capture:
-- Screenshots (in `test-results/`)
-- Traces (viewable in Playwright UI)
-
-## CI/CD
-
-Tests run automatically in GitHub Actions on:
-- Pull requests to `main`
-- Pushes to `main`
-
-See `.github/workflows/e2e.yml` for CI configuration.
-
-## Writing New Tests
-
-Add new test files to `tests/` directory:
+Mini-apps can register tools back to the AI using the `useWebMCP` hook:
 
 ```typescript
-import { test, expect } from '@playwright/test';
+import { useWebMCP } from '@mcp-b/react-webmcp';
 
-test.describe('My Feature', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-  });
-
-  test('should do something', async ({ page }) => {
-    // Your test code
-  });
+useWebMCP({
+  name: "my_tool",
+  description: "What this tool does",
+  schema: z.object({ param: z.string() }),
+  handler: async (params) => {
+    return { content: [{ type: "text", text: "Result" }] };
+  }
 });
 ```
 
-## Browser Support
+The AI assistant can now call `my_tool` as if it were a native MCP tool!
 
-Currently testing on:
-- ✅ Chromium (Chrome/Edge)
+### Communication Flow
 
-To add more browsers, update `playwright.config.ts`:
-
-```typescript
-projects: [
-  { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-  { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-  { name: 'webkit', use: { ...devices['Desktop Safari'] } },
-],
+```
+┌──────────────────────────────────────────────────────────────┐
+│                        AI Assistant                          │
+│  Calls: showTicTacToeGame                                   │
+│  Receives: tictactoe_* tools dynamically                    │
+└────────────────┬─────────────────────────┬───────────────────┘
+                 │ HTTP                    │ UI Display
+                 ↓                         ↓
+       ┌──────────────────────────────────────────────┐
+       │   Cloudflare Worker (MCP Server)             │
+       │   - Tools: showTicTacToeGame, etc.           │
+       │   - Serves: Static mini-apps                 │
+       └──────────────┬───────────────────────────────┘
+                      │ iframe
+                      ↓
+              ┌────────────────────────┐
+              │  TicTacToe Mini-App    │
+              │  - Registers tools     │
+              │  - Handles tool calls  │
+              └────────────────────────┘
 ```
 
-## Performance
+## Package Details
 
-Tests typically run in ~30-60 seconds for the full suite.
+### chat-ui
+
+Modern React chat interface that:
+- Connects to MCP servers via HTTP
+- Displays MCP UI resources in side panel
+- Supports dynamic tool registration via WebMCP
+- Built with Vite, React 19, Tailwind CSS 4
+
+[See chat-ui/README.md for details](./chat-ui/README.md)
+
+### remote-mcp-with-ui-starter
+
+MCP server implementation that:
+- Runs on Cloudflare Workers
+- Serves mini-apps as static assets
+- Implements MCP protocol with UI extensions
+- Includes TicTacToe game example
+
+[See remote-mcp-with-ui-starter/README.md for details](./remote-mcp-with-ui-starter/README.md)
+
+### e2e-tests
+
+Playwright-based E2E tests that verify:
+- Both apps load correctly
+- No console errors
+- Integration works end-to-end
+- React apps mount successfully
+
+[See e2e-tests/README.md for details](./e2e-tests/README.md)
+
+## Common Commands
+
+```bash
+# Development
+pnpm dev                    # Run both apps
+pnpm --filter chat-ui dev   # Run chat UI only
+pnpm --filter remote-mcp-with-ui-starter dev  # Run MCP server only
+
+# Building
+pnpm build                  # Build all packages
+pnpm typecheck              # Type-check all packages
+pnpm lint                   # Lint all packages
+
+# Testing
+pnpm test                   # Run all E2E tests
+pnpm test:integration       # Integration tests
+pnpm test:chat-ui          # Chat UI tests only
+pnpm test:remote-mcp       # MCP server tests only
+pnpm test:ui               # Playwright UI mode (interactive)
+pnpm test:debug            # Debug mode (step through)
+
+# Deployment
+pnpm --filter chat-ui deploy
+pnpm --filter remote-mcp-with-ui-starter deploy
+```
+
+## Environment Configuration
+
+Both apps use environment-specific configuration files **committed to git** (they contain public URLs, not secrets):
+
+**chat-ui:**
+- `.env.development` → `http://localhost:8888/mcp`
+- `.env.production` → Your production MCP server URL
+
+**remote-mcp-with-ui-starter:**
+- `.dev.vars` → `http://localhost:8888`
+- `.prod.vars` → Your production worker URL
+
+For local overrides (gitignored):
+- Create `.env.development.local` or `.env.production.local`
+- Create `.dev.vars.local` or `.prod.vars.local`
+
+[See docs/ENVIRONMENT_SETUP.md for details](./docs/ENVIRONMENT_SETUP.md)
+
+## Technology Stack
+
+### Core
+- **React 19.1.1** with React Compiler
+- **TypeScript 5.8.3** with project references
+- **Vite 7.1.12** for building
+- **pnpm 9.15.4** for package management
+- **Turborepo 2.5.6** for monorepo orchestration
+
+### MCP & AI
+- **@modelcontextprotocol/sdk** - MCP protocol
+- **@mcp-ui packages** - UI resource support
+- **@mcp-b packages** - WebMCP integration
+- **agents 0.2.20** - McpAgent from Cloudflare
+- **Vercel AI SDK** with Anthropic provider
+
+### Deployment
+- **Cloudflare Workers** - Serverless deployment
+- **Cloudflare Durable Objects** - Stateful MCP instances
+- **Hono** - API routing
+- **Wrangler** - Cloudflare CLI
+
+### Testing
+- **Playwright 1.49.2** - E2E testing
+
+## CI/CD
+
+Two GitHub Actions workflows:
+
+### ci.yml
+Runs on PRs and pushes to main:
+- Lint all packages
+- Type-check all packages
+- Build all packages
+
+### e2e.yml
+Runs E2E tests:
+- Builds packages
+- Installs Playwright browsers
+- Runs integration tests
+- Uploads test reports
+
+## Documentation
+
+- **[CLAUDE.md](./CLAUDE.md)** - Comprehensive development guide for AI assistants
+- **[chat-ui/README.md](./chat-ui/README.md)** - Chat UI documentation
+- **[remote-mcp-with-ui-starter/README.md](./remote-mcp-with-ui-starter/README.md)** - MCP server documentation
+- **[remote-mcp-with-ui-starter/ARCHITECTURE.md](./remote-mcp-with-ui-starter/ARCHITECTURE.md)** - Architecture details
+- **[e2e-tests/README.md](./e2e-tests/README.md)** - Testing documentation
+- **[docs/ENVIRONMENT_SETUP.md](./docs/ENVIRONMENT_SETUP.md)** - Environment configuration
+- **[docs/TESTING.md](./docs/TESTING.md)** - Testing infrastructure
 
 ## Troubleshooting
 
-### Port Already in Use
-
-If you see `EADDRINUSE` errors, kill the process using port 5173:
-
+### Port Conflicts
 ```bash
-lsof -ti:5173 | xargs kill
+lsof -ti:5173 | xargs kill  # Kill chat-ui port
+lsof -ti:8888 | xargs kill  # Kill MCP server port
 ```
 
-### Playwright Browsers Not Installed
-
+### TypeScript Errors
 ```bash
-pnpm --filter mcp-e2e-tests exec playwright install
+pnpm exec tsc -b  # Check all TypeScript projects
 ```
 
-### Tests Timing Out
-
-Increase timeout in `playwright.config.ts`:
-
-```typescript
-timeout: 60000, // 60 seconds
+### Build Failures
+```bash
+rm -rf dist/ node_modules/.vite/
+pnpm install
+pnpm build
 ```
+
+### Mini-Apps Not Loading
+1. Check: `ls -la remote-mcp-with-ui-starter/dist/client/mini-apps/`
+2. Verify vite.config.ts entry points
+3. Check browser console for errors
+
+### WebMCP Tools Not Registering
+1. Verify `initializeWebModelContext()` is called before React renders
+2. Check `postMessageTarget: window.parent` is set
+3. Inspect browser console for WebMCP errors
+
+## Contributing
+
+This is a demonstration project showing MCP UI + WebMCP integration patterns. Feel free to:
+
+- Fork and experiment
+- Report issues
+- Submit improvements
+- Ask questions
+
+## Resources
+
+- **[Model Context Protocol](https://modelcontextprotocol.io/)**
+- **[MCP Specification](https://spec.modelcontextprotocol.io/)**
+- **[Cloudflare Workers](https://developers.cloudflare.com/workers/)**
+- **[Playwright Documentation](https://playwright.dev/)**
+
+## License
+
+MIT - See LICENSE file for details.
+
+---
+
+**Ready to explore MCP UI + WebMCP?** Start by running `pnpm dev` and opening http://localhost:5173 in your browser! 🚀

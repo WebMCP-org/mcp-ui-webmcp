@@ -16,6 +16,7 @@
     "test:report": "pnpm --filter @mcp-b/e2e-tests test:report",
     "apps:build": "pnpm --filter chat-ui build && pnpm --filter remote-mcp-with-ui-starter build",
     "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
     "clean": "turbo run clean"
   },
   "devDependencies": {

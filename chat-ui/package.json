@@ -9,6 +9,7 @@
     "deploy": "pnpm run build && wrangler deploy",
     "dev": "vite",
     "lint": "eslint .",
+    "typecheck": "tsc -b --noEmit",
     "preview": "vite preview",
     "test": "echo 'No unit tests configured for chat-ui'"
   },

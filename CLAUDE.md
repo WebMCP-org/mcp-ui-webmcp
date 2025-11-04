@@ -355,9 +355,7 @@ lsof -ti:8888 | xargs kill  # Kill process on port 8888
 ## Additional Resources
 
 - Node version: 24.3.0 (specified in `.nvmrc`)
-- The root README.md appears to be outdated (contains E2E test info that belongs elsewhere)
-- Missing standard open-source files: LICENSE, CONTRIBUTING.md
-- [remote-mcp-with-ui-starter/README.md](remote-mcp-with-ui-starter/README.md) references `ARCHITECTURE.md` which doesn't exist
+- See [remote-mcp-with-ui-starter/ARCHITECTURE.md](remote-mcp-with-ui-starter/ARCHITECTURE.md) for detailed architecture documentation
 
 ## Key Files to Understand
 
