@@ -9,9 +9,9 @@
     "url": "https://github.com/WebMCP-org/mcp-ui-webmcp.git",
     "directory": "chat-ui"
   },
-  "author": "WebMCP-org",
+  "author": "Alex Nahas (founder of MCP-B)",
   "homepage": "https://github.com/WebMCP-org/mcp-ui-webmcp/tree/main/chat-ui#readme",
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "scripts": {
     "build": "tsc -b && vite build",
     "cf-typegen": "wrangler types",

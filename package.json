@@ -8,9 +8,9 @@
     "type": "git",
     "url": "https://github.com/WebMCP-org/mcp-ui-webmcp.git"
   },
-  "author": "WebMCP-org",
+  "author": "Alex Nahas (founder of MCP-B)",
   "homepage": "https://github.com/WebMCP-org/mcp-ui-webmcp#readme",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",

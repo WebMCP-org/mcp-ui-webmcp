@@ -376,4 +376,9 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for development standards.
 
 ## License
 
-MIT
+This project uses multiple licenses:
+
+- **Chat UI** ([chat-ui/](chat-ui/)): AGPL-3.0 - See [chat-ui/LICENSE](chat-ui/LICENSE)
+- **All other packages**: Apache-2.0 - See [LICENSE](LICENSE)
+
+Copyright 2025 Alex Nahas (founder of MCP-B)

@@ -9,9 +9,9 @@
     "url": "https://github.com/WebMCP-org/mcp-ui-webmcp.git",
     "directory": "remote-mcp-with-ui-starter"
   },
-  "author": "WebMCP-org",
+  "author": "Alex Nahas (founder of MCP-B)",
   "homepage": "https://github.com/WebMCP-org/mcp-ui-webmcp/tree/main/remote-mcp-with-ui-starter#readme",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "scripts": {
     "build": "tsc -b && vite build",
     "cf-typegen": "wrangler types",
