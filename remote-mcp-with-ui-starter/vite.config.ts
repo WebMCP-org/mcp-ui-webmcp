@@ -7,17 +7,15 @@ import { defineConfig } from 'vite';
  * Vite Configuration for MCP UI + WebMCP Starter
  *
  * This config handles:
- * 1. React app compilation with react-compiler
- * 2. Multi-entry build (main app + TicTacToe mini-app)
- * 3. Cloudflare Workers integration (dev only - production uses wrangler)
+ * 1. React app compilation with React Compiler (babel plugin)
+ * 2. Tailwind CSS via @tailwindcss/vite plugin
+ * 3. Cloudflare Workers integration via @cloudflare/vite-plugin
  *
  * Build output:
- * - dist/client/index.html - Main app
- * - dist/client/mini-apps/tictactoe/ - TicTacToe mini-app
+ * - dist/client/ - Built TicTacToe web app
+ * - dist/mcp_ui_with_webmcp_my_mcp_server/ - Cloudflare Worker bundle
  *
- * The Cloudflare plugin is only used for development mode.
- * For production, the client is built with vite, then wrangler
- * builds and deploys the worker separately.
+ * The Cloudflare plugin handles both dev and production builds.
  */
 export default defineConfig(() => ({
   plugins: [
