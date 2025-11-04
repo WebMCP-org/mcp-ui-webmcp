@@ -26,7 +26,7 @@ When the AI calls `showTicTacToeGame`:
 
 ### Prerequisites
 
-- **Node.js 22.12+**
+- **Node.js 24.3.0+** (keeps parity with repo `.nvmrc`)
 - **pnpm** (or npm/yarn)
 - **Cloudflare account** (for deployment)
 

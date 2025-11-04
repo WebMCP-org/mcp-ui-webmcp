@@ -15,7 +15,7 @@ A modern chat interface built with React, TypeScript, and Vite that integrates w
 
 ### Prerequisites
 
-- Node.js 22.12+
+- Node.js 24.3.0+ (matches repo `.nvmrc`)
 - pnpm (or npm/yarn)
 - An MCP server running (e.g., `remote-mcp-with-ui-starter`)
 
