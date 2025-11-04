@@ -270,11 +270,17 @@ Runs E2E tests:
 
 ## Documentation
 
-- **[CLAUDE.md](./CLAUDE.md)** - Comprehensive development guide for AI assistants
+### For AI Agents
+- **[AGENTS.md](./AGENTS.md)** - Navigation hub for AI assistants working on this codebase
+- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Development standards and best practices for AI agents
+
+### Package Documentation
 - **[chat-ui/README.md](./chat-ui/README.md)** - Chat UI documentation
 - **[remote-mcp-with-ui-starter/README.md](./remote-mcp-with-ui-starter/README.md)** - MCP server documentation
-- **[remote-mcp-with-ui-starter/ARCHITECTURE.md](./remote-mcp-with-ui-starter/ARCHITECTURE.md)** - Architecture details
 - **[e2e-tests/README.md](./e2e-tests/README.md)** - Testing documentation
+
+### Architecture & Configuration
+- **[remote-mcp-with-ui-starter/ARCHITECTURE.md](./remote-mcp-with-ui-starter/ARCHITECTURE.md)** - Architecture details
 - **[docs/ENVIRONMENT_SETUP.md](./docs/ENVIRONMENT_SETUP.md)** - Environment configuration
 - **[docs/TESTING.md](./docs/TESTING.md)** - Testing infrastructure
 
