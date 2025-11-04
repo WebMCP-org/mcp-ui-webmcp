@@ -1,0 +1,5 @@
+# Dependencies
+node_modules
+
+# Don't ignore dist - it's needed for npx
+# dist/
