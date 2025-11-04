@@ -209,9 +209,6 @@ export class GameStatsStorage {
         ws.send(JSON.stringify(stats));
         return;
       }
-
-      // Log unknown message types
-      console.log('Received unknown WebSocket message:', message);
     } catch (error) {
       console.error('Error handling WebSocket message:', error);
     }
@@ -224,14 +221,12 @@ export class GameStatsStorage {
    */
   async webSocketClose(
     _ws: WebSocket,
-    code: number,
-    reason: string,
-    wasClean: boolean
+    _code: number,
+    _reason: string,
+    _wasClean: boolean
   ): Promise<void> {
     // Decrement live games counter for closed connection
     await this.decrementLiveGames();
-
-    console.log(`WebSocket closed: code=${code}, reason=${reason}, clean=${wasClean}`);
   }
 
   /**

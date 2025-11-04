@@ -1,111 +1,69 @@
 # Architecture Documentation
 
-This document provides a deep dive into the technical architecture of the MCP UI + WebMCP starter template.
-
-## Table of Contents
-
-- [Overview](#overview)
-- [System Architecture](#system-architecture)
-- [Component Details](#component-details)
-- [Communication Protocols](#communication-protocols)
-- [Build System](#build-system)
-- [Runtime Behavior](#runtime-behavior)
-- [Design Decisions](#design-decisions)
+Technical architecture of the MCP UI + WebMCP starter.
 
 ## Overview
 
-This template combines three powerful technologies:
+This starter combines three technologies:
 
-1. **MCP (Model Context Protocol)**: A standardized protocol for AI assistants to interact with external services
-2. **MCP UI**: An extension to MCP that allows servers to return interactive UI components
-3. **WebMCP**: A browser-based protocol that allows embedded web apps to register tools back to the MCP server
+1. **MCP (Model Context Protocol)**: Standardized protocol for AI assistants to interact with services
+2. **MCP UI**: Extension allowing servers to return interactive UI components
+3. **WebMCP**: Browser-based protocol for embedded apps to register tools back to the MCP server
 
-The result is a **bidirectional integration** where:
+Result: **Bidirectional integration** where:
 - AI assistants can display interactive web UIs
-- Those UIs can dynamically register tools for the AI to use
+- UIs can dynamically register tools for the AI to use
 
 ## System Architecture
 
-### High-Level Architecture
-
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         AI Assistant                             │
-│  ┌───────────────────────────────────────────────────────┐     │
-│  │  MCP Client                                            │     │
-│  │  - Connects to MCP server via HTTP/SSE                │     │
-│  │  - Calls tools (showTicTacToeGame)                    │     │
-│  │  - Receives UI resources (iframe URL)                 │     │
-│  │  - Dynamically receives new tools from WebMCP         │     │
-│  └───────────────────────────────────────────────────────┘     │
-│                                                                  │
-│  ┌───────────────────────────────────────────────────────┐     │
-│  │  UI Panel                                              │     │
-│  │  - Renders iframe with TicTacToe mini-app             │     │
-│  │  - Acts as WebMCP proxy (forwards tool calls)         │     │
-│  └───────────────────────────────────────────────────────┘     │
-└─────────────────────────────────────────────────────────────────┘
-                              ↓ ↑
-                              HTTP/SSE
-                              ↓ ↑
-┌─────────────────────────────────────────────────────────────────┐
-│                    Cloudflare Worker                             │
-│                                                                   │
-│  ┌───────────────────────────────────────────────────────┐     │
-│  │  Worker Entry Point (worker/index.ts)                 │     │
-│  │  - Hono router for multi-app routing                  │     │
-│  │  - Routes /mcp → MCP Durable Object                   │     │
-│  │  - Routes /sse → SSE handler                          │     │
-│  │  - Routes / → Landing page (static)                   │     │
-│  │  - Routes /apps/* → Mini-apps (static)                │     │
-│  │  - Error handling and logging                         │     │
-│  └───────────────────────────────────────────────────────┘     │
-│                              ↓                                   │
-│  ┌───────────────────────────────────────────────────────┐     │
-│  │  MCP Server (worker/mcpServer.ts)                     │     │
-│  │  - Extends McpAgent (Durable Object)                  │     │
-│  │  - Registers MCP tools                                │     │
-│  │  - Manages sessions across invocations               │     │
-│  │  - Creates UI resources                               │     │
-│  └───────────────────────────────────────────────────────┘     │
-│                                                                   │
-│  ┌───────────────────────────────────────────────────────┐     │
-│  │  Static Assets (dist/client/) - Multi-App Platform    │     │
-│  │  - Landing page (apps/landing/)                       │     │
-│  │  - TicTacToe mini-app (apps/tictactoe/)               │     │
-│  │  - Shared components library (apps/shared/)           │     │
-│  └───────────────────────────────────────────────────────┘     │
-└─────────────────────────────────────────────────────────────────┘
-                              ↓
-                          Serves iframe
-                              ↓
-┌─────────────────────────────────────────────────────────────────┐
-│              TicTacToe Mini-App (iframe)                         │
-│                                                                   │
-│  ┌───────────────────────────────────────────────────────┐     │
-│  │  React App (mini-apps/tictactoe/main.tsx)            │     │
-│  │  - Initializes WebMCP transport                       │     │
-│  │  - Renders TicTacToeWithWebMCP component             │     │
-│  └───────────────────────────────────────────────────────┘     │
-│                              ↓                                   │
-│  ┌───────────────────────────────────────────────────────┐     │
-│  │  WebMCP Integration (useWebMCP hook)                  │     │
-│  │  - Registers tictactoe_get_state                      │     │
-│  │  - Registers tictactoe_ai_move                        │     │
-│  │  - Registers tictactoe_reset                          │     │
-│  │  - Handles tool call requests from parent            │     │
-│  │  - Returns results via postMessage                    │     │
-│  └───────────────────────────────────────────────────────┘     │
-│                              ↑ ↓                                 │
-│                          postMessage                             │
-│                              ↑ ↓                                 │
-│  ┌───────────────────────────────────────────────────────┐     │
-│  │  TabServer Transport (@mcp-b/transports)              │     │
-│  │  - Sends messages to parent via postMessage           │     │
-│  │  - Receives messages from parent                      │     │
-│  │  - Protocol: navigator.modelContext                   │     │
-│  └───────────────────────────────────────────────────────┘     │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────┐
+│          AI Assistant                    │
+│  ┌──────────────────────────────────┐   │
+│  │  MCP Client                      │   │
+│  │  - Calls showTicTacToeGame       │   │
+│  │  - Receives iframe URL            │   │
+│  │  - Gets tools from WebMCP        │   │
+│  └──────────────────────────────────┘   │
+└────────────┬────────────────────────────┘
+             │ HTTP/SSE
+             ↓
+┌─────────────────────────────────────────┐
+│      Cloudflare Worker                   │
+│  ┌──────────────────────────────────┐   │
+│  │  Hono Router (worker/index.ts)   │   │
+│  │  - /mcp → MCP protocol           │   │
+│  │  - /sse → Server-sent events     │   │
+│  │  - / → TicTacToe app (static)    │   │
+│  │  - /api/stats → Stats endpoints  │   │
+│  └──────────────────────────────────┘   │
+│  ┌──────────────────────────────────┐   │
+│  │  MyMCP (Durable Object)          │   │
+│  │  - MCP server implementation     │   │
+│  │  - 5 tools registered            │   │
+│  └──────────────────────────────────┘   │
+│  ┌──────────────────────────────────┐   │
+│  │  GameStatsStorage (DO)           │   │
+│  │  - WebSocket connections         │   │
+│  │  - Real-time stats tracking      │   │
+│  └──────────────────────────────────┘   │
+└────────────┬────────────────────────────┘
+             │ Serves iframe
+             ↓
+┌─────────────────────────────────────────┐
+│      TicTacToe App (iframe)             │
+│  ┌──────────────────────────────────┐   │
+│  │  React App (src/main.tsx)        │   │
+│  │  - Initializes WebMCP            │   │
+│  │  - Renders TicTacToeWithWebMCP   │   │
+│  └──────────────────────────────────┘   │
+│  ┌──────────────────────────────────┐   │
+│  │  WebMCP (useWebMCP hook)         │   │
+│  │  - Registers 3 tools             │   │
+│  │  - Handles tool calls            │   │
+│  │  - Returns results via postMsg   │   │
+│  └──────────────────────────────────┘   │
+└─────────────────────────────────────────┘
 ```
 
 ## Component Details
@@ -113,709 +71,464 @@ The result is a **bidirectional integration** where:
 ### 1. Worker Entry Point (worker/index.ts)
 
 **Responsibilities:**
-- Route incoming HTTP requests using Hono framework
-- Serve MCP protocol endpoints (/mcp, /sse)
-- Serve static assets for multiple apps
-- Handle fallback routing for SPAs
-- Error handling and logging
+- Route HTTP requests using Hono
+- Serve MCP protocol endpoints
+- Serve static TicTacToe app
+- Handle game statistics API
 
-**Key Code:**
+**Key Routes:**
 ```typescript
-import { Hono } from 'hono/tiny';
-import { serveStatic } from 'hono/cloudflare-workers';
+// MCP Protocol
+app.all('/mcp', ...) → MyMCP.serve()
+app.all('/sse/*', ...) → MyMCP.serveSSE()
 
-const app = new Hono<{ Bindings: Env }>();
+// Game Statistics API
+app.get('/api/stats', ...) → GameStatsStorage
+app.get('/api/stats/ws', ...) → GameStatsStorage (WebSocket)
+app.post('/api/stats/game-complete', ...) → GameStatsStorage
 
-// MCP Protocol Endpoint
-app.post('/mcp', async (c) => {
-  return await MyMCP.serve('/mcp').fetch(c.req.raw, c.env, c.executionCtx);
-});
-
-// Server-Sent Events Endpoint
-app.all('/sse/*', async (c) => {
-  return await MyMCP.serveSSE('/sse').fetch(c.req.raw, c.env, c.executionCtx);
-});
-
-// Static File Serving (multi-app platform)
-app.use('/*', serveStatic({ root: './' }));
-
-// SPA Fallback Handler
-app.get('*', async (c) => {
-  const path = new URL(c.req.url).pathname;
-
-  // Route to specific app index.html
-  if (path.startsWith('/apps/tictactoe')) {
-    return serveStatic({ path: '/apps/tictactoe/index.html' })(c);
-  }
-
-  // Default to landing page
-  return serveStatic({ path: '/index.html' })(c);
-});
-
-export default app;
+// 404 Handler
+app.notFound(...) → JSON error response
 ```
 
 **Why Hono?**
 - Lightweight (~12KB) and fast
-- Built for edge runtimes (Cloudflare Workers optimized)
-- Clean routing API
-- Static file serving middleware included
+- Built for edge runtimes
+- Clean routing API with CORS support
 - Type-safe with TypeScript
-
-**Why Cloudflare Workers?**
-- Edge deployment (low latency worldwide)
-- Auto-scaling (handles any traffic level)
-- Durable Objects for stateful sessions
-- Zero server management
 
 ### 2. MCP Server (worker/mcpServer.ts)
 
-**Responsibilities:**
-- Implement the MCP protocol
-- Register tools and prompts
-- Create UI resources
-- Manage session state via Durable Objects
-
-**Base Class: McpAgent**
-```typescript
-export class MyMCP extends McpAgent {
-  server = new McpServer({
-    name: "mcp-ui-webmcp-cloudflare",
-    version: "1.0.0",
-  });
-
-  async init() {
-    // Register tools
-    this.server.tool(...);
-  }
-}
-```
-
-The `McpAgent` class (from the `agents` library) handles:
+Extends `McpAgent` from the `agents` library which handles:
 - Durable Object lifecycle
 - HTTP/SSE transport
 - Session management
 - Request routing
 
-**Tool Registration Pattern:**
-```typescript
-this.server.tool(
-  "toolName",           // Tool name (snake_case)
-  "Description",        // Human-readable description
-  { /* schema */ },     // Input parameters schema (optional)
-  async (params) => {   // Handler function
-    // Tool implementation
-    return {
-      content: [{ type: "text", text: "Result" }]
-    };
-  }
-);
+**Tools Registered:**
+1. `showExternalUrl` - Display external website in iframe
+2. `showRawHtml` - Render raw HTML content
+3. `showRemoteDom` - Execute JavaScript to build DOM
+4. `showTicTacToeGame` - Launch TicTacToe game (WebMCP enabled)
+5. `tictactoe_get_stats` - Get global game statistics
+
+**Prompts Registered:**
+- `PlayTicTacToe` - Pre-configured prompt to start a game
+
+### 3. GameStatsStorage (Durable Object)
+
+Real-time statistics tracking using WebSocket and Durable Objects.
+
+**Features:**
+- WebSocket hibernation support (cost-effective)
+- Live game counting via connection tracking
+- Automatic stats broadcasting to all connected clients
+- Tracks: Clankers wins, Carbon Units wins, draws, live games
+
+**Endpoints:**
+- `GET /stats` - Get current statistics
+- `POST /game-complete` - Record game result
+- WebSocket upgrade - Real-time updates
+
+### 4. TicTacToe React App (src/)
+
+**Architecture:**
+```
+src/
+├── main.tsx                      # Entry point, initializes WebMCP
+├── TicTacToe.tsx                 # Pure game component (no WebMCP)
+├── TicTacToeWithWebMCP.tsx       # WebMCP integration layer
+├── ErrorBoundary.tsx             # Error handling
+└── lib/utils.ts                  # Utility functions
 ```
 
-**URL Auto-Detection:**
-```typescript
-private getBaseUrl(): string {
-  const env = (this as Record<string, any>).env as Env | undefined;
-  return env?.APP_URL || "http://localhost:8888";
-}
-```
+**Separation of Concerns:**
+- `TicTacToe.tsx` - Pure, reusable game logic (can work standalone)
+- `TicTacToeWithWebMCP.tsx` - WebMCP wrapper that registers tools
 
-This method retrieves the auto-detected or configured base URL, ensuring iframe URLs work in all environments.
-
-### 3. UI Resource Creation
-
-**UI Resource Types:**
-
-1. **External URL (iframe)**
-   ```typescript
-   createUIResource({
-     uri: "ui://unique-id",
-     content: {
-       type: "externalUrl",
-       iframeUrl: "https://example.com"
-     },
-     encoding: "text" | "blob"
-   })
-   ```
-
-2. **Raw HTML**
-   ```typescript
-   createUIResource({
-     uri: "ui://unique-id",
-     content: {
-       type: "rawHtml",
-       htmlString: "<h1>Hello</h1>"
-     },
-     encoding: "text"
-   })
-   ```
-
-3. **Remote DOM (JavaScript)**
-   ```typescript
-   createUIResource({
-     uri: "ui://unique-id",
-     content: {
-       type: "remoteDom",
-       script: "const p = document.createElement('p'); ...",
-       framework: "react"
-     },
-     encoding: "text"
-   })
-   ```
-
-**When to use each type:**
-- **externalUrl**: For complex web apps (React, Vue, etc.) that need full control
-- **rawHtml**: For simple static content
-- **remoteDom**: For dynamic content that doesn't need a full framework
-
-### 4. Multi-App Platform Structure
-
-**Directory Structure:**
-
-```
-apps/
-├── landing/                # Main landing page
-│   ├── index.html         # Entry point
-│   ├── main.tsx           # React entry
-│   └── App.tsx            # Landing page component
-├── tictactoe/             # TicTacToe mini-app
-│   ├── index.html         # Entry point
-│   ├── main.tsx           # React entry with WebMCP
-│   └── TicTacToeWithWebMCP.tsx  # Game + WebMCP integration
-├── shared/                # Shared component library
-│   ├── components/
-│   │   ├── ErrorBoundary.tsx    # Reusable error boundary
-│   │   └── TicTacToe.tsx        # Pure game component
-│   └── styles/
-│       └── index.css      # Base styles
-└── _template/             # Boilerplate for new apps
-```
-
-**Benefits of Multi-App Structure:**
-- **Landing Page**: Central hub listing all available apps
-- **Shared Components**: DRY principle, reuse across apps
-- **Independent Apps**: Each app is self-contained
-- **Easy to Extend**: Add new apps by copying template
-
-**TicTacToe Entry Point (apps/tictactoe/main.tsx):**
-```typescript
-import '@shared/styles/index.css';  // Import shared styles
-import { ErrorBoundary } from '@shared/components/ErrorBoundary';
-
-// 1. Initialize WebMCP BEFORE React renders
-initializeWebModelContext({
-  transport: {
-    tabServer: {
-      allowedOrigins: ['*'],
-    },
-  },
-});
-
-// 2. Render React app
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <ErrorBoundary>
-      <TicTacToeWithWebMCP />
-    </ErrorBoundary>
-  </StrictMode>,
-)
-```
-
-**WebMCP Integration (useWebMCP hook):**
-```typescript
-import { useWebMCP } from '@mcp-b/react-webmcp';
-
-export function TicTacToeWithWebMCP() {
-  const [board, setBoard] = useState<GameState>([...]);
-
-  // Register tool: tictactoe_get_state
-  useWebMCP({
-    name: "tictactoe_get_state",
-    description: "Get current board state",
-    schema: z.object({}),
-    handler: async () => {
-      return {
-        content: [{
-          type: "text",
-          text: formatBoardState(board)
-        }]
-      };
-    }
-  });
-
-  // More tools...
-
-  return <TicTacToe board={board} onMove={handleMove} />;
-}
-```
-
-**Why separate TicTacToe and TicTacToeWithWebMCP?**
-- **TicTacToe.tsx**: Pure, reusable game component (no WebMCP dependency)
-- **TicTacToeWithWebMCP.tsx**: WebMCP integration layer
-
-This separation allows:
+This allows:
 - Easier testing (pure component)
 - Reusability (use TicTacToe without WebMCP)
 - Clear separation of concerns
 
-### 5. WebMCP Transport (TabServer)
+### 5. WebMCP Integration
 
-**How it works:**
-
-```
-┌─────────────────────┐         postMessage         ┌──────────────────┐
-│   Parent Window     │ ←──────────────────────────→ │  Iframe (child)  │
-│  (AI Assistant)     │                               │  (TicTacToe)     │
-│                     │                               │                  │
-│  TabClient          │                               │  TabServer       │
-│  - Receives tools   │                               │  - Sends tools   │
-│  - Sends requests   │                               │  - Receives req  │
-│  - Receives results │                               │  - Sends results │
-└─────────────────────┘                               └──────────────────┘
-```
-
-**Message Format:**
+**Initialization (src/main.tsx):**
 ```typescript
-// Tool registration message (child → parent)
-{
-  type: "tool-register",
-  toolName: "tictactoe_ai_move",
-  toolDescription: "Make a move as player O",
-  toolSchema: { /* zod schema */ }
-}
+import { initializeWebModelContext } from '@mcp-b/global';
 
-// Tool call message (parent → child)
-{
-  type: "tool-call",
-  toolName: "tictactoe_ai_move",
-  params: { position: 4 }
-}
-
-// Tool result message (child → parent)
-{
-  type: "tool-result",
-  result: {
-    content: [{ type: "text", text: "Move made!" }]
-  }
-}
+// MUST be called BEFORE React renders
+initializeWebModelContext({
+  transport: {
+    tabServer: {
+      allowedOrigins: ['*'],
+      // postMessageTarget defaults to window.parent
+    },
+  },
+});
 ```
 
-**Security:**
-- `allowedOrigins: ['*']` allows any parent (suitable for iframes served from same origin)
-- For cross-origin, specify exact origins: `['https://trusted-domain.com']`
-- postMessage is same-origin by default (parent and child must share origin)
+**Tool Registration (src/TicTacToeWithWebMCP.tsx):**
+```typescript
+import { useWebMCP } from '@mcp-b/react-webmcp';
+import { z } from 'zod';
+
+useWebMCP({
+  name: "tictactoe_ai_move",
+  description: "Make a move as the AI player",
+  inputSchema: {
+    position: z.number().min(0).max(8)
+  },
+  handler: async ({ position }) => {
+    // Game logic executes here
+    const result = performMove(position, agentPlayer);
+    return formatMoveMarkdown(result);
+  }
+});
+```
+
+**Tools Registered by TicTacToe:**
+1. `tictactoe_get_state` - Get current board state
+2. `tictactoe_ai_move` - Make a move (AI player)
+3. `tictactoe_reset` - Reset the game
 
 ## Communication Protocols
 
-### MCP Protocol (HTTP/SSE)
+### MCP Protocol Flow
 
-**Client → Server (POST /mcp):**
-```json
+1. AI calls `showTicTacToeGame` tool
+2. MCP server returns UI resource with iframe URL (`APP_URL/`)
+3. AI assistant displays iframe
+4. TicTacToe app loads and initializes WebMCP
+5. TicTacToe registers tools via `useWebMCP`
+6. AI receives tool registrations
+7. AI can now call `tictactoe_*` tools
+
+### WebMCP postMessage Protocol
+
+**Tool Registration (iframe → parent):**
+```typescript
 {
-  "jsonrpc": "2.0",
-  "method": "tools/call",
-  "params": {
-    "name": "showTicTacToeGame",
-    "arguments": {}
-  },
-  "id": 1
+  type: "webmcp-tool-register",
+  tool: {
+    name: "tictactoe_ai_move",
+    description: "...",
+    inputSchema: { /* Zod schema */ }
+  }
 }
 ```
 
-**Server → Client (SSE /sse):**
-```json
+**Tool Call (parent → iframe):**
+```typescript
 {
-  "jsonrpc": "2.0",
-  "result": {
-    "content": [
-      {
-        "type": "resource",
-        "resource": {
-          "uri": "ui://tictactoe-game",
-          "mimeType": "application/vnd.mcp.ui+json",
-          "blob": "..."
-        }
-      }
-    ]
-  },
-  "id": 1
+  type: "webmcp-tool-call",
+  toolName: "tictactoe_ai_move",
+  params: { position: 4 },
+  callId: "unique-id"
 }
 ```
 
-### WebMCP Protocol (postMessage)
+**Tool Result (iframe → parent):**
+```typescript
+{
+  type: "webmcp-tool-result",
+  callId: "unique-id",
+  result: "Markdown formatted result"
+}
+```
 
-**Lifecycle Messages:**
+### Parent Readiness Protocol
 
-1. **iframe-ready** (child → parent)
-   - Sent when mini-app finishes loading
-   - Parent responds with tool capabilities
-
-2. **parent-ready** (parent → child)
-   - Sent when parent is ready to receive tools
-   - Child starts registering tools
-
-3. **tool-register** (child → parent)
-   - Registers a new tool
-   - Includes name, description, schema
-
-4. **tool-call** (parent → child)
-   - Invokes a registered tool
-   - Includes tool name and parameters
-
-5. **tool-result** (child → parent)
-   - Returns tool execution result
-   - Includes content array
-
-**Parent Readiness Pattern:**
-
-The TicTacToe app implements a "parent readiness" check:
+The iframe handles multiple readiness signals to ensure reliable communication:
 
 ```typescript
-const [isParentReady, setIsParentReady] = useState(false);
+// Iframe sends on load
+{ type: 'ui-lifecycle-iframe-ready' }
 
-useEffect(() => {
-  const handleMessage = (event: MessageEvent) => {
-    if (event.data.type === 'parent-ready' || ...) {
-      setIsParentReady(true);
-    }
-  };
-  window.addEventListener('message', handleMessage);
-  return () => window.removeEventListener('message', handleMessage);
-}, []);
-
-// Block moves until parent is ready
-const handleMove = (position: number) => {
-  if (!isParentReady) {
-    console.warn("Parent not ready yet");
-    return;
-  }
-  // ... handle move
-};
+// Parent may respond with any of:
+{ type: 'parent-ready' }
+{ type: 'ui-lifecycle-iframe-render-data' }
+{ type: 'ui-message-response', payload: { status: 'ready' } }
 ```
 
-This prevents race conditions where the child tries to send messages before the parent is listening.
+This prevents race conditions where tools are registered before the parent is listening.
+
+### Size Notification Protocol
+
+The iframe notifies the parent of its dimensions for proper sizing:
+
+```typescript
+{
+  type: 'ui-size-change',
+  payload: {
+    width: 800,
+    height: 600
+  }
+}
+```
+
+Sent:
+- Once on initial load
+- (Could be sent on resize if needed)
 
 ## Build System
 
-### Multi-Entry Vite Configuration
+### Vite Configuration
+
+Single-entry build with multiple plugins:
 
 ```typescript
-// vite.config.ts
-import { resolve } from 'node:path';
-
 export default defineConfig({
-  build: {
-    rollupOptions: {
-      input: {
-        // Main landing page (served at /)
-        main: resolve(__dirname, 'apps/landing/index.html'),
-
-        // Mini-apps (served at /apps/{name}/)
-        tictactoe: resolve(__dirname, 'apps/tictactoe/index.html'),
-
-        // Add more apps here:
-        // calculator: resolve(__dirname, 'apps/calculator/index.html'),
-      },
-    },
-
-    // Optimize for smaller bundles
-    target: 'es2022',
-    minify: 'terser' as const,
-    sourcemap: true,
-  },
-
-  // Resolve paths for shared components
-  resolve: {
-    alias: {
-      '@shared': resolve(__dirname, 'apps/shared'),
-    },
-  },
-})
+  plugins: [
+    react({
+      babel: {
+        plugins: ['babel-plugin-react-compiler'] // React 19 compiler
+      }
+    }),
+    tailwindcss(),    // Tailwind CSS v4
+    cloudflare()       // Cloudflare Workers integration
+  ],
+  server: {
+    port: 8888,
+    strictPort: true
+  }
+});
 ```
 
-**Build Output:**
-```
-dist/
-└── client/
-    ├── index.html                      # Landing page (root)
-    ├── assets/
-    │   ├── main-xyz.js                 # Landing page bundle
-    │   ├── main-xyz.css                # Landing page styles
-    │   └── chunks/
-    │       └── vendor-react-abc.js     # Shared React bundle
-    └── apps/
-        └── tictactoe/
-            ├── index.html              # TicTacToe entry point
-            └── assets/
-                ├── tictactoe-def.js    # TicTacToe bundle
-                └── tictactoe-def.css   # TicTacToe styles
-```
+### Build Outputs
 
-**Key Features:**
-- **Shared Components**: `@shared` alias for imports across apps
-- **Code Splitting**: Vite automatically extracts shared vendor code
-- **Multiple Entries**: Each app has its own entry point
-- **Route-Based Structure**: URLs match file structure (`/apps/tictactoe/` → `apps/tictactoe/`)
+**Development (`pnpm dev`):**
+- Vite dev server at `http://localhost:8888`
+- Hot module replacement (HMR)
+- Cloudflare Workers local simulation
 
-**Why separate builds?**
-- Each mini-app is self-contained
-- Can be developed/tested independently
-- No shared state between apps
-- Optimized bundle sizes with automatic code splitting
-- Easy to add new apps (just add entry to config)
+**Production (`pnpm build`):**
+1. `tsc -b` - TypeScript compilation
+2. `vite build` - Creates two bundles:
+   - `dist/client/` - TicTacToe web app (HTML, CSS, JS)
+   - `dist/mcp_ui_with_webmcp_my_mcp_server/` - Cloudflare Worker bundle
 
-### TypeScript Project References
+### Deployment
 
-```
-tsconfig.json              # Root (references only)
-├── tsconfig.app.json      # React app (includes src/ and mini-apps/)
-├── tsconfig.node.json     # Vite config
-└── tsconfig.worker.json   # Cloudflare Worker
+```bash
+pnpm deploy
 ```
 
-**Benefits:**
-- Faster incremental builds
-- Better IDE performance
-- Strict boundaries between environments
+Runs `deploy.sh` which:
+1. Runs `pnpm build`
+2. Loads `.prod.vars` environment variables
+3. Deploys to Cloudflare Workers with `wrangler deploy`
 
 ## Runtime Behavior
 
-### Deployment Scenarios
+### Development Flow
 
-**Development (localhost:8888):**
-1. Wrangler dev server runs on port 8888
-2. Worker serves from http://localhost:8888
-3. `APP_URL` loaded from `.dev.vars` (automatically by wrangler dev)
-4. Iframe URL: `http://localhost:8888/mini-apps/tictactoe/`
+1. `pnpm dev` starts Vite + Cloudflare Workers local
+2. Visit `http://localhost:8888/` → TicTacToe app
+3. Visit `http://localhost:8888/mcp` → MCP endpoint
+4. Connect AI assistant to `http://localhost:8888/mcp`
+5. Call `showTicTacToeGame` → loads iframe from same origin
 
-**Production (Cloudflare Workers):**
-1. `pnpm deploy` runs `deploy.sh` script
-2. Script loads `APP_URL` from `.prod.vars`
-3. `pnpm build` creates dist/
-4. `wrangler deploy` uploads to Cloudflare with vars
-5. Worker serves from https://my-worker.workers.dev
-6. Iframe URL: `https://my-worker.workers.dev/mini-apps/tictactoe/`
+### Production Flow
 
-**Custom Domain:**
-1. Configure domain in Cloudflare
-2. Worker serves from https://my-domain.com
-3. Auto-detection sets `APP_URL = https://my-domain.com`
-4. Iframe URL: `https://my-domain.com/mini-apps/tictactoe/`
+1. Deploy to Cloudflare Workers
+2. Worker serves at `https://your-worker.workers.dev`
+3. MCP endpoint at `/mcp`
+4. TicTacToe app served from root `/`
+5. Iframe URL uses `APP_URL` from `.prod.vars`
 
-### Session Management (Durable Objects)
+### Environment Variables
 
-**How Durable Objects work:**
-
-```
-Request 1 → Worker → DO Instance (ID: session-123)
-                    │ State: { session: {...} }
-                    │ Lives in memory
-                    └─→ Response 1
-
-Request 2 → Worker → Same DO Instance (ID: session-123)
-                    │ State: { session: {...} }  ← Persisted
-                    └─→ Response 2
+**`.dev.vars` (development):**
+```env
+APP_URL=http://localhost:8888
 ```
 
-**Session Lifecycle:**
-1. Client sends `mcp-session-id` header (or server generates one)
-2. Worker routes to Durable Object with that ID
-3. MCP server initializes (only once per session)
-4. Subsequent requests reuse the same DO instance
-5. State persists across requests
-6. DO hibernates after inactivity
-7. DO is destroyed on explicit close or timeout
+**`.prod.vars` (production):**
+```env
+APP_URL=https://your-worker.workers.dev
+# Or custom domain:
+APP_URL=https://beattheclankers.com
+```
 
-**Why Durable Objects for MCP?**
-- Session state (tools, resources, conversation history)
-- Exactly-once semantics (no duplicate processing)
-- Strong consistency (no race conditions)
-- Automatic lifecycle management
+The MCP server uses `APP_URL` to construct iframe URLs that work in any environment.
 
 ## Design Decisions
 
-### Why McpAgent (agents library)?
+### Why Durable Objects?
 
-**Alternative:** Custom Durable Object implementation
+**For MCP Server:**
+- Session persistence across requests
+- Multiple AI clients can share state
+- Automatic scaling per client
 
-**Chosen:** McpAgent from `agents` library
+**For GameStatsStorage:**
+- Centralized statistics storage
+- WebSocket connection management
+- Atomic updates to stats
 
-**Rationale:**
-- **Less boilerplate**: McpAgent handles routing, session management, etc.
-- **Best practices**: Implements MCP protocol correctly
-- **Cloudflare optimized**: Designed for Durable Objects
-- **Maintained**: Active development by Cloudflare
+### Why Single App Architecture?
 
-**Trade-off:** Less control over low-level details
+This starter intentionally uses a simple single-app architecture:
+- **Easier to understand** - Less abstraction
+- **Easier to customize** - Modify one app, not a platform
+- **Still extensible** - Can add more apps as separate workers if needed
 
-### Why Vite multi-entry?
+For multi-app platforms, consider:
+- Separate Cloudflare Workers per app
+- Monorepo with shared packages
+- Turborepo for orchestration
 
-**Alternative:** Separate build processes for each mini-app
+### Why Separate TicTacToe Components?
 
-**Chosen:** Single Vite config with multiple entry points
+**TicTacToe.tsx** (Pure component):
+- No WebMCP dependency
+- Can be used in any React app
+- Easy to test
+- Controlled/uncontrolled modes
 
-**Rationale:**
-- **Shared config**: All apps use same build settings
-- **Shared dependencies**: Single node_modules
-- **Faster builds**: Vite's parallel builds
-- **Simpler setup**: One `pnpm build` command
+**TicTacToeWithWebMCP.tsx** (Integration layer):
+- Wraps pure component
+- Handles WebMCP registration
+- Manages parent communication
+- Tracks AI/human roles
 
-**Trade-off:** All mini-apps must be compatible with same build tools
+This pattern is recommended for complex UI components.
 
-### Why TabServer transport?
+### Why TabServer Transport?
 
-**Alternative:** WebSocket, HTTP polling, etc.
+TabServer is the WebMCP transport for iframe communication:
+- Uses `postMessage` API (standard browser API)
+- Works in any modern browser
+- No WebSocket needed (simplifies deployment)
+- Handles bidirectional communication
 
-**Chosen:** postMessage via TabServer transport
-
-**Rationale:**
-- **Same-origin friendly**: Works with iframes from same domain
-- **Low latency**: Direct browser messaging (no network)
-- **Standard API**: Built-in browser postMessage
-- **Secure**: Same-origin policy enforced
-
-**Trade-off:** Requires same origin (or CORS for cross-origin)
-
-### Why separate TicTacToe components?
-
-**Alternative:** Single component with WebMCP baked in
-
-**Chosen:** TicTacToe (pure) + TicTacToeWithWebMCP (integration)
-
-**Rationale:**
-- **Testability**: Can test game logic without WebMCP
-- **Reusability**: Can use TicTacToe elsewhere
-- **Separation of concerns**: Game logic separate from integration
-- **Easier to understand**: Clear boundaries
-
-**Trade-off:** Slight increase in code complexity
-
-### Why use .dev.vars and .prod.vars?
-
-**Alternative:** Hardcode URLs or use wrangler environments
-
-**Chosen:** Separate `.dev.vars` and `.prod.vars` files
-
-**Rationale:**
-- **Simple**: Easy to understand and modify
-- **Explicit**: Clear separation between dev and prod
-- **No secrets**: Both files can be committed to git (no sensitive data)
-- **Wrangler native**: `.dev.vars` is automatically loaded in dev mode
-- **Flexible**: Can create `.local` overrides for personal settings
-
-**Trade-off:** Requires custom deploy script to load `.prod.vars`
+Alternative transports:
+- **HttpServer** - For standalone servers
+- **StdioServer** - For CLI tools
+- **Custom** - Build your own transport
 
 ## Performance Considerations
 
-### Bundle Sizes
+### Cloudflare Workers
 
-**TicTacToe mini-app:**
-- React: ~130 KB (gzipped)
-- WebMCP libraries: ~20 KB (gzipped)
-- Game code: ~5 KB (gzipped)
-- Total: ~155 KB (gzipped)
+- **Cold start**: ~5-10ms (minimal)
+- **Edge location**: Runs close to users
+- **Durable Objects**: Slightly higher latency (centralized) but worth it for state
+- **WebSocket hibernation**: Reduces costs for idle connections
 
-**Optimization strategies:**
-- Code splitting (Vite automatic)
-- Tree shaking (remove unused code)
-- Asset compression (Cloudflare automatic)
+### React Compiler
 
-### Latency
+The starter uses React 19's experimental compiler:
+- Automatic memoization
+- Reduced re-renders
+- No need for `useMemo`/`useCallback`
 
-**Tool call flow:**
-1. AI → MCP server (HTTP): 50-100ms
-2. MCP server → AI (SSE): <10ms
-3. AI → iframe (postMessage): <1ms
-4. iframe → AI (postMessage): <1ms
-
-**Total latency:** ~60-110ms per tool call
-
-### Scaling
-
-**Cloudflare Workers:**
-- Auto-scales to millions of requests
-- Edge deployment (low latency worldwide)
-- No cold starts (Durable Objects warm in memory)
-
-**Durable Objects:**
-- Each session = 1 DO instance
-- 1000s of concurrent sessions supported
-- State persists automatically
-
-## Security
-
-### Threat Model
-
-**Threats:**
-1. Malicious iframes injecting code into parent
-2. XSS attacks via tool parameters
-3. CSRF attacks on MCP endpoints
-4. Unauthorized tool calls
-
-**Mitigations:**
-1. **Same-origin iframes**: All mini-apps served from same origin
-2. **Input validation**: Zod schemas validate all tool parameters
-3. **CORS**: Cloudflare Workers enforce CORS
-4. **Authentication**: Can add auth headers to MCP requests
-
-### Content Security Policy
-
-For production, consider adding CSP headers:
-
+Enable in `vite.config.ts`:
 ```typescript
-headers: {
-  "Content-Security-Policy":
-    "default-src 'self'; " +
-    "script-src 'self' 'unsafe-inline'; " +
-    "style-src 'self' 'unsafe-inline'; " +
-    "frame-ancestors 'none';"
-}
+react({
+  babel: {
+    plugins: ['babel-plugin-react-compiler']
+  }
+})
 ```
 
-## Debugging
+### Bundle Size
 
-### Worker Logs
+Production build sizes:
+- TicTacToe app: ~450KB (includes React 19, WebMCP, Tailwind)
+- Worker bundle: ~800KB (includes Hono, MCP SDK, agents)
 
-```bash
-# Stream live logs
-wrangler tail
+Optimization tips:
+- Tree-shaking works automatically
+- Tailwind purges unused CSS
+- Vite code-splits automatically
 
-# Filter by status code
-wrangler tail --status error
+## Security Considerations
+
+### CORS Configuration
+
+Worker uses wildcard CORS for development:
+```typescript
+cors({
+  origin: '*',
+  allowHeaders: ['*'],
+  allowMethods: ['*']
+})
 ```
 
-### Browser Console
-
-The TicTacToe app logs all WebMCP messages:
-
-```javascript
-console.log("[WebMCP] Tool registered:", toolName);
-console.log("[WebMCP] Tool call received:", params);
-console.log("[WebMCP] Sending result:", result);
+For production, tighten this:
+```typescript
+cors({
+  origin: 'https://your-ai-assistant.com',
+  allowHeaders: ['Content-Type', 'X-Anthropic-API-Key'],
+  allowMethods: ['GET', 'POST']
+})
 ```
 
-### TypeScript Type Checking
+### postMessage Security
 
-```bash
-# Check all projects
-pnpm exec tsc -b
+TabServer accepts messages from any origin (`allowedOrigins: ['*']`).
 
-# Check specific project
-pnpm exec tsc -p tsconfig.worker.json --noEmit
+For production, specify allowed origins:
+```typescript
+initializeWebModelContext({
+  transport: {
+    tabServer: {
+      allowedOrigins: ['https://your-ai-assistant.com']
+    }
+  }
+});
 ```
 
-## Future Enhancements
+### Environment Variables
 
-### Potential Improvements
+`.dev.vars` and `.prod.vars` are **committed to git** because they contain:
+- Public URLs only
+- No secrets
 
-1. **WebSocket transport**: For cross-origin WebMCP
-2. **Authentication**: OAuth, API keys, etc.
-3. **Rate limiting**: Prevent abuse
-4. **Metrics/analytics**: Usage tracking
-5. **Error recovery**: Retry logic for failed tool calls
-6. **State persistence**: Save game state to Durable Object storage
-7. **Multiple mini-apps**: Gallery of mini-apps to choose from
+For actual secrets (API keys), use:
+- Cloudflare Workers secrets: `wrangler secret put SECRET_NAME`
+- `.vars.local` files (gitignored)
+
+## Troubleshooting
+
+### Tools Not Appearing
+
+1. Check WebMCP initialization happens before React renders
+2. Verify `allowedOrigins` includes the AI assistant's origin
+3. Check browser console for WebMCP errors
+4. Ensure parent window is ready (check readiness protocol)
+
+### Iframe Not Loading
+
+1. Verify `APP_URL` in `.dev.vars` or `.prod.vars`
+2. Check CORS configuration
+3. Ensure static assets are built (`pnpm build`)
+4. Check worker logs (`wrangler tail`)
+
+### Build Failures
+
+1. Run `pnpm typecheck` to check TypeScript errors
+2. Clear build cache: `rm -rf dist/ node_modules/.vite/`
+3. Reinstall dependencies: `pnpm install`
+
+### WebSocket Connection Failures
+
+1. Check Durable Object bindings in `wrangler.jsonc`
+2. Verify WebSocket upgrade headers
+3. Check browser console for WebSocket errors
+4. Ensure GameStatsStorage is deployed
+
+## Additional Resources
+
+- [MCP Specification](https://spec.modelcontextprotocol.io/)
+- [WebMCP Documentation](https://github.com/WebMCP-org)
+- [Cloudflare Workers Docs](https://developers.cloudflare.com/workers/)
+- [Durable Objects Docs](https://developers.cloudflare.com/durable-objects/)
+- [Hono Documentation](https://hono.dev/)
+- [React 19 Release](https://react.dev/blog/2024/12/05/react-19)
 
 ---
 
-This architecture provides a solid foundation for building sophisticated MCP UI + WebMCP applications. The modular design makes it easy to extend and customize for your specific use case.
+This architecture balances simplicity with real-world production patterns. It's designed to be a starter, not a framework.
