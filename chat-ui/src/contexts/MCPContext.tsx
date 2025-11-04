@@ -16,12 +16,9 @@ export interface MCPContextValue {
   callPrompt: (name: string, args?: Record<string, string>) => Promise<unknown>;
   readResource: (uri: string) => Promise<unknown>;
   callTool: (request: CallToolRequest['params'], sourceId?: string) => Promise<CallToolResult>;
-  // Server connection management
   serverUrl: string | null;
   connectServer: (url: string) => Promise<void>;
   disconnectServer: () => Promise<void>;
-
-  // WebMCP integration methods
   registerWebMcpClient: (sourceId: string, client: Client) => void;
   registerWebMcpTools: (tools: Tool[], sourceId: string) => void;
   unregisterWebMcpClient: (sourceId: string) => void;

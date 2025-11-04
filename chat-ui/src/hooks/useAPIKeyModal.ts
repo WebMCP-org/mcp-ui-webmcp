@@ -27,7 +27,6 @@ export function useAPIKeyModal(mcpState: MCPState) {
     !getStoredApiKey() || mcpState !== 'ready'
   );
 
-  // Auto-show when connection fails or disconnected
   useEffect(() => {
     if (mcpState === 'failed' || mcpState === 'disconnected') {
       setShowApiKeyDialog(true);
