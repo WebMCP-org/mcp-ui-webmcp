@@ -101,9 +101,9 @@ flowchart TB
         WEBMCP_INIT --> TRANSPORT_CHILD
     end
 
-    HTTP_CLIENT <-->|HTTP/SSE<br/>MCP Protocol| TOOLS
+    HTTP_CLIENT <-->|HTTP/SSE MCP Protocol| TOOLS
     ASSETS -->|iframe src| APP
-    WEBMCP_MGR <-->|IframeParentTransport<br/>postMessage| TRANSPORT_CHILD
+    WEBMCP_MGR <-->|IframeParentTransport postMessage| TRANSPORT_CHILD
 
     style WEBMCP_INIT fill:#e1f5ff
     style HOOKS fill:#e1f5ff
