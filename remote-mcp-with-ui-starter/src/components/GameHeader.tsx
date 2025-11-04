@@ -32,7 +32,6 @@ export function GameHeader({ stats }: GameHeaderProps) {
         Beat The Clankers 🤖
       </h1>
 
-      {/* Primary Stats: Game Outcomes */}
       {stats && (
         <div className="flex items-center justify-center gap-3 text-xs text-black dark:text-white mb-0.5">
           <span className="font-semibold">👤 {stats.carbonUnitsWins} Humans</span>
@@ -43,7 +42,6 @@ export function GameHeader({ stats }: GameHeaderProps) {
         </div>
       )}
 
-      {/* Secondary Stats: Meta Information */}
       {stats && (
         <div className="flex items-center justify-center gap-2 text-[0.625rem] text-black dark:text-gray-400">
           <span title="Total games played">📊 {stats.totalGames} total</span>

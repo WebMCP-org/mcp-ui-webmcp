@@ -54,7 +54,6 @@ export function useGameStats(): UseGameStatsReturn {
    * Automatically reconnects with exponential backoff on disconnection.
    */
   useEffect(() => {
-    // Construct WebSocket URL based on current location
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     const wsUrl = `${protocol}//${window.location.host}/api/stats/ws`;
 
@@ -62,15 +61,15 @@ export function useGameStats(): UseGameStatsReturn {
     let reconnectTimeout: NodeJS.Timeout | null = null;
     let reconnectAttempts = 0;
     const MAX_RECONNECT_ATTEMPTS = 5;
-    const BASE_RECONNECT_DELAY = 1000; // 1 second
-    const MAX_RECONNECT_DELAY = 30000; // 30 seconds
+    const BASE_RECONNECT_DELAY = 1000;
+    const MAX_RECONNECT_DELAY = 30000;
 
     const connect = () => {
       try {
         ws = new WebSocket(wsUrl);
 
         ws.onopen = () => {
-          reconnectAttempts = 0; // Reset on successful connection
+          reconnectAttempts = 0;
         };
 
         ws.onmessage = (event) => {
@@ -89,7 +88,6 @@ export function useGameStats(): UseGameStatsReturn {
         ws.onclose = (event) => {
           console.log(`Stats WebSocket closed: code=${event.code}, reason=${event.reason}`);
 
-          // Attempt to reconnect with exponential backoff
           if (reconnectAttempts < MAX_RECONNECT_ATTEMPTS) {
             const delay = Math.min(
               BASE_RECONNECT_DELAY * 2 ** reconnectAttempts,
@@ -115,16 +113,13 @@ export function useGameStats(): UseGameStatsReturn {
       }
     };
 
-    // Establish initial connection
     connect();
 
-    // Cleanup function
     return () => {
       if (reconnectTimeout) {
         clearTimeout(reconnectTimeout);
       }
       if (ws) {
-        // Set a flag to prevent reconnection during intentional close
         reconnectAttempts = MAX_RECONNECT_ATTEMPTS;
         ws.close(1000, 'Component unmounting');
       }

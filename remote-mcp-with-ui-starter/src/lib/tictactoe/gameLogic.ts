@@ -37,7 +37,6 @@ export function createEmptyBoard(): Board {
  * ```
  */
 export function evaluateBoard(board: Board): GameStatus {
-  // Check all winning combinations
   for (const combination of WINNING_COMBINATIONS) {
     const [a, b, c] = combination;
     if (board[a] && board[a] === board[b] && board[a] === board[c]) {
@@ -48,12 +47,10 @@ export function evaluateBoard(board: Board): GameStatus {
     }
   }
 
-  // Check for draw (all cells filled, no winner)
   if (board.every((cell) => cell !== null)) {
     return { winner: 'Draw', winningLine: null };
   }
 
-  // Game still in progress
   return { winner: null, winningLine: null };
 }
 
@@ -118,12 +115,10 @@ export function validateMove(
   currentPlayer: Player,
   winner: GameStatus['winner']
 ): string | null {
-  // Validate index range
   if (!Number.isInteger(index) || index < 0 || index > 8) {
     return 'Position must be an integer between 0 and 8.';
   }
 
-  // Check if game is already over
   if (winner) {
     if (winner === 'Draw') {
       return 'The game already ended in a draw. Call `tictactoe_reset` to start over.';
@@ -131,12 +126,10 @@ export function validateMove(
     return `Player ${winner} already won. Call \`tictactoe_reset\` to start a new game.`;
   }
 
-  // Check if it's the player's turn
   if (player !== currentPlayer) {
     return `It's Player ${currentPlayer}'s turn.`;
   }
 
-  // Check if cell is occupied
   if (board[index]) {
     return `Cell ${index} is already occupied by Player ${board[index]}. Choose an empty cell.`;
   }
