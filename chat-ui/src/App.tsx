@@ -22,7 +22,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { MCPContext, type MCPContextValue } from '@/contexts/MCPContext';
 import { useUIResources } from '@/contexts/UIResourceContext';
 
-// Type for tools with source metadata
 type ToolWithSource = MCPTool & { _sourceId: string };
 
 import { isUIResource } from '@mcp-ui/client';
@@ -73,7 +72,6 @@ function App() {
   const [mcpState, setMCPState] = useState<
     'disconnected' | 'connecting' | 'loading' | 'ready' | 'failed'
   >('disconnected');
-  // Aggressive modal: show if no API key OR not connected (demo app requirement)
   const [showApiKeyDialog, setShowApiKeyDialog] = useState(
     !getStoredApiKey() || mcpState !== 'ready'
   );
@@ -82,16 +80,13 @@ function App() {
   const [mcpPrompts, setMcpPrompts] = useState<MCPPrompt[]>([]);
   const [mcpResources, setMcpResources] = useState<MCPResource[]>([]);
 
-  // MCP client and transport refs
   const clientRef = useRef<Client | null>(null);
   const transportRef = useRef<Transport | null>(null);
 
-  // WebMCP state for iframe tools
   const [webMcpTools, setWebMcpTools] = useState<MCPTool[]>([]);
   const webMcpClients = useRef<Map<string, Client>>(new Map());
 
   const disconnectFromServer = useCallback(async () => {
-    // Close existing connection
     if (clientRef.current) {
       try {
         await clientRef.current.close();
@@ -110,19 +105,16 @@ function App() {
       transportRef.current = null;
     }
 
-    // Reset state
     setMcpTools([]);
     setMcpPrompts([]);
     setMcpResources([]);
     setMCPState('disconnected');
 
-    // Clear server URL from localStorage
     clearStoredServerUrl();
   }, []);
 
   const connectToServer = useCallback(
     async (url: string) => {
-      // Validate URL
       try {
         new URL(url);
       } catch (error) {
@@ -131,13 +123,11 @@ function App() {
         return;
       }
 
-      // Disconnect from existing server first
       await disconnectFromServer();
 
       setMCPState('connecting');
 
       try {
-        // Create new client and transport
         const { client, transport } = createClient(
           {
             _clientInfo: {
@@ -156,7 +146,6 @@ function App() {
         await client.connect(transport);
         setMCPState('loading');
 
-        // Fetch available tools, prompts, and resources
         const [toolsResponse, promptsResponse, resourcesResponse] = await Promise.all([
           client.listTools(),
           client.listPrompts().catch(() => ({ prompts: [] })),
@@ -167,7 +156,6 @@ function App() {
         setMcpPrompts(promptsResponse.prompts || []);
         setMcpResources(resourcesResponse.resources || []);
 
-        // Save URL to localStorage
         setStoredServerUrl(url);
 
         setMCPState('ready');
@@ -175,7 +163,6 @@ function App() {
         console.error('MCP connection failed:', error);
         setMCPState('failed');
 
-        // Clean up on failure
         clientRef.current = null;
         transportRef.current = null;
       }
@@ -209,16 +196,13 @@ function App() {
     }
   }, []);
 
-  // WebMCP integration callbacks
   const registerWebMcpClient = useCallback((sourceId: string, webMcpClient: Client) => {
     webMcpClients.current.set(sourceId, webMcpClient);
   }, []);
 
   const registerWebMcpTools = useCallback((tools: MCPTool[], sourceId: string) => {
     setWebMcpTools((prev) => {
-      // Remove old tools from this source
       const filtered = prev.filter((t) => (t as ToolWithSource)._sourceId !== sourceId);
-      // Add new tools with source metadata
       const tagged = tools.map((t) => ({ ...t, _sourceId: sourceId }) as ToolWithSource);
       return [...filtered, ...tagged];
     });
@@ -230,13 +214,11 @@ function App() {
       webMcpClient.close?.();
       webMcpClients.current.delete(sourceId);
     }
-    // Remove tools from this source
     setWebMcpTools((prev) => prev.filter((t) => (t as ToolWithSource)._sourceId !== sourceId));
   }, []);
 
   const callTool = useCallback(
     async (request: CallToolRequest['params'], sourceId?: string): Promise<CallToolResult> => {
-      // Route to WebMCP iframe client if sourceId is provided
       if (sourceId) {
         const webMcpClient = webMcpClients.current.get(sourceId);
         if (!webMcpClient) {
@@ -251,7 +233,6 @@ function App() {
         }
       }
 
-      // Default to HTTP server client
       if (!clientRef.current) {
         throw new Error('MCP client not connected');
       }
@@ -299,16 +280,13 @@ function App() {
     ]
   );
 
-  // Cleanup all connections on unmount
   useEffect(() => {
     return () => {
-      // Close all WebMCP clients
       webMcpClients.current.forEach((client) => {
         client.close().catch(console.error);
       });
       webMcpClients.current.clear();
 
-      // Close main MCP connection
       if (clientRef.current) {
         clientRef.current.close().catch(console.error);
       }
@@ -318,7 +296,6 @@ function App() {
     };
   }, []);
 
-  // Aggressive modal behavior: auto-show when connection fails or disconnected
   useEffect(() => {
     if (mcpState === 'failed' || mcpState === 'disconnected') {
       setShowApiKeyDialog(true);
@@ -333,7 +310,6 @@ function App() {
       api: '/api/chat',
       credentials: 'include',
       fetch: async (url, options) => {
-        // Read API key directly from localStorage on every request
         const currentApiKey = getStoredApiKey();
         return fetch(url, {
           ...options,
@@ -349,7 +325,6 @@ function App() {
   return (
     <MCPContext.Provider value={mcpContextValue}>
       <AssistantRuntimeProvider runtime={runtime}>
-        {/* Register MCP tools as frontend tools (HTTP + WebMCP) */}
         {mcpTools.map((tool) => {
           const sourceId = (tool as ToolWithSource)._sourceId;
           return (
@@ -376,7 +351,6 @@ function App() {
               toolDescription={tool.description || ''}
               inputSchema={tool.inputSchema}
               callTool={(name, args) => {
-                // Route to WebMCP client
                 const webMcpClient = webMcpClients.current.get(sourceId);
                 if (!webMcpClient) {
                   throw new Error(`WebMCP client not found for source: ${sourceId}`);
