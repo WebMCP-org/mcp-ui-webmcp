@@ -19,8 +19,8 @@
 
 ## Try It Live
 
-🎮 **Live Chat UI:** [mcp-ui.mcp-b.ai](https://mcp-ui.mcp-b.ai)
-🎯 **Full App Demo:** [beattheclankers.com](https://beattheclankers.com/)
+**Live Chat UI:** [mcp-ui.mcp-b.ai](https://mcp-ui.mcp-b.ai)
+**Full App Demo:** [beattheclankers.com](https://beattheclankers.com/)
 
 Visit [beattheclankers.com](https://beattheclankers.com/) to see the full application with embedded iframe. Test the tools yourself using the [MCP-B Chrome Extension](https://chromewebstore.google.com/detail/mcp-b/fkhbffeojcfadbkpldmbjlbfocgknjlj).
 
@@ -71,8 +71,8 @@ Open http://localhost:5173 and ask the AI to show you a TicTacToe game.
 ### System Architecture
 
 ```mermaid
-graph TB
-    subgraph "Chat UI Browser Context"
+flowchart TB
+    subgraph ChatUI["Chat UI Browser Context"]
         UI[AI Chat Interface]
         HTTP_CLIENT[HTTP MCP Client<br/>@modelcontextprotocol/sdk]
         WEBMCP_MGR[WebMCP Integration<br/>useWebMCPIntegration]
@@ -83,31 +83,31 @@ graph TB
         WEBMCP_MGR --> IFRAME
     end
 
-    subgraph "MCP Server Cloudflare Worker"
+    subgraph MCPServer["MCP Server - Cloudflare Worker"]
         TOOLS[Tool Registry<br/>showTicTacToeGame, etc.]
         ASSETS[Static Asset Server<br/>Serves mini-apps]
 
         TOOLS -.->|Returns UI Resource| ASSETS
     end
 
-    subgraph "Embedded App Iframe Context"
+    subgraph EmbeddedApp["Embedded App Iframe Context"]
         APP[Mini-App React<br/>TicTacToe, etc.]
         WEBMCP_INIT[MCP-B Polyfill<br/>@mcp-b/global]
         HOOKS[useWebMCP Hooks<br/>@mcp-b/react-webmcp]
-        TRANSPORT_SERVER[IframeChildTransport<br/>@mcp-b/transports]
+        TRANSPORT_CHILD[IframeChildTransport<br/>@mcp-b/transports]
 
         APP --> HOOKS
         HOOKS --> WEBMCP_INIT
-        WEBMCP_INIT --> TRANSPORT_SERVER
+        WEBMCP_INIT --> TRANSPORT_CHILD
     end
 
     HTTP_CLIENT <-->|HTTP/SSE<br/>MCP Protocol| TOOLS
     ASSETS -->|iframe src| APP
-    WEBMCP_MGR <-->|IframeParentTransport<br/>postMessage| TRANSPORT_SERVER
+    WEBMCP_MGR <-->|IframeParentTransport<br/>postMessage| TRANSPORT_CHILD
 
     style WEBMCP_INIT fill:#e1f5ff
     style HOOKS fill:#e1f5ff
-    style TRANSPORT_SERVER fill:#e1f5ff
+    style TRANSPORT_CHILD fill:#e1f5ff
     style WEBMCP_MGR fill:#e1f5ff
 ```
 
