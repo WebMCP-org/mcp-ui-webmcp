@@ -1,10 +1,12 @@
 name: E2E Tests
 
-# E2E tests are currently disabled as they require Cloudflare Workers infrastructure
-# which is not available in CI without credentials. Run tests locally with:
-# pnpm test
+# E2E tests require Cloudflare Workers runtime which needs network access to CF services.
+# The current CI environment has network restrictions that block CF metadata access.
+# Run E2E tests locally with: pnpm test
+# Or trigger manually in environments with CF access.
 on:
   workflow_dispatch:  # Manual trigger only
+  # Uncomment below to enable on PR/push (requires CF-accessible environment)
   # pull_request:
   #   branches:
   #     - main

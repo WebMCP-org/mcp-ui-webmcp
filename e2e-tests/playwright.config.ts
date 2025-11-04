@@ -38,9 +38,7 @@ export default defineConfig({
   /* Run both dev servers before starting the tests */
   webServer: [
     {
-      command: process.env.CI
-        ? 'cd ../chat-ui && npx serve dist/client -l 5173'
-        : 'cd ../chat-ui && pnpm dev',
+      command: 'cd ../chat-ui && pnpm dev',
       url: 'http://localhost:5173',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
@@ -48,9 +46,7 @@ export default defineConfig({
       stderr: 'pipe',
     },
     {
-      command: process.env.CI
-        ? 'cd ../remote-mcp-with-ui-starter && npx serve dist/client -l 8888'
-        : 'cd ../remote-mcp-with-ui-starter && pnpm dev',
+      command: 'cd ../remote-mcp-with-ui-starter && pnpm dev',
       url: 'http://localhost:8888',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,

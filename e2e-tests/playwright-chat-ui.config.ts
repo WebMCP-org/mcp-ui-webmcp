@@ -37,9 +37,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: process.env.CI
-      ? 'cd ../chat-ui && npx serve dist/client -l 5173'
-      : 'cd ../chat-ui && pnpm dev',
+    command: 'cd ../chat-ui && pnpm dev',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
