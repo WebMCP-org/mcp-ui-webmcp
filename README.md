@@ -40,6 +40,26 @@ This pattern works for any embedded application: forms, visualizations, interact
 
 ## Quick Start
 
+### Create a New App (Recommended)
+
+Use our interactive CLI to scaffold a new project:
+
+```bash
+npx create-webmcp-app
+```
+
+Choose between:
+- **Vanilla** - Pure HTML/CSS/JavaScript (no build step!)
+- **React** - React + TypeScript + Vite (full-featured)
+
+Then:
+```bash
+cd your-project
+pnpm dev
+```
+
+### Or Run the Demo
+
 ```bash
 # Install dependencies
 pnpm install

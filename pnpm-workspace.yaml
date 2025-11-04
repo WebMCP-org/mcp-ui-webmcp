@@ -3,6 +3,7 @@ packages:
   - remote-mcp-with-ui-starter
   - webmcp-template
   - webmcp-template-vanilla
+  - create-webmcp-app
   - e2e-tests
 
 catalog:
