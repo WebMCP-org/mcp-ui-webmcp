@@ -74,9 +74,9 @@ Open http://localhost:5173 and ask the AI to show you a TicTacToe game.
 flowchart TB
     subgraph ChatUI["Chat UI Browser Context"]
         UI[AI Chat Interface]
-        HTTP_CLIENT[HTTP MCP Client<br/>@modelcontextprotocol/sdk]
-        WEBMCP_MGR[WebMCP Integration<br/>useWebMCPIntegration]
-        IFRAME[Iframe Container<br/>Side Panel]
+        HTTP_CLIENT["HTTP MCP Client<br/>@modelcontextprotocol/sdk"]
+        WEBMCP_MGR["WebMCP Integration<br/>useWebMCPIntegration"]
+        IFRAME["Iframe Container<br/>Side Panel"]
 
         UI --> HTTP_CLIENT
         UI --> WEBMCP_MGR
@@ -84,17 +84,17 @@ flowchart TB
     end
 
     subgraph MCPServer["MCP Server - Cloudflare Worker"]
-        TOOLS[Tool Registry<br/>showTicTacToeGame, etc.]
-        ASSETS[Static Asset Server<br/>Serves mini-apps]
+        TOOLS["Tool Registry<br/>showTicTacToeGame, etc."]
+        ASSETS["Static Asset Server<br/>Serves mini-apps"]
 
         TOOLS -.->|Returns UI Resource| ASSETS
     end
 
     subgraph EmbeddedApp["Embedded App Iframe Context"]
-        APP[Mini-App React<br/>TicTacToe, etc.]
-        WEBMCP_INIT[MCP-B Polyfill<br/>@mcp-b/global]
-        HOOKS[useWebMCP Hooks<br/>@mcp-b/react-webmcp]
-        TRANSPORT_CHILD[IframeChildTransport<br/>@mcp-b/transports]
+        APP["Mini-App React<br/>TicTacToe, etc."]
+        WEBMCP_INIT["MCP-B Polyfill<br/>@mcp-b/global"]
+        HOOKS["useWebMCP Hooks<br/>@mcp-b/react-webmcp"]
+        TRANSPORT_CHILD["IframeChildTransport<br/>@mcp-b/transports"]
 
         APP --> HOOKS
         HOOKS --> WEBMCP_INIT
