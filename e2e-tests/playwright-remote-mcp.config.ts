@@ -37,7 +37,9 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'cd ../remote-mcp-with-ui-starter && pnpm dev',
+    command: process.env.CI
+      ? 'cd ../remote-mcp-with-ui-starter && npx serve dist/client -l 8888'
+      : 'cd ../remote-mcp-with-ui-starter && pnpm dev',
     url: 'http://localhost:8888',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,
