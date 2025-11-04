@@ -1,8 +1,20 @@
 # MCP UI + WebMCP Demo Monorepo
 
+[![CI](https://github.com/WebMCP-org/mcp-ui-webmcp/workflows/CI/badge.svg)](https://github.com/WebMCP-org/mcp-ui-webmcp/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/WebMCP-org/mcp-ui-webmcp/blob/main/LICENSE)
+[![Node](https://img.shields.io/badge/node-24.3.0-brightgreen.svg)](https://nodejs.org)
+[![pnpm](https://img.shields.io/badge/pnpm-10.14.0-blue.svg)](https://pnpm.io)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-blue.svg)](https://www.typescriptlang.org)
+
 A demonstration monorepo showcasing the powerful combination of **MCP UI** (Model Context Protocol with UI resources) and **WebMCP** (bidirectional tool registration between AI and embedded web apps).
 
 🔗 **Repository**: [https://github.com/WebMCP-org/mcp-ui-webmcp](https://github.com/WebMCP-org/mcp-ui-webmcp)
+
+<!--
+🎮 **Live Demo**: Coming soon!
+- Chat UI: https://your-demo-url.pages.dev
+- MCP Server: https://your-worker-url.workers.dev
+-->
 
 ## What Makes This Special?
 
@@ -34,7 +46,7 @@ mcp-ui-webmcp/
 │
 ├── remote-mcp-with-ui-starter/ # MCP server with embedded UIs
 │   ├── worker/                 # Cloudflare Worker code
-│   ├── mini-apps/              # Self-contained mini-apps
+│   ├── src/                    # React apps (TicTacToe, etc.)
 │   ├── .dev.vars              # Dev environment (committed)
 │   └── .prod.vars             # Prod environment (committed)
 │
@@ -126,6 +138,51 @@ useWebMCP({
 
 The AI assistant can now call `my_tool` as if it were a native MCP tool!
 
+### Architecture Diagram
+
+```mermaid
+graph TB
+    subgraph "Chat UI (React)"
+        A[AI Assistant UI]
+        B[MCP Client]
+        C[WebMCP Integration]
+        D[Iframe Container]
+    end
+
+    subgraph "MCP Server (Cloudflare Worker)"
+        E[HTTP/SSE Transport]
+        F[MCP Protocol Handler]
+        G[Tool Registry]
+        H[Static Asset Server]
+    end
+
+    subgraph "Embedded App (TicTacToe)"
+        I[React App]
+        J[WebMCP Client]
+        K[Dynamic Tool Registry]
+    end
+
+    A -->|User Message| B
+    B -->|HTTP/SSE| E
+    E --> F
+    F --> G
+    G -->|Tool: showTicTacToeGame| H
+    H -->|Serve iframe| D
+    D -->|Load| I
+    I --> J
+    J -->|postMessage| C
+    C -->|Register Tools| B
+    B -->|Tool: tictactoe_move| J
+    J -->|Execute| I
+    I -->|Response| J
+    J -->|postMessage| C
+    C -->|Result| A
+
+    style A fill:#e1f5ff
+    style I fill:#fff4e1
+    style F fill:#f0e1ff
+```
+
 ### Communication Flow
 
 ```
@@ -139,12 +196,12 @@ The AI assistant can now call `my_tool` as if it were a native MCP tool!
        ┌──────────────────────────────────────────────┐
        │   Cloudflare Worker (MCP Server)             │
        │   - Tools: showTicTacToeGame, etc.           │
-       │   - Serves: Static mini-apps                 │
+       │   - Serves: Static apps                      │
        └──────────────┬───────────────────────────────┘
                       │ iframe
                       ↓
               ┌────────────────────────┐
-              │  TicTacToe Mini-App    │
+              │  TicTacToe App         │
               │  - Registers tools     │
               │  - Handles tool calls  │
               └────────────────────────┘
@@ -202,29 +259,74 @@ pnpm test:chat-ui          # Chat UI tests only
 pnpm test:remote-mcp       # MCP server tests only
 pnpm test:ui               # Playwright UI mode (interactive)
 pnpm test:debug            # Debug mode (step through)
-
-# Deployment
-pnpm --filter chat-ui deploy
-pnpm --filter remote-mcp-with-ui-starter deploy
 ```
 
-## Environment Configuration
+## Deployment
 
-Both apps use environment-specific configuration files **committed to git** (they contain public URLs, not secrets):
+### Deploying the MCP Server (Cloudflare Workers)
 
-**chat-ui:**
-- `.env.development` → `http://localhost:8888/mcp`
-- `.env.production` → Your production MCP server URL
+The MCP server can be deployed to Cloudflare Workers:
 
-**remote-mcp-with-ui-starter:**
-- `.dev.vars` → `http://localhost:8888`
-- `.prod.vars` → Your production worker URL
+```bash
+cd remote-mcp-with-ui-starter
 
-For local overrides (gitignored):
-- Create `.env.development.local` or `.env.production.local`
-- Create `.dev.vars.local` or `.prod.vars.local`
+# Build the project
+pnpm build
 
-[See docs/ENVIRONMENT_SETUP.md for details](./docs/ENVIRONMENT_SETUP.md)
+# Deploy to Cloudflare Workers
+pnpm deploy
+
+# Or use wrangler directly
+wrangler deploy
+```
+
+**Configuration:**
+1. Update `.prod.vars` with your production worker URL
+2. Configure your Cloudflare account in `wrangler.jsonc`
+3. Set up Durable Objects bindings if needed
+
+### Deploying the Chat UI (Cloudflare Pages)
+
+The chat UI can be deployed to Cloudflare Pages or any static hosting:
+
+```bash
+cd chat-ui
+
+# Build for production
+pnpm build
+
+# The dist/ folder contains the static files
+# Deploy to Cloudflare Pages:
+wrangler pages deploy dist
+
+# Or deploy to other platforms (Vercel, Netlify, etc.)
+```
+
+**Configuration:**
+1. Update `.env.production` with your MCP server URL
+2. Configure build settings:
+   - Build command: `pnpm build`
+   - Output directory: `dist`
+   - Node version: `24.3.0`
+
+### Environment Variables
+
+**Required for Chat UI:**
+- `VITE_MCP_SERVER_URL` - URL of your deployed MCP server
+
+**Required for MCP Server:**
+- `WORKER_URL` - Your Cloudflare Worker URL (for serving static assets)
+
+See [docs/ENVIRONMENT_SETUP.md](./docs/ENVIRONMENT_SETUP.md) for detailed configuration.
+
+### Testing Deployed Apps
+
+After deployment:
+
+1. Visit your Chat UI URL
+2. The app should automatically connect to your MCP server
+3. Try asking the AI to "show me a TicTacToe game"
+4. Verify the game loads and the AI can interact with it
 
 ## Technology Stack
 
@@ -304,8 +406,8 @@ pnpm install
 pnpm build
 ```
 
-### Mini-Apps Not Loading
-1. Check: `ls -la remote-mcp-with-ui-starter/dist/client/mini-apps/`
+### Embedded Apps Not Loading
+1. Check: `ls -la remote-mcp-with-ui-starter/dist/client/`
 2. Verify vite.config.ts entry points
 3. Check browser console for errors
 

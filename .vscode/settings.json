@@ -1,0 +1,98 @@
+{
+  // Editor settings
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.rulers": [100],
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+
+  // TypeScript settings
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.preferences.importModuleSpecifier": "relative",
+
+  // ESLint settings
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact"
+  ],
+  "eslint.workingDirectories": [
+    "./chat-ui",
+    "./remote-mcp-with-ui-starter",
+    "./e2e-tests"
+  ],
+
+  // Tailwind CSS settings
+  "tailwindCSS.experimental.classRegex": [
+    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
+  ],
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  },
+
+  // File associations
+  "files.associations": {
+    "*.css": "tailwindcss"
+  },
+
+  // Search exclusions
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/build": true,
+    "**/.turbo": true,
+    "**/pnpm-lock.yaml": true,
+    "**/.wrangler": true
+  },
+
+  // File watcher exclusions
+  "files.watcherExclude": {
+    "**/.git/objects/**": true,
+    "**/.git/subtree-cache/**": true,
+    "**/node_modules/**": true,
+    "**/dist/**": true,
+    "**/.turbo/**": true,
+    "**/.wrangler/**": true
+  },
+
+  // Testing
+  "vitest.enable": true,
+  "vitest.commandLine": "pnpm test",
+
+  // Spell checker
+  "cSpell.words": [
+    "anthropic",
+    "assistantui",
+    "cloudflare",
+    "durable",
+    "hookform",
+    "hono",
+    "lucide",
+    "markdownit",
+    "miniapps",
+    "monorepo",
+    "msedge",
+    "PlaywrightTestConfig",
+    "pnpm",
+    "radix",
+    "remotemcp",
+    "RJSF",
+    "tiptap",
+    "toastify",
+    "turborepo",
+    "uiresources",
+    "vercel",
+    "vitest",
+    "webmcp",
+    "wrangler",
+    "zustand"
+  ]
+}

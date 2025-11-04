@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Question or Discussion
+    url: https://github.com/WebMCP-org/mcp-ui-webmcp/discussions
+    about: Ask questions or discuss ideas
+  - name: MCP Documentation
+    url: https://modelcontextprotocol.io/
+    about: Official Model Context Protocol documentation

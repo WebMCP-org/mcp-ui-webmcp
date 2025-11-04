@@ -19,7 +19,8 @@ loglevel.log
 Thumbs.db
 
 # IDEs
-.vscode
+# Note: .vscode/ is intentionally committed to share recommended settings with contributors
+# .vscode
 .idea
 *.swp
 *.swo
