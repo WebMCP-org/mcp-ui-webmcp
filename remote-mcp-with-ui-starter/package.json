@@ -9,6 +9,7 @@
     "deploy": "bash deploy.sh",
     "dev": "wrangler dev --port 8888",
     "lint": "eslint .",
+    "typecheck": "tsc -b --noEmit",
     "preview": "vite preview",
     "test": "echo 'No unit tests configured for remote-mcp-with-ui-starter'"
   },
