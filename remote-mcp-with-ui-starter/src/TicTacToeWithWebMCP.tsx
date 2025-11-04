@@ -444,7 +444,6 @@ export const TicTacToeWithWebMCP: React.FC<TicTacToeWithWebMCPProps> = ({ animat
         ws = new WebSocket(wsUrl);
 
         ws.onopen = () => {
-          console.log('Stats WebSocket connected');
           reconnectAttempts = 0; // Reset on successful connection
         };
 
@@ -633,8 +632,6 @@ export const TicTacToeWithWebMCP: React.FC<TicTacToeWithWebMCPProps> = ({ animat
       },
       '*'
     );
-
-    console.log(`📏 Size notification sent: ${width}x${height}`);
   }, []);
 
   /**
@@ -671,8 +668,6 @@ export const TicTacToeWithWebMCP: React.FC<TicTacToeWithWebMCPProps> = ({ animat
         },
         '*'
       );
-
-      console.log(`📤 ${logLabel}`);
     },
     [isParentReady]
   );
