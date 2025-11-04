@@ -612,6 +612,6 @@ if (isStandalone) {
 
 ## Related Documentation
 
-- [UPGRADE_TO_TAILWIND_V4.md](./UPGRADE_TO_TAILWIND_V4.md) - Guide for making embeddable UIs responsive
+- [README.md#-how-to-customize](./README.md#-how-to-customize) - UI customization and structure
 - [ARCHITECTURE.md](./ARCHITECTURE.md) - Overall architecture of the MCP server
 - [README.md](./README.md) - Getting started guide

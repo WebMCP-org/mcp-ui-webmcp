@@ -16,7 +16,7 @@
 - **[remote-mcp-with-ui-starter/ARCHITECTURE.md](./remote-mcp-with-ui-starter/ARCHITECTURE.md)** - Detailed architecture decisions and patterns
 - **[remote-mcp-with-ui-starter/EMBEDDING_PROTOCOL.md](./remote-mcp-with-ui-starter/EMBEDDING_PROTOCOL.md)** - WebMCP embedding protocol details
 - **[remote-mcp-with-ui-starter/ROUTES.md](./remote-mcp-with-ui-starter/ROUTES.md)** - Worker routing and endpoints
-- **[remote-mcp-with-ui-starter/ADDING_NEW_APPS.md](./remote-mcp-with-ui-starter/ADDING_NEW_APPS.md)** - Guide for creating new mini-apps
+- **[remote-mcp-with-ui-starter/README.md#-how-to-customize](./remote-mcp-with-ui-starter/README.md#-how-to-customize)** - Guide for creating new mini-apps
 
 ### Configuration & Environment
 - **[docs/ENVIRONMENT_SETUP.md](./docs/ENVIRONMENT_SETUP.md)** - Environment variables and deployment configuration
@@ -106,7 +106,7 @@ Edit: [remote-mcp-with-ui-starter/worker/mcpServer.ts](./remote-mcp-with-ui-star
 3. Update: [remote-mcp-with-ui-starter/vite.config.ts](./remote-mcp-with-ui-starter/vite.config.ts)
 4. Add MCP tool to display it
 
-See: [remote-mcp-with-ui-starter/ADDING_NEW_APPS.md](./remote-mcp-with-ui-starter/ADDING_NEW_APPS.md)
+See: [remote-mcp-with-ui-starter/README.md#-how-to-customize](./remote-mcp-with-ui-starter/README.md#-how-to-customize)
 
 ### Modifying Routes
 Edit: [remote-mcp-with-ui-starter/worker/index.ts](./remote-mcp-with-ui-starter/worker/index.ts)

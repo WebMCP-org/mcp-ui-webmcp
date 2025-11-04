@@ -308,7 +308,7 @@ See [ENVIRONMENT_SETUP.md](./docs/ENVIRONMENT_SETUP.md) for detailed configurati
 ### Architecture
 - [ARCHITECTURE.md](./remote-mcp-with-ui-starter/ARCHITECTURE.md) - Design decisions
 - [EMBEDDING_PROTOCOL.md](./remote-mcp-with-ui-starter/EMBEDDING_PROTOCOL.md) - WebMCP protocol
-- [ADDING_NEW_APPS.md](./remote-mcp-with-ui-starter/ADDING_NEW_APPS.md) - Create mini-apps
+- [How to Customize](./remote-mcp-with-ui-starter/README.md#-how-to-customize) - Create mini-apps
 
 ### Configuration
 - [ENVIRONMENT_SETUP.md](./docs/ENVIRONMENT_SETUP.md) - Environment variables
