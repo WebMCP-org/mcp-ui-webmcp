@@ -3,8 +3,8 @@ import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import './index.css';
+import App from './App';
 import { ErrorBoundary } from './ErrorBoundary';
-import { TicTacToeWithWebMCP } from './TicTacToeWithWebMCP';
 
 initializeWebModelContext({
   transport: {
@@ -22,7 +22,7 @@ if (!rootElement) {
 createRoot(rootElement).render(
   <StrictMode>
     <ErrorBoundary>
-      <TicTacToeWithWebMCP />
+      <App />
     </ErrorBoundary>
   </StrictMode>
 );
