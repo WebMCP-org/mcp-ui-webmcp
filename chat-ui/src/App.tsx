@@ -26,20 +26,16 @@ import { getStoredApiKey } from '@/lib/storage';
 function App() {
   const [showMobileMenu, setShowMobileMenu] = useState(false);
 
-  // Custom hooks extract all complex logic
   const mcpConnection = useMCPConnection();
   const webMcpIntegration = useWebMCPIntegration();
   const apiKeyModal = useAPIKeyModal(mcpConnection.mcpState);
 
-  // Unified tool calling function that routes to HTTP or WebMCP client
   const callTool = useCallback(
     async (request: CallToolRequest['params'], sourceId?: string): Promise<CallToolResult> => {
       if (sourceId) {
-        // WebMCP tool call
         return webMcpIntegration.callTool(request, sourceId);
       }
 
-      // HTTP MCP tool call
       if (!mcpConnection.clientRef.current) {
         throw new Error('MCP client not connected');
       }
@@ -56,14 +52,14 @@ function App() {
 
   const mcpContextValue: MCPContextValue = useMemo(
     () => ({
-      tools: [...mcpConnection.mcpTools, ...webMcpIntegration.webMcpTools], // Merge HTTP and WebMCP tools
+      tools: [...mcpConnection.mcpTools, ...webMcpIntegration.webMcpTools],
       prompts: mcpConnection.mcpPrompts,
       resources: mcpConnection.mcpResources,
       state: mcpConnection.mcpState,
       callPrompt: mcpConnection.callPrompt,
       readResource: mcpConnection.readResource,
       callTool,
-      serverUrl: mcpConnection.mcpState === 'ready' ? 'connected' : null, // Simplified - just indicate if connected
+      serverUrl: mcpConnection.mcpState === 'ready' ? 'connected' : null,
       connectServer: mcpConnection.connectToServer,
       disconnectServer: mcpConnection.disconnectFromServer,
       registerWebMcpClient: webMcpIntegration.registerWebMcpClient,
@@ -104,10 +100,8 @@ function App() {
         />
 
         <div className="flex min-h-dvh w-full flex-col bg-gradient-to-br from-background via-background to-muted/20">
-          {/* Header */}
           <header className="z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pt-[env(safe-area-inset-top)]">
             <div className="flex h-12 items-center justify-between gap-1.5 px-2 sm:h-14 sm:gap-3 sm:px-4 md:h-16 md:gap-4 md:px-6 pl-[max(0.5rem,env(safe-area-inset-left))] pr-[max(0.5rem,env(safe-area-inset-right))] sm:pl-[max(1rem,env(safe-area-inset-left))] sm:pr-[max(1rem,env(safe-area-inset-right))] md:pl-[max(1.5rem,env(safe-area-inset-left))] md:pr-[max(1.5rem,env(safe-area-inset-right))]">
-              {/* Logo and Title */}
               <div className="flex min-w-0 items-center gap-1.5 sm:gap-2 md:gap-3">
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 sm:h-8 sm:w-8 md:h-10 md:w-10">
                   <PlugZap className="h-3.5 w-3.5 text-primary sm:h-4 sm:w-4 md:h-5 md:w-5" />
@@ -117,9 +111,7 @@ function App() {
                 </h1>
               </div>
 
-              {/* Right side - Navigation, Connection status and settings */}
               <div className="flex shrink-0 items-center gap-2 sm:gap-3">
-                {/* Mobile Menu - Hamburger */}
                 <Sheet open={showMobileMenu} onOpenChange={setShowMobileMenu}>
                   <SheetTrigger asChild>
                     <Button
@@ -136,7 +128,6 @@ function App() {
                       <SheetTitle>Navigation</SheetTitle>
                     </SheetHeader>
 
-                    {/* Navigation Links in Mobile Menu */}
                     <div className="flex flex-col gap-4 mb-6">
                       <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                         Links
@@ -175,7 +166,6 @@ function App() {
                       </nav>
                     </div>
 
-                    {/* Tool Source Legend in Mobile Menu */}
                     <div className="flex flex-col gap-4 pt-4 border-t">
                       <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                         Tool Sources
@@ -198,7 +188,6 @@ function App() {
                   </SheetContent>
                 </Sheet>
 
-                {/* Desktop Navigation Links */}
                 <div className="hidden items-center gap-2 border-r pr-3 md:flex">
                   <a
                     href="https://mcp-b.ai"
@@ -229,7 +218,6 @@ function App() {
                   </a>
                 </div>
 
-                {/* Tool Source Legend */}
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -258,7 +246,6 @@ function App() {
                   </Tooltip>
                 </TooltipProvider>
 
-                {/* MCP Connection Button and Status */}
                 <TooltipProvider>
                   {mcpConnection.mcpState === 'ready' ? (
                     <Tooltip>
@@ -276,7 +263,6 @@ function App() {
                               {mcpConnection.mcpTools.length}
                             </Badge>
                           </div>
-                          {/* Mobile: Just show tool count */}
                           <span className="text-xs font-medium text-green-700 dark:text-green-400 sm:hidden">
                             {mcpConnection.mcpTools.length}
                           </span>
@@ -342,7 +328,6 @@ function App() {
                   )}
                 </TooltipProvider>
 
-                {/* Settings button */}
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -364,7 +349,6 @@ function App() {
             </div>
           </header>
 
-          {/* API Key warning banner */}
           {!getStoredApiKey() && (
             <div className="flex justify-center border-b bg-background px-4 py-3">
               <Card className="w-full max-w-xl border-yellow-500/50 bg-yellow-500/10">
@@ -391,7 +375,6 @@ function App() {
             </div>
           )}
 
-          {/* Main content - Thread with internal scrolling */}
           <div className="flex-1 overflow-hidden">
             <div className="flex h-full w-full flex-col">
               <Thread />

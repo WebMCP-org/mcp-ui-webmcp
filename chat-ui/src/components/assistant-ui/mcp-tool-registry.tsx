@@ -43,7 +43,7 @@ const McpToolBridge: FC<{
     },
   });
 
-  return null; // This component only registers the tool
+  return null;
 };
 
 /**
@@ -75,7 +75,6 @@ export const MCPToolRegistry: FC<{
 }> = ({ mcpTools, webMcpTools, clientRef, webMcpClients }) => {
   return (
     <>
-      {/* HTTP MCP Tools */}
       {mcpTools.map((tool) => {
         const sourceId = (tool as ToolWithSource)._sourceId;
         return (
@@ -94,7 +93,6 @@ export const MCPToolRegistry: FC<{
         );
       })}
 
-      {/* WebMCP Tools */}
       {webMcpTools.map((tool) => {
         const sourceId = (tool as ToolWithSource)._sourceId;
         if (!sourceId) {

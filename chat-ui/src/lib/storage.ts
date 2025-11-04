@@ -2,7 +2,6 @@
  * Centralized localStorage utilities for application settings
  */
 
-// Storage keys
 export const API_KEY_STORAGE_KEY = 'anthropic_api_key';
 export const SERVER_URL_STORAGE_KEY = 'mcp_server_url';
 

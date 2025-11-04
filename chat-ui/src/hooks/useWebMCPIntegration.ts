@@ -82,7 +82,6 @@ export function useWebMCPIntegration() {
     []
   );
 
-  // Cleanup on unmount
   useEffect(() => {
     const clients = webMcpClients;
     return () => {

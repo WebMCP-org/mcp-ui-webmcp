@@ -57,7 +57,6 @@ import { StreamingOverlay } from './streaming-overlay';
 import { ToolExecutionPanel } from './tool-execution-panel';
 import { ToolFallback } from './tool-fallback';
 
-// Context for sharing tool surface state
 type ToolSurfaceContextValue = {
   hasToolSurface: boolean;
   isLargeScreen: boolean;
@@ -65,7 +64,6 @@ type ToolSurfaceContextValue = {
 
 const ToolSurfaceContext = createContext<ToolSurfaceContextValue | null>(null);
 
-// Marker to identify notify messages in the thread
 const NOTIFY_MESSAGE_PREFIX = '[NOTIFY_MESSAGE]';
 
 const REMOTE_DOM_ELEMENTS: RemoteElementConfiguration[] = [
@@ -93,14 +91,12 @@ const ThreadContent: FC = () => {
   const { resources } = useUIResources();
   const hasToolSurface = resources.length > 0;
 
-  // Use custom hook for mobile view management
   const { mobileView, setMobileView, viewportRef, handlePanEnd, isMobile } =
     useMobileViewToggle(hasToolSurface);
 
   const isLargeScreen = !isMobile;
   const prefersReducedMotion = usePrefersReducedMotion();
 
-  // Refs for gesture targets
   const chatPanelRef = useRef<HTMLDivElement>(null);
   const uiPanelRef = useRef<HTMLDivElement>(null);
 
@@ -120,7 +116,6 @@ const ThreadContent: FC = () => {
           ['--thread-max-width' as string]: hasToolSurface && isLargeScreen ? '36rem' : '48rem',
         }}
       >
-        {/* Side Panel - Absolutely Positioned with Slide Animation */}
         <AnimatePresence initial={false}>
           {hasToolSurface && (
             <motion.aside
@@ -147,7 +142,6 @@ const ThreadContent: FC = () => {
           )}
         </AnimatePresence>
 
-        {/* Main Chat Content - Uses absolute positioning for layout */}
         <motion.div
           ref={chatPanelRef}
           onPanEnd={isMobile && hasToolSurface ? handlePanEnd : undefined}
@@ -179,9 +173,6 @@ const ThreadContent: FC = () => {
             className={cn(
               'flex h-full flex-1 flex-col overflow-y-auto scroll-smooth px-3 pt-6 sm:px-6 sm:pt-8 md:px-8 md:pt-10 max-[500px]:pt-3 transition-[align-items,padding] duration-400 ease-[cubic-bezier(0.42,0,0.58,1)]',
               hasToolSurface ? 'items-stretch lg:items-end lg:px-10' : 'items-center',
-              // Dynamic bottom padding based on screen size and tool surface presence
-              // Minimal padding to bring thread content very close to composer
-              // Reduced in landscape (max-height 500px) for better space usage
               isMobile && hasToolSurface
                 ? 'pb-44 max-[500px]:pb-32'
                 : isMobile
@@ -204,10 +195,8 @@ const ThreadContent: FC = () => {
             </ThreadPrimitive.If>
           </ThreadPrimitive.Viewport>
 
-          {/* Gradient overlay above composer */}
           <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background via-background/60 to-transparent" />
 
-          {/* Fixed position composer at bottom - floats above content */}
           <div
             className={cn(
               'pointer-events-none absolute bottom-0 left-0 right-0 flex justify-center px-3 sm:px-6 md:px-8',
@@ -235,12 +224,10 @@ const ThreadContent: FC = () => {
           </div>
         </motion.div>
 
-        {/* Mobile View Toggle Bar */}
         {isMobile && hasToolSurface && (
           <MobileViewToggle mobileView={mobileView} setMobileView={setMobileView} />
         )}
 
-        {/* Streaming Overlay - shows assistant response on mobile chat view */}
         {isMobile && mobileView !== 'chat' && hasToolSurface && <StreamingOverlay />}
       </ThreadPrimitive.Root>
     </ToolSurfaceContext.Provider>
@@ -282,7 +269,6 @@ const ThreadWelcome: FC = () => {
 const ThreadWelcomeSuggestions: FC = () => {
   const { prompts } = useMCP();
 
-  // Show placeholder if no prompts are available
   if (prompts.length === 0) {
     return (
       <div className="flex w-full flex-wrap justify-center gap-2 sm:gap-3">
@@ -313,8 +299,6 @@ const ThreadWelcomeSuggestions: FC = () => {
   );
 };
 
-// Removed: ThreadWelcomeTicTacToeDemo - now using real tool from MCP server
-
 const ToolResponsePanel: FC = () => {
   const { resources, selectedResourceId } = useUIResources();
   const { tools, callTool } = useMCP();
@@ -322,17 +306,14 @@ const ToolResponsePanel: FC = () => {
   const [openToolsPanelId, setOpenToolsPanelId] = useState<string | null>(null);
   const runtime = useAssistantRuntime();
 
-  // Custom hooks for iframe management
   const { setupIframe } = useIframeLifecycle();
 
   const selectedResource = useMemo(() => {
     return resources.find((r) => r.id === selectedResourceId);
   }, [resources, selectedResourceId]);
 
-  // Use iframe resize hook
   useIframeResize(selectedResource?.iframeRef);
 
-  // Filter tools for the currently open tool panel
   const iframeTools = useMemo(() => {
     if (!openToolsPanelId) return [];
     return tools.filter((tool) => {
@@ -349,8 +330,7 @@ const ToolResponsePanel: FC = () => {
         if (runtime.thread.getState().isRunning) {
           runtime.thread.cancelRun();
         }
-        await new Promise((resolve) => setTimeout(resolve, 100)); // wait for cancellation to propagate
-        // Prefix message with marker so we can identify it as a notify message
+        await new Promise((resolve) => setTimeout(resolve, 100));
         runtime.thread.append(`${NOTIFY_MESSAGE_PREFIX}${action.payload.message}`);
       }
 
@@ -384,10 +364,8 @@ const ToolResponsePanel: FC = () => {
 
   return (
     <div className="relative w-full max-w-full h-full flex flex-col overflow-hidden">
-      {/* Tab Selector */}
       <TabSelector openToolsPanelId={openToolsPanelId} setOpenToolsPanelId={setOpenToolsPanelId} />
 
-      {/* Iframe-specific Tool Execution Panel */}
       {openToolsPanelId && iframeTools.length > 0 && (
         <div className="p-2 sm:p-3 bg-muted/5 border-b border-border/40">
           <ToolExecutionPanel
@@ -400,7 +378,6 @@ const ToolResponsePanel: FC = () => {
         </div>
       )}
 
-      {/* Full-Screen UI Resource Renderer */}
       <div className="relative flex-1 overflow-hidden max-w-full">
         <AnimatePresence initial={false} mode="popLayout">
           <motion.div
@@ -434,9 +411,7 @@ const ToolResponsePanel: FC = () => {
           </motion.div>
         </AnimatePresence>
 
-        {/* Overlay Icons - Bottom Right Corner */}
         <div className="absolute bottom-2 right-2 flex gap-1.5 z-10 sm:bottom-4 sm:right-4 sm:gap-2">
-          {/* Resource Info Icon */}
           <Tooltip>
             <TooltipTrigger asChild>
               <button className="h-11 w-11 rounded-full bg-background/95 backdrop-blur-sm border border-border/60 shadow-lg hover:bg-background transition-colors flex items-center justify-center">
@@ -463,7 +438,6 @@ const ToolResponsePanel: FC = () => {
             </TooltipContent>
           </Tooltip>
 
-          {/* Raw JSON Icon */}
           <Tooltip>
             <TooltipTrigger asChild>
               <button className="h-11 w-11 rounded-full bg-background/95 backdrop-blur-sm border border-border/60 shadow-lg hover:bg-background transition-colors flex items-center justify-center">
@@ -478,7 +452,6 @@ const ToolResponsePanel: FC = () => {
             </TooltipContent>
           </Tooltip>
 
-          {/* UI Action Icon */}
           {lastUIAction && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -496,7 +469,6 @@ const ToolResponsePanel: FC = () => {
           )}
         </div>
 
-        {/* Tool Name Badge - Bottom Left Corner */}
         <div className="absolute bottom-2 left-2 z-10 sm:bottom-4 sm:left-4">
           <div className="px-2 py-1 rounded-full bg-background/95 backdrop-blur-sm border border-border/60 shadow-lg text-xs sm:px-3 sm:py-1.5">
             <p className="font-semibold text-foreground truncate max-w-[120px] sm:max-w-none">
@@ -508,8 +480,6 @@ const ToolResponsePanel: FC = () => {
     </div>
   );
 };
-
-// Removed ToolRunCard - now using full-screen UI rendering in ToolResponsePanel
 
 const ResourcesList: FC<{
   resources: Array<{ uri: string; name: string; description?: string; mimeType?: string }>;
@@ -564,8 +534,6 @@ const ResourcesList: FC<{
     </div>
   );
 };
-// Removed ToolResultModal - now using side panel for all tool results
-// Removed ToolCallState and ToolResultContent types - moved to ToolExecutionPanel component
 
 const Composer: FC = () => {
   const { tools, resources, callTool } = useMCP();
@@ -581,7 +549,6 @@ const Composer: FC = () => {
 
   return (
     <div className="flex w-full flex-col gap-2 sm:gap-3">
-      {/* Expanded Tools List */}
       {showTools && tools.length > 0 && (
         <ToolExecutionPanel
           tools={tools}
@@ -593,9 +560,7 @@ const Composer: FC = () => {
       )}
 
       <ComposerPrimitive.Root className="focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10 flex w-full flex-col gap-1.5 rounded-xl border border-border/60 bg-background shadow-xl backdrop-blur-sm transition-all ease-in-out sm:gap-2 sm:rounded-2xl max-[500px]:gap-1">
-        {/* Main Input Row */}
         <div className="flex items-end gap-1.5 px-3 pt-3 pb-2 sm:gap-2 sm:px-4 sm:pt-4 sm:pb-3 max-[500px]:px-2 max-[500px]:pt-2 max-[500px]:pb-1.5">
-          {/* Tools button */}
           {tools.length > 0 && (
             <Tooltip>
               <TooltipTrigger asChild>
@@ -631,11 +596,9 @@ const Composer: FC = () => {
           <ComposerAction />
         </div>
 
-        {/* Toolbar Row */}
         <ThreadPrimitive.If empty={false}>
           <div className="flex items-center justify-between border-t border-border/40 bg-muted/5 px-3 py-1.5 sm:px-4 sm:py-2 max-[500px]:px-2 max-[500px]:py-1">
             <div className="flex items-center gap-1.5 sm:gap-2">
-              {/* Reset Thread Button */}
               <Tooltip>
                 <TooltipTrigger asChild>
                   <button
@@ -664,7 +627,6 @@ const Composer: FC = () => {
         </ThreadPrimitive.If>
       </ComposerPrimitive.Root>
 
-      {/* Resources as Attachments */}
       {resources.length > 0 && <ResourcesList resources={resources} />}
     </div>
   );
@@ -702,17 +664,14 @@ const ComposerAction: FC = () => {
 const UserMessage: FC = () => {
   const message = useMessage();
 
-  // Get the text content from the message
   const textContent = message.content.find(
     (part): part is { type: 'text'; text: string } => part.type === 'text'
   );
   const content = textContent?.text || '';
 
-  // Check if this is a notify message
   const isNotifyMessage = content.startsWith(NOTIFY_MESSAGE_PREFIX);
 
   if (isNotifyMessage) {
-    // Extract the actual message content without the prefix
     const actualMessage = content.slice(NOTIFY_MESSAGE_PREFIX.length);
 
     return (
@@ -740,7 +699,6 @@ const UserMessage: FC = () => {
     );
   }
 
-  // Regular user message
   return (
     <MessagePrimitive.Root className="grid w-full max-w-[var(--thread-max-width)] auto-rows-auto grid-cols-[minmax(72px,1fr)_auto] gap-y-1.5 py-2.5 transition-[max-width] duration-400 ease-[cubic-bezier(0.42,0,0.58,1)] sm:gap-y-2 sm:py-4 [&:where(>*)]:col-start-2">
       <UserActionBar />
