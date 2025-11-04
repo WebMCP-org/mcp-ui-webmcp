@@ -11,7 +11,6 @@ export { MyMCP, GameStatsStorage };
  */
 const app = new Hono<{ Bindings: Env }>();
 
-// Apply CORS middleware to all routes
 app.use(
   '/*',
   cors({
@@ -21,7 +20,6 @@ app.use(
   })
 );
 
-// Route SSE (Server-Sent Events) endpoints
 app.all('/sse/*', async (c) => {
   return await MyMCP.serveSSE('/sse').fetch(c.req.raw, c.env, c.executionCtx);
 });
@@ -30,13 +28,10 @@ app.all('/sse', async (c) => {
   return await MyMCP.serveSSE('/sse').fetch(c.req.raw, c.env, c.executionCtx);
 });
 
-// Route MCP protocol endpoint
 app.all('/mcp', async (c) => {
   return await MyMCP.serve('/mcp').fetch(c.req.raw, c.env, c.executionCtx);
 });
 
-// Game statistics API endpoints
-// GET /api/stats - Fetch current game statistics
 app.get('/api/stats', async (c) => {
   try {
     const id = c.env.GAME_STATS.idFromName('global-stats');
@@ -49,10 +44,8 @@ app.get('/api/stats', async (c) => {
   }
 });
 
-// GET /api/stats/ws - WebSocket endpoint for real-time stats updates
 app.get('/api/stats/ws', async (c) => {
   try {
-    // Check for WebSocket upgrade header
     const upgradeHeader = c.req.header('Upgrade');
     if (!upgradeHeader || upgradeHeader.toLowerCase() !== 'websocket') {
       return c.json(
@@ -61,11 +54,9 @@ app.get('/api/stats/ws', async (c) => {
       );
     }
 
-    // Forward the WebSocket upgrade request to the GameStatsStorage Durable Object
     const id = c.env.GAME_STATS.idFromName('global-stats');
     const stub = c.env.GAME_STATS.get(id);
 
-    // Pass through the entire request (including headers for WebSocket upgrade)
     return await stub.fetch(c.req.raw);
   } catch (error) {
     console.error('Error upgrading WebSocket:', error);
@@ -73,7 +64,6 @@ app.get('/api/stats/ws', async (c) => {
   }
 });
 
-// POST /api/stats/game-complete - Record completed game result
 app.post('/api/stats/game-complete', async (c) => {
   try {
     const body = await c.req.json();
@@ -93,12 +83,10 @@ app.post('/api/stats/game-complete', async (c) => {
   }
 });
 
-// 404 handler for unmatched routes
 app.notFound((c) => {
   return c.json({ error: 'Not found', path: c.req.path }, 404);
 });
 
-// Error handler
 app.onError((error, c) => {
   console.error('Worker error:', error);
   return c.json(

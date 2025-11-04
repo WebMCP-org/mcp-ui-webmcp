@@ -58,7 +58,6 @@ export function GameBoard({
 }: GameBoardProps) {
   return (
     <>
-      {/* Animations (inline styles) */}
       {animated && (
         <style>{`
           @keyframes cellAppear {

@@ -50,7 +50,6 @@ export function RoleSelectionModal({ onSelect, disabled }: RoleSelectionModalPro
           Pick your side:
         </legend>
 
-        {/* Role labels */}
         <div className="flex items-center justify-center gap-2 mb-1">
           <span className="text-xs font-semibold text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.3)]">
             👤 Carbon Units
@@ -61,7 +60,6 @@ export function RoleSelectionModal({ onSelect, disabled }: RoleSelectionModalPro
           </span>
         </div>
 
-        {/* Role selection buttons */}
         <div className="flex gap-3 justify-center">
           <button
             type="button"

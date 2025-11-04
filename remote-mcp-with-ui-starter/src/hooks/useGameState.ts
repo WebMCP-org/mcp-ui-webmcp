@@ -77,7 +77,6 @@ export function useGameState(): UseGameStateReturn {
   const [winningLine, setWinningLine] = useState<number[] | null>(null);
   const [humanPlayer, setHumanPlayer] = useState<Player>('X');
 
-  // AI always plays opposite of human
   const aiPlayer: Player = humanPlayer === 'X' ? 'O' : 'X';
 
   /**
@@ -86,20 +85,16 @@ export function useGameState(): UseGameStateReturn {
    */
   const makeMove = useCallback(
     (index: number, player: Player): MoveResult => {
-      // Validate the move
       const error = validateMove(board, index, player, currentPlayer, winner);
       if (error) {
         return { success: false, error };
       }
 
-      // Execute the move
       const newBoard = [...board] as Board;
       newBoard[index] = player;
 
-      // Evaluate new game state
       const status = evaluateBoard(newBoard);
 
-      // Update state
       setBoard(newBoard);
       setWinner(status.winner);
       setWinningLine(status.winningLine);

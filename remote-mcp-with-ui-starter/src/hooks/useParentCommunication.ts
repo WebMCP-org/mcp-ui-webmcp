@@ -69,7 +69,6 @@ export function useParentCommunication(): UseParentCommunicationReturn {
 
     const embedded = window.parent !== window;
 
-    // Not in iframe - no parent to wait for
     if (!embedded) {
       setIsParentReady(true);
       return;
@@ -90,7 +89,6 @@ export function useParentCommunication(): UseParentCommunicationReturn {
         payload?: unknown;
       };
 
-      // Handle various ready message types
       if (type === 'ui-lifecycle-iframe-render-data') {
         markReady();
         return;

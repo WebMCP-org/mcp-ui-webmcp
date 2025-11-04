@@ -31,10 +31,6 @@ export class GameStatsStorage {
 
   constructor(state: DurableObjectState) {
     this.state = state;
-
-    // Restore hibernated WebSocket connections
-    // When the Durable Object is evicted from memory and later re-initialized,
-    // this ensures we maintain references to active WebSocket connections
     this.state.getWebSockets();
   }
 
@@ -46,18 +42,15 @@ export class GameStatsStorage {
     const url = new URL(request.url);
 
     try {
-      // Handle WebSocket upgrade requests
       const upgradeHeader = request.headers.get('Upgrade');
       if (upgradeHeader?.toLowerCase() === 'websocket') {
         return this.handleWebSocketUpgrade(request);
       }
 
-      // GET /stats - Retrieve current statistics
       if (url.pathname === '/stats' && request.method === 'GET') {
         return await this.getStats();
       }
 
-      // POST /game-complete - Record game result
       if (url.pathname === '/game-complete' && request.method === 'POST') {
         return await this.gameComplete(request);
       }
@@ -93,7 +86,6 @@ export class GameStatsStorage {
 
     const stats = await this.getOrInitializeStats();
 
-    // Track game results only (liveGames managed by WebSocket lifecycle)
     stats.totalGames++;
     if (result === 'clankers') {
       stats.clankersWins++;
@@ -106,7 +98,6 @@ export class GameStatsStorage {
     stats.lastUpdated = new Date().toISOString();
     await this.state.storage.put('stats', stats);
 
-    // Broadcast updated stats to all connected WebSocket clients
     await this.broadcastStats();
 
     return Response.json(stats);
@@ -139,17 +130,11 @@ export class GameStatsStorage {
    * Increments liveGames counter when connection is established
    */
   private handleWebSocketUpgrade(_request: Request): Response {
-    // Create a WebSocket pair (client and server ends)
     const webSocketPair = new WebSocketPair();
     const [client, server] = Object.values(webSocketPair);
 
-    // Use acceptWebSocket() for hibernation support
-    // This allows the Durable Object to hibernate when idle, reducing costs
-    // Unlike server.accept(), this enables automatic reconnection after hibernation
     this.state.acceptWebSocket(server);
 
-    // Increment live games counter for new connection
-    // Send initial stats to the newly connected client
     this.incrementLiveGames()
       .then(() => this.getOrInitializeStats())
       .then((stats) => {
@@ -157,11 +142,9 @@ export class GameStatsStorage {
       })
       .catch((error) => {
         console.error('Failed to increment live games counter:', error);
-        // Close connection if tracking fails to prevent inaccurate count
         server.close(1011, 'Failed to track connection');
       });
 
-    // Return the client side of the WebSocket connection
     return new Response(null, {
       status: 101,
       webSocket: client,
@@ -176,16 +159,13 @@ export class GameStatsStorage {
     const stats = await this.getOrInitializeStats();
     const message = JSON.stringify(stats);
 
-    // Get all active WebSocket connections (including hibernated ones)
     const sockets = this.state.getWebSockets();
 
-    // Send stats to each connected client
     for (const socket of sockets) {
       try {
         socket.send(message);
       } catch (error) {
         console.error('Error broadcasting to WebSocket:', error);
-        // Continue broadcasting to other clients even if one fails
       }
     }
   }
@@ -197,13 +177,11 @@ export class GameStatsStorage {
    */
   async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer): Promise<void> {
     try {
-      // Handle ping/pong for connection health checks
       if (message === 'ping') {
         ws.send('pong');
         return;
       }
 
-      // Handle refresh requests - send current stats
       if (message === 'refresh') {
         const stats = await this.getOrInitializeStats();
         ws.send(JSON.stringify(stats));
@@ -225,7 +203,6 @@ export class GameStatsStorage {
     _reason: string,
     _wasClean: boolean
   ): Promise<void> {
-    // Decrement live games counter for closed connection
     await this.decrementLiveGames();
   }
 

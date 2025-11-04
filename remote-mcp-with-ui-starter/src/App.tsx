@@ -269,17 +269,13 @@ export default function App({ animated = true }: AppProps) {
     }
   }, [game.winner, game.aiPlayer, notifyGameComplete]);
 
-  // Derived state for UI
   const showStatus = !isParentReady || isAIThinking || !showRoleModal;
 
   return (
     <div className="flex flex-col gap-1.5 font-sans">
-      {/* Header with title and stats */}
       <GameHeader stats={stats} />
 
-      {/* Game board with overlays */}
       <div className="relative">
-        {/* Status message overlay */}
         <GameStatus
           isConnecting={!isParentReady}
           isAIThinking={isAIThinking}
@@ -288,7 +284,6 @@ export default function App({ animated = true }: AppProps) {
           show={showStatus}
         />
 
-        {/* Main game board */}
         <GameBoard
           board={game.board}
           winningLine={game.winningLine}
@@ -298,12 +293,10 @@ export default function App({ animated = true }: AppProps) {
           animated={animated}
         />
 
-        {/* Role selection modal (shown at game start) */}
         {showRoleModal && isParentReady && (
           <RoleSelectionModal onSelect={handleRoleSelect} disabled={!isParentReady} />
         )}
 
-        {/* New game button (shown when game ends) */}
         {game.winner && !showRoleModal && (
           <ResetButton onReset={handleNewGame} disabled={!isParentReady} />
         )}
