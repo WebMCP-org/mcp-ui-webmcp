@@ -3,10 +3,28 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpAgent } from 'agents/mcp';
 
 /**
- * WebMCP Vanilla Template MCP Server
+ * WebMCP Vanilla Template MCP Server.
+ * Minimal MCP server for vanilla HTML/JS template with no build step required.
  *
- * This is a minimal MCP server for the vanilla HTML/JS template.
- * No build step required - just pure HTML, CSS, and JavaScript!
+ * Provides:
+ * - showTemplateApp: Tool to display the vanilla HTML embedded app
+ * - sayHello: Example server-side tool without UI
+ * - LaunchTemplate: Prompt to quickly launch the template
+ * - BuildGame: Interactive prompt to scaffold vanilla JS games
+ *
+ * Uses pure HTML/CSS/JavaScript with @mcp-b/global IIFE build via script tag.
+ * Perfect for learning WebMCP or building simple interactive tools.
+ *
+ * @example
+ * ```typescript
+ * // Cloudflare Worker instantiates this class via Durable Objects
+ * export class VanillaTemplateMCP extends McpAgent<Cloudflare.Env> {
+ *   async init() {
+ *     // Register tools that serve static HTML from public/ directory
+ *     this.server.tool('myTool', 'description', {}, async () => {...});
+ *   }
+ * }
+ * ```
  */
 export class VanillaTemplateMCP extends McpAgent<Cloudflare.Env> {
   server = new McpServer({

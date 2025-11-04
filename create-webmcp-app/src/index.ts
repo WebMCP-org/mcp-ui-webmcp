@@ -35,6 +35,21 @@ const templates: Template[] = [
   },
 ];
 
+/**
+ * Main CLI entry point for create-webmcp-app.
+ * Prompts user for project path, template choice, and dependency installation,
+ * then scaffolds the selected WebMCP template.
+ *
+ * @returns Promise that resolves when project creation completes
+ * @example
+ * ```bash
+ * npx create-webmcp-app
+ * # User is prompted for:
+ * # 1. Project path
+ * # 2. Template choice (vanilla or react)
+ * # 3. Whether to install dependencies
+ * ```
+ */
 async function main() {
   console.clear();
 
@@ -136,6 +151,23 @@ async function main() {
   );
 }
 
+/**
+ * Copies template files from source to target directory, excluding build artifacts.
+ * Updates package.json with project-specific name and creates environment variable files.
+ *
+ * @param source - Absolute path to template source directory
+ * @param target - Absolute path to target project directory
+ * @param templateType - Type of template ('vanilla' or 'react') for port configuration
+ * @example
+ * ```typescript
+ * copyTemplate(
+ *   '/path/to/webmcp-template',
+ *   '/path/to/my-project',
+ *   'react'
+ * );
+ * // Creates project with updated package.json and environment files
+ * ```
+ */
 function copyTemplate(source: string, target: string, templateType: string) {
   // Files/directories to exclude
   const exclude = [

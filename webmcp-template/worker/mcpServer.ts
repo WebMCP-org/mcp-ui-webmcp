@@ -3,12 +3,25 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpAgent } from 'agents/mcp';
 
 /**
- * WebMCP Template MCP Server
+ * WebMCP Template MCP Server.
+ * Minimal MCP server demonstrating embedded web app serving with WebMCP integration.
  *
- * This is a minimal MCP server that demonstrates how to serve
- * an embedded web app with WebMCP integration.
+ * Provides:
+ * - showTemplateApp: Tool to display the embedded web application
+ * - sayHello: Example server-side tool without UI requirement
+ * - LaunchTemplate: Prompt to quickly launch the template app
+ * - BuildGame: Interactive prompt to scaffold new games
  *
- * Customize this file to add your own tools and prompts!
+ * @example
+ * ```typescript
+ * // Cloudflare Worker instantiates this class via Durable Objects
+ * export class TemplateMCP extends McpAgent<Cloudflare.Env> {
+ *   async init() {
+ *     // Register tools and prompts
+ *     this.server.tool('myTool', 'description', {}, async () => {...});
+ *   }
+ * }
+ * ```
  */
 export class TemplateMCP extends McpAgent<Cloudflare.Env> {
   server = new McpServer({

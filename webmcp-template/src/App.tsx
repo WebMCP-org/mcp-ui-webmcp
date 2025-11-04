@@ -12,12 +12,24 @@ import { useCallback, useEffect, useState } from 'react';
 import { z } from 'zod';
 
 /**
- * Main application component
+ * Main application component for WebMCP template.
+ * Demonstrates WebMCP tool registration, parent window communication, and state management.
  *
- * This example demonstrates:
- * - Basic WebMCP tool registration
- * - Parent window communication
- * - Simple state management
+ * This component registers three WebMCP tools:
+ * - template_get_message: Read-only tool to get current message
+ * - template_update_message: Updates the displayed message
+ * - template_reset: Resets message to default value
+ *
+ * @returns React component that renders a simple message display with WebMCP tools
+ * @example
+ * ```typescript
+ * // In a WebMCP-enabled iframe environment:
+ * import App from './App';
+ * // Component automatically:
+ * // 1. Establishes parent-child communication
+ * // 2. Registers WebMCP tools with the parent window
+ * // 3. Provides UI for manual message manipulation
+ * ```
  */
 export default function App() {
   // Track connection to parent window

@@ -16,7 +16,7 @@
     "cf-typegen": "wrangler types",
     "deploy": "bash deploy.sh",
     "dev": "wrangler dev --port 8889",
-    "lint": "eslint worker",
+    "lint": "eslint .",
     "typecheck": "tsc -b --noEmit"
   },
   "dependencies": {
