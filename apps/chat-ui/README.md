@@ -190,6 +190,65 @@ wrangler secret put SENTRY_DSN
 wrangler secret put ENVIRONMENT
 ```
 
+### Setting Up Anthropic API Key with Secrets Store
+
+For production deployments, you should store your Anthropic API key in [Cloudflare Secrets Store](https://developers.cloudflare.com/secrets-store/) instead of using environment variables. This provides better security and centralized secret management.
+
+**Prerequisites:**
+- Super Administrator or Secrets Store Admin role in your Cloudflare account
+- A Secrets Store created in your account (automatically created on first use)
+
+**Setup Steps:**
+
+1. **Create a secret in Secrets Store** (choose one method):
+
+   Using Wrangler CLI:
+   ```bash
+   # Find your store ID
+   npx wrangler secrets-store store list
+
+   # Create the secret with workers scope
+   npx wrangler secrets-store secret create <STORE_ID> \
+     --name ANTHROPIC_API_KEY \
+     --scopes workers \
+     --remote
+   # You'll be prompted to enter the secret value
+   ```
+
+   Or via Cloudflare Dashboard:
+   - Go to **Secrets Store** in the Cloudflare dashboard
+   - Click **Create secret**
+   - Name: `ANTHROPIC_API_KEY`
+   - Permission scope: **Workers**
+   - Value: Your Anthropic API key (starts with `sk-ant-`)
+
+2. **Configure the binding in `wrangler.jsonc`**:
+
+   Update the `store_id` in the Secrets Store binding:
+   ```jsonc
+   "secrets_store_secrets": [
+     {
+       "binding": "ANTHROPIC_API_KEY_SECRET",
+       "store_id": "your-actual-store-id",  // Replace with your store ID
+       "secret_name": "ANTHROPIC_API_KEY"
+     }
+   ]
+   ```
+
+3. **Deploy your worker**:
+   ```bash
+   pnpm deploy
+   ```
+
+**How it works:**
+- Users who don't provide their own API key will use the shared key from Secrets Store
+- Usage is tracked per device with a $1.00 quota limit
+- Users can optionally add their own API key for unlimited usage
+- The worker checks API keys in this order: User's key → Secrets Store → Environment variable (dev only)
+
+**Local Development:**
+For local development, continue using the `ANTHROPIC_API_KEY` environment variable in `.dev.vars` (gitignored). The Secrets Store binding is only used in production.
+
 The worker automatically:
 - Captures all uncaught exceptions in the `/api/chat` endpoint
 - Tracks performance of API requests

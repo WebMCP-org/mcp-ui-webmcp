@@ -8,9 +8,12 @@ import { z } from 'zod';
  * Settings form validation schema
  */
 export const settingsFormSchema = z.object({
-  apiKey: z.string().trim().min(1, 'API key is required').startsWith('sk-ant-', {
-    message: "Invalid API key format. Anthropic API keys start with 'sk-ant-'",
-  }),
+  apiKey: z
+    .string()
+    .trim()
+    .refine((val) => val === '' || val.startsWith('sk-ant-'), {
+      message: "Invalid API key format. Anthropic API keys start with 'sk-ant-'",
+    }),
   serverUrl: z
     .string()
     .trim()

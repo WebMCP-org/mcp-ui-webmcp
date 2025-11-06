@@ -32,14 +32,16 @@ export interface ResetButtonProps {
  */
 export function ResetButton({ onReset, disabled }: ResetButtonProps) {
   return (
-    <button
-      onClick={onReset}
-      disabled={disabled}
-      className="absolute bottom-2 left-1/2 transform -translate-x-1/2 px-6 py-2 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold rounded-md shadow-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed z-10"
-      type="button"
-      aria-label="Start new game"
-    >
-      New Game
-    </button>
+    <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+      <button
+        onClick={onReset}
+        disabled={disabled}
+        className="py-3 px-6 border-2 border-white rounded-md text-base font-semibold cursor-pointer transition-all duration-150 text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.3)] pointer-events-auto hover:scale-105 hover:border-[3px] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+        type="button"
+        aria-label="Start new game"
+      >
+        New Game
+      </button>
+    </div>
   );
 }

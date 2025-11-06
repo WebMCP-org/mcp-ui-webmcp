@@ -37,7 +37,7 @@ export default defineConfig({
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'cd ../apps/mcp-server && pnpm dev',
+    command: 'cd ../../apps/mcp-server && pnpm dev',
     url: 'http://localhost:8888',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,

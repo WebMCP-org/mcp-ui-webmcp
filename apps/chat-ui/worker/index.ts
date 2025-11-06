@@ -21,8 +21,11 @@ app.use(
 
 app.post('/api/chat', async (c) => {
   try {
-    const apiKey = c.req.header('X-Anthropic-API-Key') || c.env?.ANTHROPIC_API_KEY;
-    console.log('Using Anthropic API Key:', apiKey ? 'Provided' : 'Missing');
+    let apiKey = c.req.header('X-Anthropic-API-Key');
+
+    if (!apiKey) {
+      apiKey = c.env?.ANTHROPIC_API_KEY;
+    }
 
     if (!apiKey) {
       return c.json({ error: 'Anthropic API key is required' }, 401);

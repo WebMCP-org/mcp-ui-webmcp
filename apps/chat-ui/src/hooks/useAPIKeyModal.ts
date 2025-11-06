@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { getStoredApiKey } from '@/lib/storage';
 
 type MCPState = 'disconnected' | 'connecting' | 'loading' | 'ready' | 'failed';
 
@@ -7,7 +6,6 @@ type MCPState = 'disconnected' | 'connecting' | 'loading' | 'ready' | 'failed';
  * Manage API key modal visibility logic
  *
  * Automatically shows the API key modal when:
- * - No API key is stored
  * - MCP connection fails
  * - MCP is disconnected
  *
@@ -23,9 +21,7 @@ type MCPState = 'disconnected' | 'connecting' | 'loading' | 'ready' | 'failed';
  * ```
  */
 export function useAPIKeyModal(mcpState: MCPState) {
-  const [showApiKeyDialog, setShowApiKeyDialog] = useState(
-    !getStoredApiKey() || mcpState !== 'ready'
-  );
+  const [showApiKeyDialog, setShowApiKeyDialog] = useState(mcpState !== 'ready');
 
   useEffect(() => {
     if (mcpState === 'failed' || mcpState === 'disconnected') {

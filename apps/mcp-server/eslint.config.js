@@ -5,9 +5,10 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules'] },
+  { ignores: ['dist', 'node_modules', '.wrangler'] },
   {
     files: ['**/*.{ts,tsx}'],
+    ignores: ['**/*.config.ts', '**/*.config.js'],
     extends: [
       js.configs.recommended,
       ...tseslint.configs.recommended,
@@ -15,6 +16,10 @@ export default tseslint.config(
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
     },
     plugins: {
       'react-hooks': reactHooks,

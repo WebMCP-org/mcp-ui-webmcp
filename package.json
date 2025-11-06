@@ -26,7 +26,8 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "check": "pnpm lint && pnpm typecheck",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "clean:modules": "find . -name 'node_modules' -type d -prune -exec rm -rf '{}' +"
   },
   "devDependencies": {
     "@playwright/test": "^1.49.2",

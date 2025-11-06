@@ -78,7 +78,8 @@ export function ApiKeyInput({
             <DialogHeader>
               <DialogTitle>Settings</DialogTitle>
               <DialogDescription>
-                Configure your Anthropic API key and MCP server connection.
+                Configure your MCP server connection. Optionally add your Anthropic API key for
+                unlimited usage.
               </DialogDescription>
             </DialogHeader>
 
@@ -90,7 +91,7 @@ export function ApiKeyInput({
                   <p className="text-sm font-medium text-yellow-700 dark:text-yellow-400">
                     {connectionState === 'failed'
                       ? 'Connection failed. Please check your server URL and try again.'
-                      : 'Please configure both API key and MCP server to start chatting.'}
+                      : 'Please configure your MCP server to start chatting.'}
                   </p>
                 </div>
               </div>
@@ -101,7 +102,7 @@ export function ApiKeyInput({
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <label htmlFor={apiKeyId} className="text-sm font-medium">
-                    Anthropic API Key
+                    Anthropic API Key <span className="text-muted-foreground">(Optional)</span>
                   </label>
                   <TooltipProvider>
                     <Tooltip>
@@ -110,7 +111,7 @@ export function ApiKeyInput({
                       </TooltipTrigger>
                       <TooltipContent className="max-w-sm">
                         <p className="text-xs">
-                          Get your API key from{' '}
+                          Without an API key, you get $1.00 of free usage. Add your own API key from{' '}
                           <a
                             href="https://console.anthropic.com"
                             target="_blank"
@@ -118,8 +119,9 @@ export function ApiKeyInput({
                             className="underline"
                           >
                             console.anthropic.com
-                          </a>
-                          . Your key is stored locally and never sent to our servers.
+                          </a>{' '}
+                          for unlimited usage. Your key is stored locally and never sent to our
+                          servers.
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -138,7 +140,8 @@ export function ApiKeyInput({
                   <p className="text-sm text-destructive">{form.formState.errors.apiKey.message}</p>
                 )}
                 <p className="text-xs text-muted-foreground">
-                  Your API key will be stored locally in your browser and sent with each request.
+                  Leave empty to use free quota ($1.00 limit). Add your own key for unlimited usage.
+                  Keys are stored locally in your browser.
                 </p>
               </div>
 

@@ -263,11 +263,19 @@ export default function App({ animated = true }: AppProps) {
 
   const showStatus = !isParentReady || isAIThinking || !showRoleModal;
 
+  const getGameOverMessage = (): string | null => {
+    if (!game.winner) return null;
+    if (game.winner === 'Draw') return "It's a draw!";
+
+    const winnerLabel = game.winner === game.humanPlayer ? 'Carbon Units 👤' : 'Clankers 🤖';
+    return `Player ${game.winner} (${winnerLabel}) wins!`;
+  };
+
   return (
-    <div className="flex flex-col gap-1.5 font-sans">
+    <div className="flex flex-col gap-4 font-sans p-4">
       <GameHeader stats={stats} />
 
-      <div className="relative">
+      <div className="relative flex items-center justify-center">
         <GameStatus
           isConnecting={!isParentReady}
           isAIThinking={isAIThinking}
@@ -290,7 +298,14 @@ export default function App({ animated = true }: AppProps) {
         )}
 
         {game.winner && !showRoleModal && (
-          <ResetButton onReset={handleNewGame} disabled={!isParentReady} />
+          <>
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+              <div className="text-2xl max-[480px]:text-lg font-bold text-white [text-shadow:0_2px_4px_rgba(0,0,0,0.5)] mb-16">
+                {getGameOverMessage()}
+              </div>
+            </div>
+            <ResetButton onReset={handleNewGame} disabled={!isParentReady} />
+          </>
         )}
       </div>
     </div>

@@ -12,7 +12,6 @@ import { Thread } from '@/components/assistant-ui/thread';
 import { ToolSourceBadge } from '@/components/assistant-ui/tool-source-badge';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { MCPContext, type MCPContextValue } from '@/contexts/MCPContext';
@@ -353,6 +352,36 @@ function App() {
                   )}
                 </TooltipProvider>
 
+                {!getStoredApiKey() && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => apiKeyModal.setShowApiKeyDialog(true)}
+                          className="shrink-0 rounded-full hover:bg-blue-500/10"
+                        >
+                          <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-500" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <div className="space-y-1">
+                          <p className="text-xs font-semibold text-blue-700 dark:text-blue-400">
+                            Using Free Quota
+                          </p>
+                          <p className="text-xs">
+                            You have $1.00 of free usage.
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            Click to add API key for unlimited access.
+                          </p>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -373,32 +402,6 @@ function App() {
               </div>
             </div>
           </header>
-
-          {!getStoredApiKey() && (
-            <div className="flex justify-center border-b bg-background px-4 py-3">
-              <Card className="w-full max-w-xl border-yellow-500/50 bg-yellow-500/10">
-                <CardContent className="flex flex-col gap-3 p-4 text-left sm:flex-row sm:items-center">
-                  <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-500" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-yellow-700 dark:text-yellow-400">
-                      API Key Required
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      Please enter your Anthropic API key to start chatting
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => apiKeyModal.setShowApiKeyDialog(true)}
-                    className="w-full sm:w-auto"
-                  >
-                    Add Key
-                  </Button>
-                </CardContent>
-              </Card>
-            </div>
-          )}
 
           <div className="flex-1 overflow-hidden">
             <div className="flex h-full w-full flex-col">

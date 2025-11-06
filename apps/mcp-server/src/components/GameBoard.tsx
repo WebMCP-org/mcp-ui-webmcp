@@ -63,7 +63,7 @@ export function GameBoard({
           @keyframes cellAppear {
             from {
               opacity: 0;
-              transform: scale(0.8);
+              transform: scale(0);
             }
             to {
               opacity: 1;
@@ -72,26 +72,26 @@ export function GameBoard({
           }
 
           @keyframes winningPulse {
-            0%, 100% {
-              background-color: rgba(34, 197, 94, 0.3);
+            from {
+              transform: scale(1);
             }
-            50% {
-              background-color: rgba(34, 197, 94, 0.6);
+            to {
+              transform: scale(1.05);
             }
           }
 
           .cell-appear {
-            animation: cellAppear 0.3s ease-out;
+            animation: cellAppear 0.3s ease;
           }
 
           .winning-pulse {
-            animation: winningPulse 1.5s ease-in-out infinite;
+            animation: winningPulse 0.5s ease infinite alternate;
           }
         `}</style>
       )}
 
       <div
-        className="grid grid-cols-3 gap-0.5 bg-gray-300 dark:bg-gray-700 p-0.5 rounded-md max-w-[min(90vw,400px)] mx-auto"
+        className="inline-grid grid-cols-3 gap-2.5 bg-[#f0f0f0] dark:bg-[#2a2a2a] p-5 rounded-2xl shadow-md dark:shadow-[0_4px_6px_rgba(0,0,0,0.3)] max-[768px]:gap-2 max-[768px]:p-4 max-[480px]:gap-1.5 max-[480px]:p-3"
         role="grid"
         aria-label="Tic-Tac-Toe board"
       >
@@ -105,15 +105,21 @@ export function GameBoard({
               onClick={() => !disabled && isEmpty && onCellClick(index, currentPlayer)}
               disabled={disabled || !isEmpty}
               className={cn(
-                'aspect-square flex items-center justify-center text-4xl font-bold',
-                'bg-white dark:bg-gray-800',
-                'transition-colors duration-200',
+                'w-[140px] h-[140px] text-[3.5rem] font-bold',
+                'max-[768px]:w-[90px] max-[768px]:h-[90px] max-[768px]:text-[2.25rem]',
+                'max-[480px]:w-[75px] max-[480px]:h-[75px] max-[480px]:text-[2rem]',
+                'bg-white dark:bg-[#1a1a1a]',
+                'border-[3px] border-[#ddd] dark:border-[#444]',
+                'rounded-lg',
+                'transition-all duration-200',
+                'flex items-center justify-center',
                 'disabled:cursor-not-allowed',
-                !disabled && isEmpty && 'hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer',
-                isWinning && 'winning-pulse',
+                !disabled && isEmpty && 'hover:bg-[#f8f8f8] dark:hover:bg-[#252525] hover:border-[#999] dark:hover:border-[#666] hover:scale-105 cursor-pointer',
+                cell && !isEmpty && 'cursor-default',
+                isWinning && 'bg-[#4CAF50]! border-[#45a049]! text-white! winning-pulse',
                 cell && animated && 'cell-appear',
-                cell === 'X' && 'text-blue-600 dark:text-blue-400',
-                cell === 'O' && 'text-red-600 dark:text-red-400'
+                cell === 'X' && !isWinning && 'text-[#2196F3]',
+                cell === 'O' && !isWinning && 'text-[#f44336]'
               )}
               role="gridcell"
               aria-label={cell ? `Cell ${index}, ${cell}` : `Cell ${index}, empty`}

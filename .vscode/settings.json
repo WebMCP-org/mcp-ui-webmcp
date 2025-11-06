@@ -29,14 +29,6 @@
     "./tests/e2e"
   ],
 
-  // Tailwind CSS settings
-  "tailwindCSS.experimental.classRegex": [
-    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
-  ],
-  "tailwindCSS.includeLanguages": {
-    "typescript": "javascript",
-    "typescriptreact": "javascript"
-  },
 
   // File associations
   "files.associations": {

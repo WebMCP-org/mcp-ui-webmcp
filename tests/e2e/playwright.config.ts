@@ -38,7 +38,7 @@ export default defineConfig({
   /* Run both dev servers before starting the tests */
   webServer: [
     {
-      command: 'cd ../apps/chat-ui && pnpm dev',
+      command: 'cd ../../apps/chat-ui && pnpm dev',
       url: 'http://localhost:5173',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
@@ -46,7 +46,7 @@ export default defineConfig({
       stderr: 'pipe',
     },
     {
-      command: 'cd ../apps/mcp-server && pnpm dev',
+      command: 'cd ../../apps/mcp-server && pnpm dev',
       url: 'http://localhost:8888',
       reuseExistingServer: !process.env.CI,
       timeout: 120 * 1000,
