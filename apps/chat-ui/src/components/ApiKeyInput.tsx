@@ -53,7 +53,6 @@ export function ApiKeyInput({
     }
   }, [open, form]);
 
-  // Auto-close modal when connection succeeds
   useEffect(() => {
     if (connectionState === 'ready' && open) {
       onClose();

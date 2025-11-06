@@ -33,13 +33,12 @@ function App() {
   const apiKeyModal = useAPIKeyModal(mcpConnection.mcpState);
   const quotaExhausted = useQuotaExhausted();
 
-  // Auto-connect to server on mount if URL is stored
   useEffect(() => {
     const storedUrl = getStoredServerUrl();
     if (storedUrl && mcpConnection.mcpState === 'disconnected') {
       mcpConnection.connectToServer(storedUrl);
     }
-  }, []); // Empty dependency array - only run on mount
+  }, []);
 
   const callTool = useCallback(
     async (request: CallToolRequest['params'], sourceId?: string): Promise<CallToolResult> => {
