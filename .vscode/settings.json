@@ -24,19 +24,11 @@
     "typescriptreact"
   ],
   "eslint.workingDirectories": [
-    "./chat-ui",
-    "./remote-mcp-with-ui-starter",
-    "./e2e-tests"
+    "./apps/chat-ui",
+    "./apps/mcp-server",
+    "./tests/e2e"
   ],
 
-  // Tailwind CSS settings
-  "tailwindCSS.experimental.classRegex": [
-    ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
-  ],
-  "tailwindCSS.includeLanguages": {
-    "typescript": "javascript",
-    "typescriptreact": "javascript"
-  },
 
   // File associations
   "files.associations": {

@@ -10,13 +10,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Initial release** of MCP UI + WebMCP Demo Monorepo
-- Modern React chat interface (`chat-ui`) with MCP and WebMCP integration
+- Modern React chat interface (`apps/chat-ui`) with MCP and WebMCP integration
   - AI assistant UI with side panel for embedded apps
   - MCP client with HTTP/SSE transport
   - WebMCP integration for bidirectional tool registration
   - Mobile-responsive design with swipe gestures
   - Dark mode support
-- MCP server (`remote-mcp-with-ui-starter`) running on Cloudflare Workers
+- MCP server (`apps/mcp-server`) running on Cloudflare Workers
   - MCP protocol implementation with UI resource support
   - TicTacToe game example with WebMCP integration
   - Durable Objects for persistent game statistics

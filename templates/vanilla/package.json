@@ -1,0 +1,36 @@
+{
+  "name": "@mcp-b/template-vanilla",
+  "version": "1.0.0",
+  "description": "Minimal WebMCP template using vanilla HTML/JS (no build step!)",
+  "private": true,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WebMCP-org/mcp-ui-webmcp.git",
+    "directory": "templates/vanilla"
+  },
+  "author": "WebMCP-org",
+  "homepage": "https://github.com/WebMCP-org/mcp-ui-webmcp/tree/main/templates/vanilla#readme",
+  "license": "MIT",
+  "scripts": {
+    "cf-typegen": "wrangler types",
+    "deploy": "bash deploy.sh",
+    "dev": "wrangler dev --port 8889",
+    "lint": "eslint .",
+    "typecheck": "tsc -b --noEmit"
+  },
+  "dependencies": {
+    "@mcp-ui/server": "^5.2.0",
+    "@modelcontextprotocol/sdk": "^1.20.2",
+    "agents": "^0.2.20",
+    "hono": "^4.10.4"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.33.0",
+    "eslint": "^9.33.0",
+    "globals": "^16.3.0",
+    "typescript": "~5.8.3",
+    "typescript-eslint": "^8.39.1",
+    "wrangler": "^4.45.3"
+  }
+}

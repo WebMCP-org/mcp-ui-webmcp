@@ -5,16 +5,28 @@
       "path": ".."
     },
     {
-      "name": "💬 chat-ui",
-      "path": "../chat-ui"
+      "name": "💬 Chat UI",
+      "path": "../apps/chat-ui"
     },
     {
-      "name": "🔧 remote-mcp-with-ui-starter",
-      "path": "../remote-mcp-with-ui-starter"
+      "name": "🎮 MCP Server",
+      "path": "../apps/mcp-server"
     },
     {
-      "name": "🧪 e2e-tests",
-      "path": "../e2e-tests"
+      "name": "📦 Create WebMCP App",
+      "path": "../apps/create-webmcp-app"
+    },
+    {
+      "name": "🧪 E2E Tests",
+      "path": "../tests/e2e"
+    },
+    {
+      "name": "📋 React Template",
+      "path": "../templates/react"
+    },
+    {
+      "name": "📄 Vanilla Template",
+      "path": "../templates/vanilla"
     }
   ],
   "settings": {
@@ -25,14 +37,5 @@
       "**/.turbo": true,
       "**/.wrangler": true
     }
-  },
-  "extensions": {
-    "recommendations": [
-      "dbaeumer.vscode-eslint",
-      "esbenp.prettier-vscode",
-      "bradlc.vscode-tailwindcss",
-      "ms-playwright.playwright",
-      "vitest.explorer"
-    ]
   }
 }

@@ -1,6 +1,6 @@
 <div align="center">
 
-![MCP UI + WebMCP](./chat-ui/public/mcp-b-logo.png)
+![MCP UI + WebMCP](./apps/chat-ui/public/mcp-b-logo.png)
 
 # MCP UI + WebMCP
 
@@ -192,8 +192,8 @@ sequenceDiagram
 
 #### Chat UI (Parent Context)
 - **HTTP MCP Client** (`@modelcontextprotocol/sdk`): Connects to remote MCP server via HTTP/SSE for initial tools
-- **WebMCP Integration** ([useWebMCPIntegration.ts](chat-ui/src/hooks/useWebMCPIntegration.ts)): Manages WebMCP clients and tools from iframes
-- **Iframe Lifecycle** ([useIframeLifecycle.ts](chat-ui/src/hooks/useIframeLifecycle.ts)): Sets up MCP-B transport for each iframe
+- **WebMCP Integration** ([useWebMCPIntegration.ts](apps/chat-ui/src/hooks/useWebMCPIntegration.ts)): Manages WebMCP clients and tools from iframes
+- **Iframe Lifecycle** ([useIframeLifecycle.ts](apps/chat-ui/src/hooks/useIframeLifecycle.ts)): Sets up MCP-B transport for each iframe
 - **Tool Routing**: Routes calls to HTTP MCP or WebMCP clients based on source ID
 - **IframeParentTransport** (`@mcp-b/transports`): Bidirectional communication channel to embedded apps
 
@@ -201,7 +201,7 @@ sequenceDiagram
 - **MCP-B Polyfill** (`@mcp-b/global`): Implements `navigator.modelContext` API
 - **useWebMCP Hook** (`@mcp-b/react-webmcp`): Registers tools with automatic lifecycle management
 - **IframeChildTransport** (`@mcp-b/transports`): Receives tool calls from parent via postMessage
-- **Parent Communication** ([useParentCommunication.ts](remote-mcp-with-ui-starter/src/hooks/useParentCommunication.ts)): Readiness protocol and notifications
+- **Parent Communication** ([useParentCommunication.ts](apps/mcp-server/src/hooks/useParentCommunication.ts)): Readiness protocol and notifications
 
 #### MCP Server
 - **Tool Registry**: Exposes tools like `showTicTacToeGame` that return UI resources
@@ -256,43 +256,70 @@ The AI can immediately invoke `tictactoe_move` as if it were a native MCP tool.
 
 ## Packages
 
-### chat-ui
+### Apps
+
+#### chat-ui
 React chat interface with MCP client and WebMCP integration. Connects to MCP servers via HTTP, displays UI resources, handles dynamic tool registration.
 
 **Tech:** React 19, Vite, Tailwind CSS 4, Vercel AI SDK
 
-[→ Documentation](./chat-ui/README.md)
+[→ Documentation](./apps/chat-ui/README.md)
 
-### remote-mcp-with-ui-starter
+#### mcp-server
 MCP server implementation on Cloudflare Workers. Serves static mini-apps, implements MCP protocol with UI extensions.
 
 **Tech:** Cloudflare Workers, Hono, @modelcontextprotocol/sdk
 
-[→ Documentation](./remote-mcp-with-ui-starter/README.md)
+[→ Documentation](./apps/mcp-server/README.md)
 
-### e2e-tests
+#### create-webmcp-app
+Interactive CLI for scaffolding new WebMCP applications with template selection.
+
+**Tech:** Node.js, TypeScript
+
+[→ Documentation](./apps/create-webmcp-app/README.md)
+
+### Templates
+
+#### react
+React + TypeScript + Vite template for building production-ready MCP servers with embedded UIs.
+
+[→ Documentation](./templates/react/README.md)
+
+#### vanilla
+Pure HTML/CSS/JavaScript template with no build step required - perfect for learning.
+
+[→ Documentation](./templates/vanilla/README.md)
+
+### Tests
+
+#### e2e
 Playwright test suite verifying integration between chat UI and MCP server.
 
-[→ Documentation](./e2e-tests/README.md)
+[→ Documentation](./tests/e2e/README.md)
 
 ## Commands
 
 ```bash
 # Development
-pnpm dev                    # Run all apps
-pnpm --filter chat-ui dev   # Chat UI only
-pnpm --filter remote-mcp-with-ui-starter dev  # MCP server only
+pnpm dev                        # Run all apps (chat-ui + mcp-server)
+pnpm --filter chat-ui dev       # Chat UI only
+pnpm --filter mcp-server dev    # MCP server only
+
+# Templates (run manually from template directories)
+cd templates/react && pnpm dev
+cd templates/vanilla && pnpm dev
 
 # Build & Quality
-pnpm build                  # Build all packages
-pnpm typecheck              # Type-check
-pnpm lint                   # Lint all packages
-pnpm check                  # Run lint + typecheck
+pnpm build                      # Build all packages
+pnpm typecheck                  # Type-check
+pnpm lint                       # Lint all packages
+pnpm check                      # Run lint + typecheck
 
 # Testing
-pnpm test                   # Run E2E tests
-pnpm test:ui                # Interactive Playwright UI
-pnpm test:debug             # Debug mode
+pnpm test                       # Run E2E tests
+pnpm test:ui                    # Interactive Playwright UI
+pnpm test:debug                 # Debug mode
 ```
 
 ## Deployment
@@ -300,7 +327,7 @@ pnpm test:debug             # Debug mode
 ### MCP Server → Cloudflare Workers
 
 ```bash
-cd remote-mcp-with-ui-starter
+cd apps/mcp-server
 pnpm build
 pnpm deploy  # or: wrangler deploy
 ```
@@ -310,7 +337,7 @@ Configure `.prod.vars` with your worker URL.
 ### Chat UI → Cloudflare Pages
 
 ```bash
-cd chat-ui
+cd apps/chat-ui
 pnpm build
 wrangler pages deploy dist
 ```
@@ -326,9 +353,9 @@ See [ENVIRONMENT_SETUP.md](./docs/ENVIRONMENT_SETUP.md) for detailed configurati
 - [CONTRIBUTING.md](./CONTRIBUTING.md) - Development standards
 
 ### Architecture
-- [ARCHITECTURE.md](./remote-mcp-with-ui-starter/ARCHITECTURE.md) - Design decisions
-- [EMBEDDING_PROTOCOL.md](./remote-mcp-with-ui-starter/EMBEDDING_PROTOCOL.md) - WebMCP protocol
-- [How to Customize](./remote-mcp-with-ui-starter/README.md#-how-to-customize) - Create mini-apps
+- [ARCHITECTURE.md](./apps/mcp-server/ARCHITECTURE.md) - Design decisions
+- [EMBEDDING_PROTOCOL.md](./apps/mcp-server/EMBEDDING_PROTOCOL.md) - WebMCP protocol
+- [How to Customize](./apps/mcp-server/README.md#-how-to-customize) - Create mini-apps
 
 ### Configuration
 - [ENVIRONMENT_SETUP.md](./docs/ENVIRONMENT_SETUP.md) - Environment variables
@@ -398,7 +425,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for development standards.
 
 This project uses multiple licenses:
 
-- **Chat UI** ([chat-ui/](chat-ui/)): AGPL-3.0 - See [chat-ui/LICENSE](chat-ui/LICENSE)
+- **Chat UI** ([apps/chat-ui/](apps/chat-ui/)): AGPL-3.0 - See [apps/chat-ui/LICENSE](apps/chat-ui/LICENSE)
 - **All other packages**: Apache-2.0 - See [LICENSE](LICENSE)
 
 Copyright 2025 Alex Nahas (founder of MCP-B)

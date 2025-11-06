@@ -28,7 +28,7 @@ This document identifies opportunities to break down large components and extrac
 **Purpose**: Manage MCP server connection state and operations
 
 ```typescript
-// chat-ui/src/hooks/useMCPConnection.ts
+// apps/chat-ui/src/hooks/useMCPConnection.ts
 export function useMCPConnection() {
   const [mcpState, setMCPState] = useState<MCPState>('disconnected');
   const [mcpTools, setMcpTools] = useState<MCPTool[]>([]);
@@ -82,7 +82,7 @@ export function useMCPConnection() {
 **Purpose**: Manage WebMCP iframe clients and dynamic tool registration
 
 ```typescript
-// chat-ui/src/hooks/useWebMCPIntegration.ts
+// apps/chat-ui/src/hooks/useWebMCPIntegration.ts
 export function useWebMCPIntegration() {
   const [webMcpTools, setWebMcpTools] = useState<MCPTool[]>([]);
   const webMcpClients = useRef<Map<string, Client>>(new Map());
@@ -138,7 +138,7 @@ export function useWebMCPIntegration() {
 **Purpose**: Handle tool registration and bridge creation
 
 ```typescript
-// chat-ui/src/components/MCPToolRegistry.tsx
+// apps/chat-ui/src/components/MCPToolRegistry.tsx
 interface MCPToolRegistryProps {
   mcpTools: MCPTool[];
   webMcpTools: MCPTool[];
@@ -196,7 +196,7 @@ export const MCPToolRegistry: FC<MCPToolRegistryProps> = ({
 **Purpose**: Manage API key modal visibility logic
 
 ```typescript
-// chat-ui/src/hooks/useAPIKeyModal.ts
+// apps/chat-ui/src/hooks/useAPIKeyModal.ts
 export function useAPIKeyModal(mcpState: MCPState) {
   const [showApiKeyDialog, setShowApiKeyDialog] = useState(
     !getStoredApiKey() || mcpState !== 'ready'
@@ -283,7 +283,7 @@ function App() {
 **Purpose**: Manage mobile view state, swipe gestures, and scroll preservation
 
 ```typescript
-// chat-ui/src/hooks/useMobileViewToggle.ts
+// apps/chat-ui/src/hooks/useMobileViewToggle.ts
 export function useMobileViewToggle(hasToolSurface: boolean) {
   const [mobileView, setMobileView] = useState<'chat' | 'ui'>('chat');
   const [savedScrollPosition, setSavedScrollPosition] = useState(0);
@@ -354,7 +354,7 @@ export function useMobileViewToggle(hasToolSurface: boolean) {
 **Purpose**: Handle iframe WebMCP setup, tool registration, and cleanup
 
 ```typescript
-// chat-ui/src/hooks/useIframeLifecycle.ts
+// apps/chat-ui/src/hooks/useIframeLifecycle.ts
 export function useIframeLifecycle() {
   const { registerWebMcpClient, registerWebMcpTools, unregisterWebMcpClient } = useMCP();
   const { setResourceCleanup } = useUIResources();
@@ -431,7 +431,7 @@ export function useIframeLifecycle() {
 **Purpose**: Handle iframe resize messages and scaling
 
 ```typescript
-// chat-ui/src/hooks/useIframeResize.ts
+// apps/chat-ui/src/hooks/useIframeResize.ts
 export function useIframeResize(iframeRef: React.RefObject<HTMLIFrameElement>) {
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -491,7 +491,7 @@ export function useIframeResize(iframeRef: React.RefObject<HTMLIFrameElement>) {
 **Purpose**: Mobile view toggle bar UI component
 
 ```typescript
-// chat-ui/src/components/assistant-ui/mobile-view-toggle.tsx
+// apps/chat-ui/src/components/assistant-ui/mobile-view-toggle.tsx
 interface MobileViewToggleProps {
   mobileView: 'chat' | 'ui';
   setMobileView: (view: 'chat' | 'ui') => void;
@@ -562,7 +562,7 @@ export const MobileViewToggle: FC<MobileViewToggleProps> = ({
 **Purpose**: Handle conversation reset and cleanup
 
 ```typescript
-// chat-ui/src/hooks/useThreadReset.ts
+// apps/chat-ui/src/hooks/useThreadReset.ts
 export function useThreadReset() {
   const assistantRuntime = useAssistantRuntime();
   const { resources, removeResource } = useUIResources();
@@ -604,7 +604,7 @@ export function useThreadReset() {
 **Purpose**: Info/debug overlay for resources
 
 ```typescript
-// chat-ui/src/components/assistant-ui/resource-info-overlay.tsx
+// apps/chat-ui/src/components/assistant-ui/resource-info-overlay.tsx
 interface ResourceInfoOverlayProps {
   resource: UIResource;
   lastUIAction: UIActionResult | null;
@@ -729,7 +729,7 @@ const Composer: FC = () => {
 **Purpose**: Centralize tool calling logic
 
 ```typescript
-// chat-ui/src/hooks/useToolExecution.ts
+// apps/chat-ui/src/hooks/useToolExecution.ts
 export function useToolExecution() {
   const { callTool } = useMCP();
   const [isExecuting, setIsExecuting] = useState(false);

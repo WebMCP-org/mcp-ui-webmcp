@@ -31,7 +31,7 @@ If applicable, add screenshots to help explain your problem.
 
 ## Environment
 
-- **Package**: [e.g., chat-ui, remote-mcp-with-ui-starter]
+- **Package**: [e.g., apps/chat-ui, apps/mcp-server, templates/react, templates/vanilla]
 - **Node Version**: [e.g., 24.3.0]
 - **pnpm Version**: [e.g., 10.14.0]
 - **Browser** (if applicable): [e.g., Chrome 120, Safari 17]

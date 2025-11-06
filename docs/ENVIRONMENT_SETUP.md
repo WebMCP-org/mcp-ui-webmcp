@@ -4,11 +4,11 @@ This document explains the environment variable configuration for the MCP UI + W
 
 ## Overview
 
-Both the **chat-ui** and **remote-mcp-with-ui-starter** apps use environment-specific configuration files that are committed to git (since they contain only public URLs, no secrets).
+Both the **chat-ui** and **mcp-server** apps use environment-specific configuration files that are committed to git (since they contain only public URLs, no secrets).
 
 ## Apps Configuration
 
-### 1. Remote MCP Server (`remote-mcp-with-ui-starter`)
+### 1. Remote MCP Server (`apps/mcp-server`)
 
 Uses Wrangler's `.vars` files for Cloudflare Workers deployment:
 
@@ -46,7 +46,7 @@ pnpm deploy
 # → Deploys to Cloudflare Workers
 ```
 
-### 2. Chat UI (`chat-ui`)
+### 2. Chat UI (`apps/chat-ui`)
 
 Uses Vite's environment files for React app:
 
@@ -104,14 +104,14 @@ pnpm build
 
 1. **Terminal 1 - Start MCP Server:**
    ```bash
-   cd remote-mcp-with-ui-starter
+   cd apps/mcp-server
    pnpm dev
    # Server running at http://localhost:8888
    ```
 
 2. **Terminal 2 - Start Chat UI:**
    ```bash
-   cd chat-ui
+   cd apps/chat-ui
    pnpm dev
    # UI running at http://localhost:5173
    ```
@@ -145,7 +145,7 @@ VITE_ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
 ### Remote MCP Server
 
 ```bash
-cd remote-mcp-with-ui-starter
+cd apps/mcp-server
 pnpm deploy
 ```
 
@@ -158,7 +158,7 @@ This will:
 ### Chat UI
 
 ```bash
-cd chat-ui
+cd apps/chat-ui
 pnpm build
 ```
 
@@ -219,7 +219,7 @@ Both apps ignore `.local` files for personal overrides:
 
 2. Verify `VITE_MCP_SERVER_URL` in `.env.development`:
    ```bash
-   cat chat-ui/.env.development
+   cat apps/chat-ui/.env.development
    ```
 
 3. Check browser console for CORS errors
@@ -238,29 +238,29 @@ Both apps ignore `.local` files for personal overrides:
 When forking this template:
 
 1. **Update Remote MCP Server:**
-   - Edit `remote-mcp-with-ui-starter/.prod.vars`
+   - Edit `apps/mcp-server/.prod.vars`
    - Replace with your Cloudflare Workers URL
 
 2. **Update Chat UI:**
-   - Edit `chat-ui/.env.production`
+   - Edit `apps/chat-ui/.env.production`
    - Replace with your MCP server URL + `/mcp` path
 
 3. **Test locally first:**
    ```bash
    # Terminal 1
-   cd remote-mcp-with-ui-starter && pnpm dev
+   cd apps/mcp-server && pnpm dev
 
    # Terminal 2
-   cd chat-ui && pnpm dev
+   cd apps/chat-ui && pnpm dev
    ```
 
 4. **Deploy:**
    ```bash
    # Deploy MCP server
-   cd remote-mcp-with-ui-starter && pnpm deploy
+   cd apps/mcp-server && pnpm deploy
 
    # Build and deploy chat UI
-   cd chat-ui && pnpm build
+   cd apps/chat-ui && pnpm build
    # Then deploy dist/ to your hosting service
    ```
 
@@ -268,7 +268,7 @@ When forking this template:
 
 | App | Dev File | Prod File | Dev URL | Prod URL |
 |-----|----------|-----------|---------|----------|
-| remote-mcp-with-ui-starter | `.dev.vars` | `.prod.vars` | http://localhost:8888 | https://...workers.dev |
+| mcp-server | `.dev.vars` | `.prod.vars` | http://localhost:8888 | https://...workers.dev |
 | chat-ui | `.env.development` | `.env.production` | http://localhost:8888/mcp | https://...workers.dev/mcp |
 
 Both apps are configured to work together out of the box in development, and can be easily customized for production deployment.

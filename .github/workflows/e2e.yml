@@ -45,17 +45,17 @@ jobs:
         run: pnpm build
 
       - name: Install Playwright Browsers
-        run: pnpm --filter @mcp-b/e2e-tests exec playwright install --with-deps chromium
+        run: pnpm --filter @mcp-b/e2e exec playwright install --with-deps chromium
 
       - name: Run E2E tests
-        run: pnpm --filter @mcp-b/e2e-tests test
+        run: pnpm --filter @mcp-b/e2e test
 
       - name: Upload Playwright Report
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright-report
-          path: e2e-tests/playwright-report/
+          path: tests/e2e/playwright-report/
           retention-days: 30
 
       - name: Upload Test Results
@@ -63,5 +63,5 @@ jobs:
         if: always()
         with:
           name: test-results
-          path: e2e-tests/test-results/
+          path: tests/e2e/test-results/
           retention-days: 7
