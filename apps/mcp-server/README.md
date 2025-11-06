@@ -34,7 +34,7 @@ When the AI calls `showTicTacToeGame`:
 
 ```bash
 # Clone and navigate to this directory
-cd remote-mcp-with-ui-starter
+cd apps/mcp-server
 
 # Install dependencies
 pnpm install
@@ -144,7 +144,7 @@ The TicTacToe game demonstrates:
 ## 🛠️ Project Structure
 
 ```
-remote-mcp-with-ui-starter/
+apps/mcp-server/
 ├── src/                              # React app source
 │   ├── TicTacToe.tsx                 # Pure game component
 │   ├── TicTacToeWithWebMCP.tsx       # WebMCP integration

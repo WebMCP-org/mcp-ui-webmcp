@@ -30,7 +30,7 @@ It demonstrates:
 
 ```bash
 # Clone and navigate to this directory
-cd webmcp-template-vanilla
+cd templates/vanilla
 
 # Install dependencies (worker only)
 pnpm install
@@ -81,7 +81,7 @@ The vanilla app registers three WebMCP tools using `window.navigator.modelContex
 ## 🏗️ Project Structure
 
 ```
-webmcp-template-vanilla/
+templates/vanilla/
 ├── public/
 │   └── index.html            # Everything in one file!
 │
@@ -196,9 +196,9 @@ Edit `worker/mcpServer.ts` to add server-side tools.
 
 ## 📚 Documentation
 
-- **Main README** ([README.md](../README.md)) - Architecture overview
-- **React Template** ([webmcp-template/README.md](../webmcp-template/README.md)) - For apps needing a build step
-- **CONTRIBUTING** ([../CONTRIBUTING.md](../CONTRIBUTING.md)) - Development standards
+- **Main README** ([README.md](../../README.md)) - Architecture overview
+- **React Template** ([../react/README.md](../react/README.md)) - For apps needing a build step
+- **CONTRIBUTING** ([../../CONTRIBUTING.md](../../CONTRIBUTING.md)) - Development standards
 
 ## 🎮 Build a Game
 
@@ -207,7 +207,7 @@ Want to build a game? Use the `BuildGame` prompt!
 The AI will ask you what game you want to build and scaffold the complete implementation in `public/index.html`.
 
 Example games you can build:
-- **Tic-Tac-Toe** (see [remote-mcp-with-ui-starter](../remote-mcp-with-ui-starter) for React version)
+- **Tic-Tac-Toe** (see [apps/mcp-server](../../apps/mcp-server) for React version)
 - **Connect Four**
 - **Wordle Clone**
 - **Hangman**

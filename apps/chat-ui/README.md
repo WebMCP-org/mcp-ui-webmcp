@@ -17,7 +17,7 @@ A modern chat interface built with React, TypeScript, and Vite that integrates w
 
 - Node.js 24.3.0+ (matches repo `.nvmrc`)
 - pnpm (or npm/yarn)
-- An MCP server running (e.g., `remote-mcp-with-ui-starter`)
+- An MCP server running (e.g., `apps/mcp-server`)
 
 ### Installation
 
@@ -74,7 +74,7 @@ The development environment (`.env.development`) is pre-configured to connect to
 VITE_MCP_SERVER_URL=http://localhost:8888/mcp
 ```
 
-Make sure to start the `remote-mcp-with-ui-starter` server before running the chat UI in development.
+Make sure to start the MCP server (`apps/mcp-server`) before running the chat UI in development.
 
 ### Configuration for Production
 
@@ -292,7 +292,7 @@ In your Sentry dashboard, navigate to:
 ## Project Structure
 
 ```
-chat-ui/
+apps/chat-ui/
 ├── src/
 │   ├── components/       # React components
 │   │   ├── ui/          # Shadcn UI components
@@ -320,7 +320,7 @@ The chat UI connects to an MCP server and:
 
 1. Start the MCP server:
    ```bash
-   cd ../remote-mcp-with-ui-starter
+   cd ../mcp-server
    pnpm dev
    ```
 

@@ -397,8 +397,8 @@ Use the **Game Builder Prompt** to scaffold common games:
 ### Want to Learn More?
 
 - **[TESTING.md](./TESTING.md)** - Comprehensive testing guide
-- **[../CONTRIBUTING.md](../CONTRIBUTING.md)** - Development standards
-- **[../remote-mcp-with-ui-starter/README.md](../remote-mcp-with-ui-starter/README.md)** - Full-featured example (Tic-Tac-Toe)
+- **[../../CONTRIBUTING.md](../../CONTRIBUTING.md)** - Development standards
+- **[../../apps/mcp-server/README.md](../../apps/mcp-server/README.md)** - Full-featured example (Tic-Tac-Toe)
 
 ### Deployment
 

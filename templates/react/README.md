@@ -25,7 +25,7 @@ It demonstrates:
 
 ```bash
 # Clone and navigate to this directory
-cd webmcp-template
+cd templates/react
 
 # Install dependencies
 pnpm install
@@ -84,7 +84,7 @@ The template app registers three WebMCP tools:
 ## 🏗️ Project Structure
 
 ```
-webmcp-template/
+templates/react/
 ├── src/                      # React app source
 │   ├── App.tsx               # Main app component
 │   ├── main.tsx              # App entry point
@@ -124,7 +124,7 @@ Ready to build your own game or tool? See **[QUICKSTART.md](./QUICKSTART.md)** f
 
 - **[QUICKSTART.md](./QUICKSTART.md)** - Step-by-step guide to building your app
 - **[TESTING.md](./TESTING.md)** - How to test your embedded app
-- **[../CONTRIBUTING.md](../CONTRIBUTING.md)** - Development standards
+- **[../../CONTRIBUTING.md](../../CONTRIBUTING.md)** - Development standards
 
 ## 🛠️ How To Customize
 

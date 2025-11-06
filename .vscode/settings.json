@@ -24,9 +24,9 @@
     "typescriptreact"
   ],
   "eslint.workingDirectories": [
-    "./chat-ui",
-    "./remote-mcp-with-ui-starter",
-    "./e2e-tests"
+    "./apps/chat-ui",
+    "./apps/mcp-server",
+    "./tests/e2e"
   ],
 
   // Tailwind CSS settings

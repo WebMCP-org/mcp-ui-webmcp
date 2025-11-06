@@ -85,7 +85,7 @@ Let's start - what game would you like to build?
 
 ### Simple Games (Good Starting Points)
 
-1. **Tic-Tac-Toe** (Already in remote-mcp-with-ui-starter!)
+1. **Tic-Tac-Toe** (Already in apps/mcp-server!)
    - 3x3 grid, simple win conditions
    - Good for learning the basics
 

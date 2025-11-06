@@ -60,7 +60,7 @@ pnpm test:ui
 ## Test Structure
 
 ```
-e2e-tests/
+tests/e2e/
 ├── tests/
 │   ├── chat-ui.spec.ts          # Chat UI app tests
 │   ├── remote-mcp-starter.spec.ts  # Remote MCP tests
