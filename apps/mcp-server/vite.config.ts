@@ -17,7 +17,7 @@ import { defineConfig } from 'vite';
  *
  * The Cloudflare plugin handles both dev and production builds.
  */
-export default defineConfig(({ command }) => ({
+export default defineConfig(() => ({
   plugins: [
     react({
       babel: {
@@ -25,8 +25,7 @@ export default defineConfig(({ command }) => ({
       },
     }),
     tailwindcss(),
-    // Only use Cloudflare plugin in dev mode, not in preview
-    ...(command === 'serve' && !process.env.CI ? [cloudflare()] : []),
+    cloudflare()
   ],
   server: {
     port: 8888,

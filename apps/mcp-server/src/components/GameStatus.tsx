@@ -63,7 +63,7 @@ export function GameStatus({
 
   return (
     <div
-      className="absolute top-0 left-0 right-0 text-xs text-center p-1.5 text-black dark:text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.5)] z-10 pointer-events-none"
+      className="absolute top-0 left-0 right-0 text-sm text-center p-2 text-[#1a1a1a] dark:text-[#f5f5f5] font-medium z-10 pointer-events-none"
       role="status"
       aria-live="polite"
     >

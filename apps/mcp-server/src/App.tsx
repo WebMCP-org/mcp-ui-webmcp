@@ -272,7 +272,7 @@ export default function App({ animated = true }: AppProps) {
   };
 
   return (
-    <div className="flex flex-col gap-4 font-sans p-4">
+    <div className="flex flex-col gap-2 font-sans p-4">
       <GameHeader stats={stats} />
 
       <div className="relative flex items-center justify-center">

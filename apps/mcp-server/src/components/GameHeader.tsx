@@ -27,26 +27,46 @@ export interface GameHeaderProps {
  */
 export function GameHeader({ stats }: GameHeaderProps) {
   return (
-    <div className="text-center">
-      <h1 className="text-sm font-bold text-black dark:text-white mb-0.5">
+    <div className="text-center mb-2">
+      <h1 className="text-xl font-black text-black mb-2 tracking-tight">
         Beat The Clankers 🤖
       </h1>
 
       {stats && (
-        <div className="flex items-center justify-center gap-3 text-xs text-black dark:text-white mb-0.5">
-          <span className="font-semibold">👤 {stats.carbonUnitsWins} Humans</span>
-          <span className="text-black dark:text-gray-400">•</span>
-          <span className="font-semibold">🤖 {stats.clankersWins} Clankers</span>
-          <span className="text-black dark:text-gray-400">•</span>
-          <span className="font-semibold">🤝 {stats.draws} Draws</span>
+        <div className="flex items-center justify-center gap-4 text-sm text-black mb-1.5 font-semibold">
+          <span className="flex items-center gap-1.5">
+            <span className="text-base">👤</span>
+            <span>{stats.carbonUnitsWins}</span>
+            <span className="font-normal text-xs text-black">Humans</span>
+          </span>
+          <span className="text-black">•</span>
+          <span className="flex items-center gap-1.5">
+            <span className="text-base">🤖</span>
+            <span>{stats.clankersWins}</span>
+            <span className="font-normal text-xs text-black">Clankers</span>
+          </span>
+          <span className="text-black">•</span>
+          <span className="flex items-center gap-1.5">
+            <span className="text-base">🤝</span>
+            <span>{stats.draws}</span>
+            <span className="font-normal text-xs text-black">Draws</span>
+          </span>
         </div>
       )}
 
       {stats && (
-        <div className="flex items-center justify-center gap-2 text-[0.625rem] text-black dark:text-gray-400">
-          <span title="Total games played">📊 {stats.totalGames} total</span>
-          <span className="text-black dark:text-gray-400">•</span>
-          <span title="Active games">🎮 {stats.liveGames} active</span>
+        <div className="flex items-center justify-center gap-3 text-xs text-black">
+          <span title="Total games played" className="flex items-center gap-1">
+            <span>📊</span>
+            <span className="font-medium">{stats.totalGames}</span>
+            <span>total</span>
+          </span>
+          <span className="text-black">•</span>
+          <span title="Active games" className="flex items-center gap-1">
+            <span>🎮</span>
+            <span className="font-medium">{stats.liveGames}</span>
+            <span>active</span>
+          </span>
         </div>
       )}
     </div>

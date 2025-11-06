@@ -178,7 +178,7 @@ function App() {
                           <ExternalLink className="h-4 w-4" />
                         </a>
                         <a
-                          href="https://docs.mcp-b.ai/mcpui-webmcp-integration"
+                          href="https://docs.mcp-b.ai/building-mcp-ui-apps"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex items-center gap-2 text-sm font-medium text-foreground transition-colors hover:text-primary"
@@ -241,7 +241,7 @@ function App() {
                     <ExternalLink className="h-3 w-3" />
                   </a>
                   <a
-                    href="https://docs.mcp-b.ai/mcpui-webmcp-integration"
+                    href="https://docs.mcp-b.ai/building-mcp-ui-apps"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
