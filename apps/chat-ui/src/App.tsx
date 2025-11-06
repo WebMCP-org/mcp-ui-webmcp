@@ -4,7 +4,7 @@ import type {
   CallToolRequest,
   CallToolResult,
 } from '@modelcontextprotocol/sdk/types.js';
-import { AlertCircle, ExternalLink, Loader2, Menu, Plug, PlugZap, Settings } from 'lucide-react';
+import { AlertCircle, ExternalLink, Github, Loader2, Menu, Plug, PlugZap, Settings } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { ApiKeyInput } from '@/components/ApiKeyInput';
 import { MCPToolRegistry } from '@/components/assistant-ui/mcp-tool-registry';
@@ -158,6 +158,16 @@ function App() {
                       </h3>
                       <nav className="flex flex-col gap-3">
                         <a
+                          href="https://github.com/WebMCP-org/mcp-ui-webmcp"
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 text-sm font-medium text-foreground transition-colors hover:text-primary"
+                          onClick={() => setShowMobileMenu(false)}
+                        >
+                          GitHub
+                          <Github className="h-4 w-4" />
+                        </a>
+                        <a
                           href="https://mcp-b.ai"
                           target="_blank"
                           rel="noopener noreferrer"
@@ -213,6 +223,14 @@ function App() {
                 </Sheet>
 
                 <div className="hidden items-center gap-2 border-r pr-3 md:flex">
+                  <a
+                    href="https://github.com/WebMCP-org/mcp-ui-webmcp"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                  >
+                    <Github className="h-3 w-3" />
+                  </a>
                   <a
                     href="https://mcp-b.ai"
                     target="_blank"
