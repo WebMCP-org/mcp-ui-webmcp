@@ -38,7 +38,8 @@ function App() {
     if (storedUrl && mcpConnection.mcpState === 'disconnected') {
       mcpConnection.connectToServer(storedUrl);
     }
-  }, [mcpConnection]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const callTool = useCallback(
     async (request: CallToolRequest['params'], sourceId?: string): Promise<CallToolResult> => {
