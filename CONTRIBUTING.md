@@ -269,7 +269,7 @@ describe('calculateWinner', () => {
 ```
 
 **Current test setup:**
-- E2E tests: Playwright (see [e2e-tests/README.md](./e2e-tests/README.md))
+- E2E tests: Playwright (see [tests/e2e/README.md](./tests/e2e/README.md))
 - Unit tests: Not yet configured (would use Vitest)
 
 ## Code Review Checklist
@@ -375,7 +375,7 @@ try {
 ### Primary Documentation
 - [README.md](./README.md) - Project overview and quick start
 - [AGENTS.md](./AGENTS.md) - Navigation hub for all documentation
-- [ARCHITECTURE.md](./remote-mcp-with-ui-starter/ARCHITECTURE.md) - Design decisions
+- [ARCHITECTURE.md](./apps/mcp-server/ARCHITECTURE.md) - Design decisions
 
 ### External Resources
 - [TypeScript Handbook](https://www.typescriptlang.org/docs/)
@@ -387,8 +387,8 @@ try {
 
 If you're unsure about a pattern or approach:
 1. Check existing code for similar patterns
-2. Review [ARCHITECTURE.md](./remote-mcp-with-ui-starter/ARCHITECTURE.md) for design decisions
-3. Look at [remote-mcp-with-ui-starter/src/TicTacToeWithWebMCP.tsx](./remote-mcp-with-ui-starter/src/TicTacToeWithWebMCP.tsx) for a complete example
+2. Review [ARCHITECTURE.md](./apps/mcp-server/ARCHITECTURE.md) for design decisions
+3. Look at [apps/mcp-server/src/TicTacToeWithWebMCP.tsx](./apps/mcp-server/src/TicTacToeWithWebMCP.tsx) for a complete example
 4. When in doubt, prioritize clarity and type safety
 
 ---

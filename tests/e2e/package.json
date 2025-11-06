@@ -1,0 +1,29 @@
+{
+  "name": "@mcp-b/e2e",
+  "version": "1.0.0",
+  "description": "End-to-end tests for MCP UI + WebMCP demo using Playwright",
+  "private": true,
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/WebMCP-org/mcp-ui-webmcp.git",
+    "directory": "tests/e2e"
+  },
+  "author": "Alex Nahas (founder of MCP-B)",
+  "license": "Apache-2.0",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:headed": "playwright test --headed",
+    "test:report": "playwright show-report",
+    "test:chat-ui": "playwright test --config=playwright-chat-ui.config.ts",
+    "test:remote-mcp": "playwright test --config=playwright-remote-mcp.config.ts",
+    "test:integration": "playwright test --config=playwright-integration.config.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.2",
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

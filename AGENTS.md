@@ -8,15 +8,18 @@
 - **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Development standards and best practices for AI agents
 
 ### Package Documentation
-- **[chat-ui/README.md](./chat-ui/README.md)** - React chat interface with MCP integration
-- **[remote-mcp-with-ui-starter/README.md](./remote-mcp-with-ui-starter/README.md)** - MCP server with embedded UIs
-- **[e2e-tests/README.md](./e2e-tests/README.md)** - Playwright E2E testing
+- **[apps/chat-ui/README.md](./apps/chat-ui/README.md)** - React chat interface with MCP integration
+- **[apps/mcp-server/README.md](./apps/mcp-server/README.md)** - MCP server with embedded UIs
+- **[apps/create-webmcp-app/README.md](./apps/create-webmcp-app/README.md)** - Interactive CLI for scaffolding new projects
+- **[templates/react/README.md](./templates/react/README.md)** - React + TypeScript template
+- **[templates/vanilla/README.md](./templates/vanilla/README.md)** - Vanilla HTML/JS template
+- **[tests/e2e/README.md](./tests/e2e/README.md)** - Playwright E2E testing
 
 ### Architecture & Design
-- **[remote-mcp-with-ui-starter/ARCHITECTURE.md](./remote-mcp-with-ui-starter/ARCHITECTURE.md)** - Detailed architecture decisions and patterns
-- **[remote-mcp-with-ui-starter/EMBEDDING_PROTOCOL.md](./remote-mcp-with-ui-starter/EMBEDDING_PROTOCOL.md)** - WebMCP embedding protocol details
-- **[remote-mcp-with-ui-starter/ROUTES.md](./remote-mcp-with-ui-starter/ROUTES.md)** - Worker routing and endpoints
-- **[remote-mcp-with-ui-starter/README.md#-how-to-customize](./remote-mcp-with-ui-starter/README.md#-how-to-customize)** - Guide for creating new mini-apps
+- **[apps/mcp-server/ARCHITECTURE.md](./apps/mcp-server/ARCHITECTURE.md)** - Detailed architecture decisions and patterns
+- **[apps/mcp-server/EMBEDDING_PROTOCOL.md](./apps/mcp-server/EMBEDDING_PROTOCOL.md)** - WebMCP embedding protocol details
+- **[apps/mcp-server/ROUTES.md](./apps/mcp-server/ROUTES.md)** - Worker routing and endpoints
+- **[apps/mcp-server/README.md#-how-to-customize](./apps/mcp-server/README.md#-how-to-customize)** - Guide for creating new mini-apps
 
 ### Configuration & Environment
 - **[docs/ENVIRONMENT_SETUP.md](./docs/ENVIRONMENT_SETUP.md)** - Environment variables and deployment configuration
@@ -33,8 +36,12 @@ pnpm install
 pnpm dev
 
 # Run individual apps
-cd chat-ui && pnpm dev              # http://localhost:5173
-cd remote-mcp-with-ui-starter && pnpm dev  # http://localhost:8888
+cd apps/chat-ui && pnpm dev        # http://localhost:5173
+cd apps/mcp-server && pnpm dev     # http://localhost:8888
+
+# Run templates manually
+cd templates/react && pnpm dev     # http://localhost:8888
+cd templates/vanilla && pnpm dev   # http://localhost:8889
 ```
 
 ### Code Quality
@@ -71,7 +78,7 @@ The server returns three types of UI resources:
 - `rawHtml` - Sanitized HTML
 - `remoteDom` - Dynamic JavaScript DOM
 
-See: [remote-mcp-with-ui-starter/README.md](./remote-mcp-with-ui-starter/README.md#key-components)
+See: [apps/mcp-server/README.md](./apps/mcp-server/README.md#key-components)
 
 ### WebMCP Tool Registration
 Mini-apps register tools dynamically using `useWebMCP` hook:
@@ -84,7 +91,7 @@ useWebMCP({
 });
 ```
 
-See: [remote-mcp-with-ui-starter/EMBEDDING_PROTOCOL.md](./remote-mcp-with-ui-starter/EMBEDDING_PROTOCOL.md)
+See: [apps/mcp-server/EMBEDDING_PROTOCOL.md](./apps/mcp-server/EMBEDDING_PROTOCOL.md)
 
 ### TypeScript Project References
 Each package uses multiple tsconfig files:
@@ -98,26 +105,26 @@ Verify with: `pnpm exec tsc -b`
 ## File Locations
 
 ### Adding MCP Tools
-Edit: [remote-mcp-with-ui-starter/worker/mcpServer.ts](./remote-mcp-with-ui-starter/worker/mcpServer.ts)
+Edit: [apps/mcp-server/worker/mcpServer.ts](./apps/mcp-server/worker/mcpServer.ts)
 
 ### Creating Embedded Apps
-1. Add your app to: `remote-mcp-with-ui-starter/src/`
+1. Add your app to: `apps/mcp-server/src/`
 2. Add entry point: `main.tsx` and `index.html`
-3. Update: [remote-mcp-with-ui-starter/vite.config.ts](./remote-mcp-with-ui-starter/vite.config.ts)
+3. Update: [apps/mcp-server/vite.config.ts](./apps/mcp-server/vite.config.ts)
 4. Add MCP tool to display it
 
-See: [remote-mcp-with-ui-starter/README.md#-how-to-customize](./remote-mcp-with-ui-starter/README.md#-how-to-customize)
+See: [apps/mcp-server/README.md#-how-to-customize](./apps/mcp-server/README.md#-how-to-customize)
 
 ### Modifying Routes
-Edit: [remote-mcp-with-ui-starter/worker/index.ts](./remote-mcp-with-ui-starter/worker/index.ts)
+Edit: [apps/mcp-server/worker/index.ts](./apps/mcp-server/worker/index.ts)
 
-See: [remote-mcp-with-ui-starter/ROUTES.md](./remote-mcp-with-ui-starter/ROUTES.md)
+See: [apps/mcp-server/ROUTES.md](./apps/mcp-server/ROUTES.md)
 
 ## Troubleshooting
 
 For common issues (port conflicts, build failures, WebMCP setup), see:
 - [README.md](./README.md#troubleshooting)
-- [remote-mcp-with-ui-starter/README.md](./remote-mcp-with-ui-starter/README.md#troubleshooting)
+- [apps/mcp-server/README.md](./apps/mcp-server/README.md#troubleshooting)
 
 ## Development Standards
 

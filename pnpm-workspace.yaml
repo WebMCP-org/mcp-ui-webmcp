@@ -1,10 +1,7 @@
 packages:
-  - chat-ui
-  - remote-mcp-with-ui-starter
-  - webmcp-template
-  - webmcp-template-vanilla
-  - create-webmcp-app
-  - e2e-tests
+  - 'apps/*'
+  - 'templates/*'
+  - 'tests/*'
 
 catalog:
   "@types/node": ^24.9.2

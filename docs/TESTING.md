@@ -1,11 +1,11 @@
 # Testing Infrastructure
 
-This repo relies on Playwright end-to-end tests that live in the `e2e-tests/` package. The suite spins up both apps (the React chat UI and the Cloudflare Worker starter) and exercises them exactly the way a user would interact with the deployed system.
+This repo relies on Playwright end-to-end tests that live in the `tests/e2e/` package. The suite spins up both apps (the React chat UI and the Cloudflare Worker starter) and exercises them exactly the way a user would interact with the deployed system.
 
 ## Overview
 
 - **Framework**: Playwright 1.49 (Chromium)
-- **Location**: `e2e-tests/`
+- **Location**: `tests/e2e/`
 - **Entrypoint scripts**: `pnpm test`, `pnpm test:chat-ui`, `pnpm test:remote-mcp`, `pnpm test:integration`
 - **Why E2E-first**: The most critical behaviors (rendering MCP UI resources, WebMCP tool registration, chat orchestration) require a real browser + iframe context, so browser automation gives the most confidence.
 
@@ -42,16 +42,16 @@ pnpm test:debug     # Inspector
 pnpm test:report    # View last HTML report
 ```
 
-Inside `e2e-tests/` you get the same commands without the workspace filters. Playwright browsers are not checked in, so run:
+Inside `tests/e2e/` you get the same commands without the workspace filters. Playwright browsers are not checked in, so run:
 
 ```bash
-pnpm --filter @mcp-b/e2e-tests exec playwright install --with-deps chromium
+pnpm --filter @mcp-b/e2e exec playwright install --with-deps chromium
 ```
 
-## Project Structure (`e2e-tests/`)
+## Project Structure (`tests/e2e/`)
 
 ```
-e2e-tests/
+tests/e2e/
 ├── tests/
 │   ├── chat-ui.spec.ts
 │   ├── remote-mcp-starter.spec.ts
@@ -76,12 +76,12 @@ Mention any E2E results in your PR description so reviewers know they were exerc
 | Issue | Fix |
 |-------|-----|
 | Port already in use (`5173` or `8888`) | `lsof -ti:5173 | xargs kill` (same for 8888) |
-| Playwright browsers missing | `pnpm --filter @mcp-b/e2e-tests exec playwright install --with-deps chromium` |
+| Playwright browsers missing | `pnpm --filter @mcp-b/e2e exec playwright install --with-deps chromium` |
 | Worker cannot reach Cloudflare APIs | Use `pnpm dev` locally (works offline) or run in an env with CF access for CI |
-| Tests keep timing out | Confirm both dev servers are printing “ready” before tests start; increase `timeout` in the relevant config if needed |
+| Tests keep timing out | Confirm both dev servers are printing "ready" before tests start; increase `timeout` in the relevant config if needed |
 
 ## Further Reading
 
-- `e2e-tests/README.md` – canonical doc for the suite
+- `tests/e2e/README.md` – canonical doc for the suite
 - [Playwright docs](https://playwright.dev/docs/intro)
 - [CONTRIBUTING.md](../CONTRIBUTING.md#testing) – repo-wide expectations

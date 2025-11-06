@@ -33,7 +33,7 @@ importers:
         specifier: 'catalog:'
         version: 5.8.3
 
-  chat-ui:
+  apps/chat-ui:
     dependencies:
       '@ai-sdk/anthropic':
         specifier: ^2.0.41
@@ -235,7 +235,7 @@ importers:
         specifier: ^4.45.2
         version: 4.45.4(@cloudflare/workers-types@4.20251014.0)
 
-  create-webmcp-app:
+  apps/create-webmcp-app:
     dependencies:
       '@clack/prompts':
         specifier: ^0.7.0
@@ -251,19 +251,7 @@ importers:
         specifier: 'catalog:'
         version: 5.8.3
 
-  e2e-tests:
-    devDependencies:
-      '@playwright/test':
-        specifier: ^1.49.2
-        version: 1.56.1
-      '@types/node':
-        specifier: 'catalog:'
-        version: 24.10.0
-      typescript:
-        specifier: 'catalog:'
-        version: 5.8.3
-
-  remote-mcp-with-ui-starter:
+  apps/mcp-server:
     dependencies:
       '@mcp-b/global':
         specifier: ^1.1.0
@@ -363,7 +351,7 @@ importers:
         specifier: ^4.45.3
         version: 4.45.4(@cloudflare/workers-types@4.20251014.0)
 
-  webmcp-template:
+  templates/react:
     dependencies:
       '@mcp-b/global':
         specifier: ^1.1.0
@@ -448,7 +436,7 @@ importers:
         specifier: ^4.45.3
         version: 4.45.4(@cloudflare/workers-types@4.20251014.0)
 
-  webmcp-template-vanilla:
+  templates/vanilla:
     dependencies:
       '@mcp-ui/server':
         specifier: ^5.2.0
@@ -481,6 +469,18 @@ importers:
       wrangler:
         specifier: ^4.45.3
         version: 4.45.4(@cloudflare/workers-types@4.20251014.0)
+
+  tests/e2e:
+    devDependencies:
+      '@playwright/test':
+        specifier: ^1.49.2
+        version: 1.56.1
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.0
+      typescript:
+        specifier: 'catalog:'
+        version: 5.8.3
 
 packages:
 
