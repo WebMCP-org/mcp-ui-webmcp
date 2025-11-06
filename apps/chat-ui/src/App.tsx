@@ -38,7 +38,7 @@ function App() {
     if (storedUrl && mcpConnection.mcpState === 'disconnected') {
       mcpConnection.connectToServer(storedUrl);
     }
-  }, []);
+  }, [mcpConnection]);
 
   const callTool = useCallback(
     async (request: CallToolRequest['params'], sourceId?: string): Promise<CallToolResult> => {
