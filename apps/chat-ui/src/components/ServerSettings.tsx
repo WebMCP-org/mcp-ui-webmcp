@@ -32,11 +32,11 @@ export function ServerSettings({ onDisconnect, connectionState }: ServerSettings
   const isLoading = connectionState === 'connecting' || connectionState === 'loading';
 
   return (
-    <div className="space-y-4">
-      <div className="space-y-2">
+    <div className="sm:space-y-4 space-y-2">
+      <div className="sm:space-y-2 space-y-1.5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <label htmlFor={serverUrlId} className="text-sm font-medium">
+            <label htmlFor={serverUrlId} className="sm:text-sm text-xs font-medium">
               MCP Server URL
             </label>
             <TooltipProvider>
@@ -62,7 +62,7 @@ export function ServerSettings({ onDisconnect, connectionState }: ServerSettings
                 <TooltipTrigger asChild>
                   <Badge
                     variant="default"
-                    className="h-5 gap-1 bg-green-500/10 text-green-700 dark:text-green-400 cursor-help"
+                    className="sm:h-5 h-4 gap-1 bg-green-500/10 text-green-700 dark:text-green-400 cursor-help sm:text-xs text-[10px] sm:px-2 px-1.5"
                   >
                     <div className="h-1.5 w-1.5 rounded-full bg-green-500" />
                     Connected
@@ -75,7 +75,7 @@ export function ServerSettings({ onDisconnect, connectionState }: ServerSettings
             </TooltipProvider>
           )}
           {connectionState === 'failed' && (
-            <Badge variant="destructive" className="h-5 gap-1">
+            <Badge variant="destructive" className="sm:h-5 h-4 gap-1 sm:text-xs text-[10px] sm:px-2 px-1.5">
               <AlertCircle className="h-3 w-3" />
               Failed
             </Badge>
@@ -89,7 +89,7 @@ export function ServerSettings({ onDisconnect, connectionState }: ServerSettings
             placeholder="http://localhost:8888"
             {...register('serverUrl')}
             disabled={isConnected || isLoading}
-            className="flex h-9 flex-1 rounded-md border border-input bg-background px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+            className="flex sm:h-9 h-8 flex-1 rounded-md border border-input bg-background sm:px-3 px-2 py-1 sm:text-base text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
             inputMode="url"
             autoComplete="url"
           />
@@ -104,10 +104,10 @@ export function ServerSettings({ onDisconnect, connectionState }: ServerSettings
                     type="button"
                     onClick={handleDisconnect}
                     disabled={isLoading}
-                    className="h-9 gap-1.5"
+                    className="sm:h-9 h-8 gap-1.5 sm:text-sm text-xs sm:px-3 px-2"
                   >
                     <XCircle className="h-3.5 w-3.5" />
-                    Disconnect
+                    <span className="sm:inline hidden">Disconnect</span>
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -119,13 +119,13 @@ export function ServerSettings({ onDisconnect, connectionState }: ServerSettings
         </div>
 
         {errors.serverUrl && (
-          <p className="flex items-center gap-1.5 text-sm text-destructive">
+          <p className="flex items-center gap-1.5 sm:text-sm text-xs text-destructive">
             <AlertCircle className="h-3.5 w-3.5" />
             {errors.serverUrl.message}
           </p>
         )}
 
-        <p className="text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground sm:block hidden">
           Enter the URL of your MCP server endpoint. The URL will be saved to your browser's
           localStorage when you connect.
         </p>

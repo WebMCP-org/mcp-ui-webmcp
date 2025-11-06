@@ -53,6 +53,13 @@ export function ApiKeyInput({
     }
   }, [open, form]);
 
+  // Auto-close modal when connection succeeds
+  useEffect(() => {
+    if (connectionState === 'ready' && open) {
+      onClose();
+    }
+  }, [connectionState, open, onClose]);
+
   const onSubmit = async (data: SettingsFormData) => {
     try {
       setStoredApiKey(data.apiKey);
@@ -71,13 +78,13 @@ export function ApiKeyInput({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleClose()}>
-      <DialogContent showCloseButton={false} className="max-w-2xl">
+      <DialogContent showCloseButton={false} className="max-w-2xl sm:p-6 p-4">
         <FormProvider {...form}>
           {/* @ts-expect-error close enough */}
           <form onSubmit={form.handleSubmit(onSubmit)}>
-            <DialogHeader>
-              <DialogTitle>Settings</DialogTitle>
-              <DialogDescription>
+            <DialogHeader className="sm:space-y-1.5 space-y-1">
+              <DialogTitle className="sm:text-lg text-base">Settings</DialogTitle>
+              <DialogDescription className="sm:text-sm text-xs">
                 Configure your MCP server connection. Optionally add your Anthropic API key for
                 unlimited usage.
               </DialogDescription>
@@ -85,10 +92,10 @@ export function ApiKeyInput({
 
             {/* Connection Status Banner */}
             {(connectionState === 'disconnected' || connectionState === 'failed') && (
-              <div className="rounded-lg border border-yellow-500/50 bg-yellow-500/10 p-3 mt-4">
+              <div className="rounded-lg border border-yellow-500/50 bg-yellow-500/10 sm:p-3 p-2 sm:mt-4 mt-2">
                 <div className="flex items-center gap-2">
                   <AlertCircle className="h-4 w-4 shrink-0 text-yellow-600 dark:text-yellow-500" />
-                  <p className="text-sm font-medium text-yellow-700 dark:text-yellow-400">
+                  <p className="sm:text-sm text-xs font-medium text-yellow-700 dark:text-yellow-400">
                     {connectionState === 'failed'
                       ? 'Connection failed. Please check your server URL and try again.'
                       : 'Please configure your MCP server to start chatting.'}
@@ -97,11 +104,11 @@ export function ApiKeyInput({
               </div>
             )}
 
-            <div className="space-y-6 mt-4">
+            <div className="sm:space-y-6 space-y-3 sm:mt-4 mt-2">
               {/* API Key Section */}
-              <div className="space-y-2">
+              <div className="sm:space-y-2 space-y-1.5">
                 <div className="flex items-center gap-2">
-                  <label htmlFor={apiKeyId} className="text-sm font-medium">
+                  <label htmlFor={apiKeyId} className="sm:text-sm text-xs font-medium">
                     Anthropic API Key <span className="text-muted-foreground">(Optional)</span>
                   </label>
                   <TooltipProvider>
@@ -132,20 +139,20 @@ export function ApiKeyInput({
                   type="password"
                   placeholder="sk-ant-..."
                   {...form.register('apiKey')}
-                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-base shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  className="flex sm:h-9 h-8 w-full rounded-md border border-input bg-background sm:px-3 px-2 py-1 sm:text-base text-sm shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
                   autoComplete="off"
                   autoFocus
                 />
                 {form.formState.errors.apiKey && (
-                  <p className="text-sm text-destructive">{form.formState.errors.apiKey.message}</p>
+                  <p className="sm:text-sm text-xs text-destructive">{form.formState.errors.apiKey.message}</p>
                 )}
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-muted-foreground sm:block hidden">
                   Leave empty to use free quota ($1.00 limit). Add your own key for unlimited usage.
                   Keys are stored locally in your browser.
                 </p>
               </div>
 
-              <Separator />
+              <Separator className="sm:my-6 my-3" />
 
               {/* Server Settings Section */}
               <ServerSettings
@@ -155,7 +162,7 @@ export function ApiKeyInput({
               />
             </div>
 
-            <DialogFooter className="mt-6">
+            <DialogFooter className="sm:mt-6 mt-4 sm:gap-2 gap-1.5">
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -165,6 +172,7 @@ export function ApiKeyInput({
                         type="button"
                         onClick={handleClose}
                         disabled={connectionState !== 'ready'}
+                        className="sm:h-10 h-8 sm:px-4 px-3 sm:text-sm text-xs"
                       >
                         Close
                       </Button>
@@ -187,6 +195,7 @@ export function ApiKeyInput({
                         connectionState === 'connecting' ||
                         connectionState === 'loading'
                       }
+                      className="sm:h-10 h-8 sm:px-4 px-3 sm:text-sm text-xs"
                     >
                       {connectionState === 'connecting' || connectionState === 'loading'
                         ? 'Connecting...'
