@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { AlertCircle } from 'lucide-react';
-import { useEffect, useId } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,6 +33,7 @@ export function ApiKeyInput({
   connectionState,
 }: ApiKeyInputProps) {
   const apiKeyId = useId();
+  const prevConnectionState = useRef(connectionState);
 
   const form = useForm<SettingsFormData>({
     // @ts-expect-error zodResolver type issue
@@ -54,9 +55,15 @@ export function ApiKeyInput({
   }, [open, form]);
 
   useEffect(() => {
-    if (connectionState === 'ready' && open) {
+    // Only auto-close if transitioning TO ready FROM connecting/loading
+    if (
+      connectionState === 'ready' &&
+      open &&
+      (prevConnectionState.current === 'connecting' || prevConnectionState.current === 'loading')
+    ) {
       onClose();
     }
+    prevConnectionState.current = connectionState;
   }, [connectionState, open, onClose]);
 
   const onSubmit = async (data: SettingsFormData) => {
