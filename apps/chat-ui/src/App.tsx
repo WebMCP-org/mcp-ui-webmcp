@@ -5,7 +5,7 @@ import type {
   CallToolResult,
 } from '@modelcontextprotocol/sdk/types.js';
 import { AlertCircle, ExternalLink, Github, Loader2, Menu, Plug, PlugZap, Settings } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { ApiKeyInput } from '@/components/ApiKeyInput';
 import { MCPToolRegistry } from '@/components/assistant-ui/mcp-tool-registry';
 import { Thread } from '@/components/assistant-ui/thread';
@@ -22,7 +22,7 @@ import { useQuotaExhausted } from '@/hooks/useQuotaExhausted';
 import { QuotaExhaustedModal } from '@/components/QuotaExhaustedModal';
 
 import { lastAssistantMessageIsCompleteWithToolCalls } from 'ai';
-import { getStoredApiKey } from '@/lib/storage';
+import { getStoredApiKey, getStoredServerUrl } from '@/lib/storage';
 import { getOrCreateDeviceId } from '@/lib/deviceId';
 
 function App() {
@@ -32,6 +32,13 @@ function App() {
   const webMcpIntegration = useWebMCPIntegration();
   const apiKeyModal = useAPIKeyModal(mcpConnection.mcpState);
   const quotaExhausted = useQuotaExhausted();
+
+  useEffect(() => {
+    const storedUrl = getStoredServerUrl();
+    if (storedUrl && mcpConnection.mcpState === 'disconnected') {
+      mcpConnection.connectToServer(storedUrl);
+    }
+  }, [mcpConnection]);
 
   const callTool = useCallback(
     async (request: CallToolRequest['params'], sourceId?: string): Promise<CallToolResult> => {
