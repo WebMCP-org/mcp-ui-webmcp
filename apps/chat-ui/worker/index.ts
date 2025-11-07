@@ -9,6 +9,13 @@ import type { UsageQuota } from './usageQuota';
 
 const app = new Hono<{ Bindings: Env }>();
 
+const getCorsHeaders = () => ({
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'Content-Type, X-Anthropic-API-Key, X-Device-ID, X-Playground-Source, sentry-trace, baggage, *',
+  'Access-Control-Allow-Methods': '*',
+  'Access-Control-Expose-Headers': '*',
+});
+
 app.use(
   '/*',
   cors({
@@ -18,6 +25,10 @@ app.use(
     exposeHeaders: ['*'],
   })
 );
+
+app.options('/api/chat', () => {
+  return new Response(null, { status: 204, headers: getCorsHeaders() });
+});
 
 app.post('/api/chat', async (c) => {
   try {
@@ -34,7 +45,7 @@ app.post('/api/chat', async (c) => {
     }
 
     if (!apiKey) {
-      return c.json({ error: 'Anthropic API key is required' }, 401);
+      return c.json({ error: 'Anthropic API key is required' }, 401, getCorsHeaders());
     }
 
     const usingOwnApiKey = !isPlaygroundRequest && c.req.header('X-Anthropic-API-Key') !== undefined;
@@ -44,7 +55,7 @@ app.post('/api/chat', async (c) => {
     if (!usingOwnApiKey && !isPlaygroundRequest) {
       deviceId = c.req.header('X-Device-ID') || null;
       if (!deviceId) {
-        return c.json({ error: 'Device ID required when using default API key' }, 400);
+        return c.json({ error: 'Device ID required when using default API key' }, 400, getCorsHeaders());
       }
 
       const quotaId = c.env.USAGE_QUOTA.idFromName(deviceId);
@@ -60,7 +71,8 @@ app.post('/api/chat', async (c) => {
             totalSpent: quotaCheck.totalSpent,
             quotaLimit: quotaCheck.quotaLimit,
           },
-          429
+          429,
+          getCorsHeaders()
         );
       }
     }
@@ -109,7 +121,12 @@ app.post('/api/chat', async (c) => {
       },
     });
 
-    return result.toUIMessageStreamResponse();
+    const streamResponse = result.toUIMessageStreamResponse();
+    const corsHeaders = getCorsHeaders();
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      streamResponse.headers.set(key, value);
+    });
+    return streamResponse;
   } catch (error) {
     console.error('Error in /api/chat:', error);
 
@@ -120,7 +137,8 @@ app.post('/api/chat', async (c) => {
         error: 'Failed to process chat request',
         message: error instanceof Error ? error.message : 'Unknown error',
       },
-      500
+      500,
+      getCorsHeaders()
     );
   }
 });
