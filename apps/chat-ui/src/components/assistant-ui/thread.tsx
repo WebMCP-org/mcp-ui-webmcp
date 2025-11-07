@@ -289,6 +289,7 @@ const ThreadWelcomeSuggestions: FC = () => {
           key={prompt.name}
           className="group flex min-w-[160px] max-w-xs cursor-pointer flex-col items-start gap-1.5 rounded-lg border border-border/60 bg-background p-3 shadow-sm transition-all hover:border-primary/40 hover:shadow-md sm:min-w-[200px] sm:gap-2 sm:rounded-xl sm:p-4"
           prompt={prompt.description || prompt.title || prompt.name}
+          autoSend
         >
           <span className="text-xs font-medium tracking-tight group-hover:text-primary sm:text-sm">
             {prompt.description || prompt.title || prompt.name}
