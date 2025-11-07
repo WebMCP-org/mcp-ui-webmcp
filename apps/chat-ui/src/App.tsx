@@ -99,7 +99,6 @@ function App() {
           },
         });
 
-        // Check for quota exceeded error
         if (response.status === 429) {
           const clonedResponse = response.clone();
           try {
@@ -113,7 +112,6 @@ function App() {
               });
             }
           } catch (e) {
-            // If parsing fails, show modal anyway with default values
             console.error('[Quota] Failed to parse quota error, showing modal with defaults:', e);
             quotaExhausted.triggerQuotaExhausted({
               totalSpent: 0,

@@ -66,7 +66,7 @@ export function QuotaExhaustedModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={() => {/* Prevent closing - user must choose an option */}}>
+    <Dialog open={open} onOpenChange={() => {}}>
       <DialogContent showCloseButton={false} className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
         <DialogHeader>
           <div className="flex items-center gap-3 mb-2">
