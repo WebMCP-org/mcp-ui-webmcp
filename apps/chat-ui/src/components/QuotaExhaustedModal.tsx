@@ -1,5 +1,4 @@
 import { ExternalLink, Wallet } from 'lucide-react';
-import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -57,10 +56,6 @@ export function QuotaExhaustedModal({
   quotaLimit,
   onAddApiKey,
 }: QuotaExhaustedModalProps) {
-  useEffect(() => {
-    console.log('[Quota Modal] Modal render - open:', open, 'spent:', totalSpent, 'limit:', quotaLimit);
-  }, [open, totalSpent, quotaLimit]);
-
   const handleDownloadExtension = () => {
     window.open('https://mcp-b.ai', '_blank', 'noopener,noreferrer');
   };
