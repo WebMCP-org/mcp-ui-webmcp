@@ -268,6 +268,7 @@ const ThreadWelcome: FC = () => {
 
 const ThreadWelcomeSuggestions: FC = () => {
   const { prompts } = useMCP();
+  const runtime = useAssistantRuntime();
 
   if (prompts.length === 0) {
     return (
@@ -285,15 +286,18 @@ const ThreadWelcomeSuggestions: FC = () => {
   return (
     <div className="flex w-full flex-wrap justify-center gap-2 sm:gap-3">
       {prompts.slice(0, 3).map((prompt) => (
-        <ThreadPrimitive.Suggestion
+        <button
           key={prompt.name}
+          onClick={() => {
+            const promptText = prompt.description || prompt.title || prompt.name;
+            runtime.thread.append({ role: 'user', content: [{ type: 'text', text: promptText }] });
+          }}
           className="group flex min-w-[160px] max-w-xs cursor-pointer flex-col items-start gap-1.5 rounded-lg border border-border/60 bg-background p-3 shadow-sm transition-all hover:border-primary/40 hover:shadow-md sm:min-w-[200px] sm:gap-2 sm:rounded-xl sm:p-4"
-          prompt={prompt.description || prompt.title || prompt.name}
         >
           <span className="text-xs font-medium tracking-tight group-hover:text-primary sm:text-sm">
             {prompt.description || prompt.title || prompt.name}
           </span>
-        </ThreadPrimitive.Suggestion>
+        </button>
       ))}
     </div>
   );
