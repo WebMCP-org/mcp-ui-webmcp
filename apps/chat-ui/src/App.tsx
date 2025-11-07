@@ -99,20 +99,24 @@ function App() {
           },
         });
 
-        // Check for quota exceeded error
         if (response.status === 429) {
           const clonedResponse = response.clone();
           try {
             const errorData = await clonedResponse.json();
+            console.log('[Quota] Received 429 error:', errorData);
             if (errorData.error === 'Usage quota exceeded') {
+              console.log('[Quota] Triggering quota exhausted modal');
               quotaExhausted.triggerQuotaExhausted({
                 totalSpent: errorData.totalSpent || 0,
                 quotaLimit: errorData.quotaLimit || 1.0,
               });
             }
           } catch (e) {
-            // If parsing fails, just return the original response
-            console.error('Failed to parse quota error:', e);
+            console.error('[Quota] Failed to parse quota error, showing modal with defaults:', e);
+            quotaExhausted.triggerQuotaExhausted({
+              totalSpent: 0,
+              quotaLimit: 1.0,
+            });
           }
         }
 
