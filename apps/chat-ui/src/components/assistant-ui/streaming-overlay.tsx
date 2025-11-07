@@ -141,7 +141,7 @@ export function StreamingOverlay() {
             setToolStatus('running');
           } else if (hasError) {
             setToolStatus('error');
-          } else if (lastMessage.status === 'done') {
+          } else if (lastMessage.status?.type === 'complete') {
             setToolStatus('complete');
           } else {
             setToolStatus('running');
@@ -152,7 +152,7 @@ export function StreamingOverlay() {
         }
 
         // Update streaming state
-        const isCurrentlyStreaming = lastMessage.status !== 'done' && textContent.trim().length > 0;
+        const isCurrentlyStreaming = lastMessage.status?.type !== 'complete' && textContent.trim().length > 0;
         setIsStreaming(isCurrentlyStreaming);
 
         // Update display text and visibility
