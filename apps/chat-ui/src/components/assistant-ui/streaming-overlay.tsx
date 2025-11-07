@@ -8,7 +8,27 @@ import { usePrefersReducedMotion } from '@/hooks/useMediaQuery';
 type ToolStatus = 'idle' | 'running' | 'complete' | 'error';
 
 /**
+ * Extended type for tool call content parts with status information
+ * Extends the base assistant-ui tool-call type with runtime status
+ */
+interface ToolCallPart {
+  type: 'tool-call';
+  toolName?: string;
+  status?: {
+    type: 'running' | 'complete' | 'incomplete' | 'requires-action';
+  };
+  isError?: boolean;
+}
+
+/**
  * Smart text truncation that tries to preserve sentence boundaries
+ *
+ * Attempts to show the last N characters of text while preserving complete
+ * sentences when possible, falling back to word boundaries if needed.
+ *
+ * @param text - The full text to truncate
+ * @param maxChars - Maximum characters to display (default: 100)
+ * @returns Object with truncated text and truncation flag
  */
 function getDisplayText(text: string, maxChars = 100): { text: string; isTruncated: boolean } {
   if (text.length <= maxChars) return { text, isTruncated: false };
@@ -28,7 +48,10 @@ function getDisplayText(text: string, maxChars = 100): { text: string; isTruncat
 }
 
 /**
- * Get border color based on tool status
+ * Get border color Tailwind class based on tool execution status
+ *
+ * @param status - Current tool execution status
+ * @returns Tailwind border color class
  */
 function getBorderColorForStatus(status: ToolStatus): string {
   switch (status) {
@@ -45,7 +68,12 @@ function getBorderColorForStatus(status: ToolStatus): string {
 
 /**
  * Calculate reading time in milliseconds based on word count
- * Assumes ~300 WPM reading speed
+ *
+ * Assumes ~300 WPM reading speed (~200ms per word).
+ * Clamps result between 2-5 seconds for reasonable auto-hide timing.
+ *
+ * @param text - Text to calculate reading time for
+ * @returns Reading time in milliseconds (between 2000-5000ms)
  */
 function getReadingTime(text: string): number {
   const wordCount = text.split(/\s+/).length;
@@ -56,6 +84,15 @@ function getReadingTime(text: string): number {
 
 /**
  * Status indicator dot with pulsing animation for running state
+ *
+ * Displays a colored dot that indicates tool execution status:
+ * - Blue (pulsing): Tool is running
+ * - Green (solid): Tool completed successfully
+ * - Red (solid): Tool encountered an error
+ * - Gray (solid): Idle state
+ *
+ * @param props - Component props
+ * @param props.status - Current tool status
  */
 function StatusDot({ status }: { status: ToolStatus }) {
   const colors = {
@@ -76,7 +113,10 @@ function StatusDot({ status }: { status: ToolStatus }) {
 }
 
 /**
- * Typing indicator with animated dots
+ * Typing indicator with animated bouncing dots
+ *
+ * Shows three dots that animate vertically in sequence to indicate
+ * active text streaming. Each dot has a 150ms delay to create a wave effect.
  */
 function TypingIndicator() {
   return (
@@ -98,6 +138,30 @@ function TypingIndicator() {
   );
 }
 
+/**
+ * Mobile streaming overlay that displays assistant activity at the top of the screen
+ *
+ * Shows real-time updates during assistant responses including:
+ * - Streaming text with smart truncation (preserves sentence boundaries)
+ * - Tool execution status with visual indicators
+ * - Animated typing indicator during active streaming
+ * - Status-based border colors (blue=running, green=complete, red=error)
+ *
+ * Features:
+ * - Smooth slide-down entrance animation
+ * - Adaptive auto-hide based on reading speed (2-5 seconds)
+ * - Tap to dismiss after 1 second (when not actively streaming)
+ * - Respects prefers-reduced-motion settings
+ * - Won't hide while tools are running or text is streaming
+ *
+ * @example
+ * ```tsx
+ * // Used in thread.tsx for mobile UI panel view
+ * {isMobile && mobileView !== 'chat' && hasToolSurface && <StreamingOverlay />}
+ * ```
+ *
+ * @see {@link thread.tsx} for integration point
+ */
 export function StreamingOverlay() {
   const runtime = useAssistantRuntime();
   const prefersReducedMotion = usePrefersReducedMotion();
@@ -120,7 +184,9 @@ export function StreamingOverlay() {
         const textParts = lastMessage.content.filter((part) => part.type === 'text');
         const textContent = textParts.map((part) => part.text).join(' ');
 
-        const toolCalls = lastMessage.content.filter((part) => part.type === 'tool-call');
+        const toolCalls = lastMessage.content.filter(
+          (part): part is ToolCallPart => part.type === 'tool-call'
+        );
 
         // Update tool status
         if (toolCalls.length > 0) {
@@ -129,12 +195,10 @@ export function StreamingOverlay() {
 
           // Determine status based on message state
           const hasRunning = toolCalls.some((tc) => {
-            const status = (tc as any).status;
-            return status?.type === 'running';
+            return tc.status?.type === 'running';
           });
           const hasError = toolCalls.some((tc) => {
-            const status = (tc as any).status;
-            return status?.type === 'incomplete' || (tc as any).isError;
+            return tc.status?.type === 'incomplete' || tc.isError;
           });
 
           if (hasRunning) {
