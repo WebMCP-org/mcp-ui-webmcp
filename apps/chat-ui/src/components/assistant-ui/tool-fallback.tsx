@@ -8,19 +8,16 @@ import { formatMcpResult } from '@/lib/mcp-utils';
 import { cn } from '@/lib/utils';
 import { ToolSourceBadge } from './tool-source-badge';
 import { type ToolStatus, ToolStatusBadge } from './tool-status-badge';
-
-type ToolCallStatus =
-  | { type: 'running' }
-  | { type: 'complete' }
-  | {
-      type: 'incomplete';
-      reason: 'cancelled' | 'length' | 'content-filter' | 'other' | 'error';
-      error?: unknown;
-    }
-  | { type: 'requires-action'; reason: 'interrupt' };
+import { type ToolCallStatus } from './types';
 
 /**
  * Map assistant-ui status to simplified ToolStatus type
+ *
+ * @param status - Tool call status from @assistant-ui/react
+ * @param isError - Optional error flag to override status
+ * @returns Simplified status for UI display
+ * @see {@link types.ts} for ToolCallStatus definition
+ * @see {@link tool-status-badge.tsx} for ToolStatus definition
  */
 function mapToToolStatus(status: ToolCallStatus, isError?: boolean): ToolStatus {
   if (status.type === 'running') return 'running';
@@ -33,16 +30,23 @@ function mapToToolStatus(status: ToolCallStatus, isError?: boolean): ToolStatus 
 
 /**
  * Determine if the tool call should auto-expand based on status
+ *
+ * @param status - Tool call status from @assistant-ui/react
+ * @returns True if tool details should be expanded by default
  */
 function shouldAutoExpandStatus(status: ToolCallStatus): boolean {
   if (status.type === 'running') return false;
   if (status.type === 'requires-action') return true;
   if (status.type === 'incomplete') return true;
-  return false; // complete - will be handled by isError check
+  return false;
 }
 
 /**
- * Get border color based on status and error state
+ * Get border color Tailwind class based on status and error state
+ *
+ * @param status - Tool call status from @assistant-ui/react
+ * @param isError - Optional error flag to override border color
+ * @returns Tailwind border color class
  */
 function getBorderColor(status: ToolCallStatus, isError?: boolean): string {
   if (status.type === 'running') return 'border-blue-500';
