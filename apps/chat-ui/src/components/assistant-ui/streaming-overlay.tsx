@@ -5,7 +5,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { usePrefersReducedMotion } from '@/hooks/useMediaQuery';
 import { type ToolStatus } from './tool-status-badge';
-import { type ToolCallContentPart } from './types';
+import { type ToolCallStatus } from './types';
 
 /**
  * Smart text truncation that tries to preserve sentence boundaries
@@ -177,19 +177,31 @@ export function StreamingOverlay() {
         const textParts = lastMessage.content.filter((part) => part.type === 'text');
         const textContent = textParts.map((part) => part.text).join(' ');
 
-        const toolCalls = lastMessage.content.filter(
-          (part): part is ToolCallContentPart => part.type === 'tool-call'
-        );
+        const toolCalls = lastMessage.content.filter((part) => part.type === 'tool-call');
 
         if (toolCalls.length > 0) {
-          const names = toolCalls.map((tc) => tc.toolName || 'tool').join(', ');
-          setToolNames(names);
+          const names = toolCalls
+            .map((tc) => ('toolName' in tc ? tc.toolName : null))
+            .filter((name): name is string => Boolean(name))
+            .join(', ');
+          setToolNames(names || 'tool');
 
           const hasRunning = toolCalls.some((tc) => {
-            return tc.status?.type === 'running';
+            if ('status' in tc) {
+              const status = tc.status as ToolCallStatus | undefined;
+              return status?.type === 'running';
+            }
+            return false;
           });
           const hasError = toolCalls.some((tc) => {
-            return tc.status?.type === 'incomplete' || tc.isError;
+            if ('status' in tc) {
+              const status = tc.status as ToolCallStatus | undefined;
+              return status?.type === 'incomplete';
+            }
+            if ('isError' in tc) {
+              return tc.isError === true;
+            }
+            return false;
           });
 
           if (hasRunning) {

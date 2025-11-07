@@ -16,14 +16,3 @@ export type ToolCallStatus =
       error?: unknown;
     }
   | { type: 'requires-action'; reason: 'interrupt' };
-
-/**
- * Extended type for tool call content parts with status information
- * Extends the base assistant-ui tool-call type with runtime status
- */
-export interface ToolCallContentPart {
-  type: 'tool-call';
-  toolName?: string;
-  status?: ToolCallStatus;
-  isError?: boolean;
-}
