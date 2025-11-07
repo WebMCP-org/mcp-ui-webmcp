@@ -1,4 +1,5 @@
 import { ExternalLink, Wallet } from 'lucide-react';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -56,13 +57,17 @@ export function QuotaExhaustedModal({
   quotaLimit,
   onAddApiKey,
 }: QuotaExhaustedModalProps) {
+  useEffect(() => {
+    console.log('[Quota Modal] Modal render - open:', open, 'spent:', totalSpent, 'limit:', quotaLimit);
+  }, [open, totalSpent, quotaLimit]);
+
   const handleDownloadExtension = () => {
     window.open('https://mcp-b.ai', '_blank', 'noopener,noreferrer');
   };
 
   return (
-    <Dialog open={open}>
-      <DialogContent showCloseButton={false} className="sm:max-w-md">
+    <Dialog open={open} onOpenChange={() => {/* Prevent closing - user must choose an option */}}>
+      <DialogContent showCloseButton={false} className="sm:max-w-md" onPointerDownOutside={(e) => e.preventDefault()} onEscapeKeyDown={(e) => e.preventDefault()}>
         <DialogHeader>
           <div className="flex items-center gap-3 mb-2">
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">

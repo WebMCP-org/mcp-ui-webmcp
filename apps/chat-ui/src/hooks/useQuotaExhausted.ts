@@ -48,8 +48,10 @@ export function useQuotaExhausted() {
   const [quotaInfo, setQuotaInfo] = useState<QuotaExhaustedInfo | null>(null);
 
   const triggerQuotaExhausted = (info: QuotaExhaustedInfo) => {
+    console.log('[Quota Hook] Triggering quota exhausted modal with info:', info);
     setQuotaInfo(info);
     setShowQuotaModal(true);
+    console.log('[Quota Hook] Modal state updated - showQuotaModal: true');
   };
 
   const closeQuotaModal = () => {
