@@ -4,21 +4,8 @@ import { Wrench } from 'lucide-react';
 import { useEffect, useState, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { usePrefersReducedMotion } from '@/hooks/useMediaQuery';
-
-type ToolStatus = 'idle' | 'running' | 'complete' | 'error';
-
-/**
- * Extended type for tool call content parts with status information
- * Extends the base assistant-ui tool-call type with runtime status
- */
-interface ToolCallPart {
-  type: 'tool-call';
-  toolName?: string;
-  status?: {
-    type: 'running' | 'complete' | 'incomplete' | 'requires-action';
-  };
-  isError?: boolean;
-}
+import { type ToolStatus } from './tool-status-badge';
+import { type ToolCallContentPart } from './types';
 
 /**
  * Smart text truncation that tries to preserve sentence boundaries
@@ -55,10 +42,14 @@ function getBorderColorForStatus(status: ToolStatus): string {
   switch (status) {
     case 'running':
       return 'border-blue-500';
-    case 'complete':
+    case 'completed':
       return 'border-green-500';
     case 'error':
       return 'border-destructive';
+    case 'cancelled':
+      return 'border-gray-500';
+    case 'waiting':
+      return 'border-yellow-500';
     default:
       return 'border-border/60';
   }
@@ -88,17 +79,21 @@ function getReadingTime(text: string): number {
  * - Blue (pulsing): Tool is running
  * - Green (solid): Tool completed successfully
  * - Red (solid): Tool encountered an error
- * - Gray (solid): Idle state
+ * - Yellow (solid): Waiting for action
+ * - Gray (solid): Cancelled or idle
  *
  * @param props - Component props
- * @param props.status - Current tool status
+ * @param props.status - Current tool status from tool-status-badge
+ * @see {@link tool-status-badge.tsx} for ToolStatus type definition
  */
 function StatusDot({ status }: { status: ToolStatus }) {
   const colors = {
     idle: 'bg-gray-400',
     running: 'bg-blue-500',
-    complete: 'bg-green-500',
+    completed: 'bg-green-500',
     error: 'bg-destructive',
+    cancelled: 'bg-gray-500',
+    waiting: 'bg-yellow-500',
   };
 
   return (
@@ -183,7 +178,7 @@ export function StreamingOverlay() {
         const textContent = textParts.map((part) => part.text).join(' ');
 
         const toolCalls = lastMessage.content.filter(
-          (part): part is ToolCallPart => part.type === 'tool-call'
+          (part): part is ToolCallContentPart => part.type === 'tool-call'
         );
 
         if (toolCalls.length > 0) {
@@ -202,7 +197,7 @@ export function StreamingOverlay() {
           } else if (hasError) {
             setToolStatus('error');
           } else if (lastMessage.status?.type === 'complete') {
-            setToolStatus('complete');
+            setToolStatus('completed');
           } else {
             setToolStatus('running');
           }
