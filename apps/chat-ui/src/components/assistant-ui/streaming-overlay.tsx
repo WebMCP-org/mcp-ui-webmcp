@@ -33,7 +33,6 @@ interface ToolCallPart {
 function getDisplayText(text: string, maxChars = 100): { text: string; isTruncated: boolean } {
   if (text.length <= maxChars) return { text, isTruncated: false };
 
-  // Try to find last sentence boundary
   const truncated = text.slice(-maxChars);
   const sentenceStart = truncated.search(/[.!?]\s+/);
 
@@ -41,7 +40,6 @@ function getDisplayText(text: string, maxChars = 100): { text: string; isTruncat
     return { text: truncated.slice(sentenceStart + 2), isTruncated: true };
   }
 
-  // Fall back to word boundary
   const wordStart = truncated.indexOf(' ');
   const finalText = wordStart > 0 ? '...' + truncated.slice(wordStart) : truncated;
   return { text: finalText, isTruncated: true };
@@ -77,9 +75,10 @@ function getBorderColorForStatus(status: ToolStatus): string {
  */
 function getReadingTime(text: string): number {
   const wordCount = text.split(/\s+/).length;
-  const readingTime = wordCount * 200; // ~200ms per word
-  // Min 2s, max 5s
-  return Math.min(Math.max(readingTime, 2000), 5000);
+  const readingTime = wordCount * 200;
+  const minReadingTime = 2000;
+  const maxReadingTime = 5000;
+  return Math.min(Math.max(readingTime, minReadingTime), maxReadingTime);
 }
 
 /**
@@ -173,7 +172,6 @@ export function StreamingOverlay() {
   const [isStreaming, setIsStreaming] = useState(false);
   const [isDismissable, setIsDismissable] = useState(false);
 
-  // Subscribe to thread updates
   useEffect(() => {
     const unsubscribe = runtime.thread.subscribe(() => {
       const threadState = runtime.thread.getState();
@@ -188,12 +186,10 @@ export function StreamingOverlay() {
           (part): part is ToolCallPart => part.type === 'tool-call'
         );
 
-        // Update tool status
         if (toolCalls.length > 0) {
           const names = toolCalls.map((tc) => tc.toolName || 'tool').join(', ');
           setToolNames(names);
 
-          // Determine status based on message state
           const hasRunning = toolCalls.some((tc) => {
             return tc.status?.type === 'running';
           });
@@ -215,11 +211,9 @@ export function StreamingOverlay() {
           setToolStatus('idle');
         }
 
-        // Update streaming state
         const isCurrentlyStreaming = lastMessage.status?.type !== 'complete' && textContent.trim().length > 0;
         setIsStreaming(isCurrentlyStreaming);
 
-        // Update display text and visibility
         if (textContent.trim()) {
           const { text } = getDisplayText(textContent);
           setDisplayText(text);
@@ -237,17 +231,13 @@ export function StreamingOverlay() {
     return () => unsubscribe();
   }, [runtime.thread]);
 
-  // Smart auto-hide logic
   useEffect(() => {
     if (!visible) return;
 
-    // Don't hide while tool is actively running
     if (toolStatus === 'running') return;
 
-    // Don't hide while actively streaming
     if (isStreaming) return;
 
-    // Calculate adaptive hide delay based on content
     const hideDelay = getReadingTime(displayText);
 
     const timer = setTimeout(() => {
@@ -257,7 +247,6 @@ export function StreamingOverlay() {
     return () => clearTimeout(timer);
   }, [visible, displayText, toolStatus, isStreaming]);
 
-  // Make dismissable after initial display
   useEffect(() => {
     if (!visible) {
       setIsDismissable(false);
@@ -271,10 +260,8 @@ export function StreamingOverlay() {
     return () => clearTimeout(timer);
   }, [visible]);
 
-  // Memoize border color
   const borderColor = useMemo(() => getBorderColorForStatus(toolStatus), [toolStatus]);
 
-  // Handle click to dismiss
   const handleClick = () => {
     if (isDismissable && !isStreaming && toolStatus !== 'running') {
       setVisible(false);
@@ -312,7 +299,6 @@ export function StreamingOverlay() {
       onClick={handleClick}
     >
       <div className="space-y-2">
-        {/* Tool name display with status */}
         {toolNames && (
           <div className="flex items-center gap-2">
             <span className="text-xs text-muted-foreground shrink-0">Using:</span>
@@ -326,7 +312,6 @@ export function StreamingOverlay() {
           </div>
         )}
 
-        {/* Text content with streaming indicator */}
         {displayText && (
           <div className="flex items-start gap-1">
             <div
@@ -349,7 +334,6 @@ export function StreamingOverlay() {
           </div>
         )}
 
-        {/* Subtle tap hint when dismissable */}
         {isDismissable && !isStreaming && toolStatus !== 'running' && (
           <motion.div
             initial={{ opacity: 0 }}
