@@ -13,7 +13,7 @@ app.use(
   '/*',
   cors({
     origin: '*',
-    allowHeaders: ['Content-Type', 'X-Anthropic-API-Key', 'X-Device-ID', 'sentry-trace', 'baggage', '*'],
+    allowHeaders: ['Content-Type', 'X-Anthropic-API-Key', 'X-Device-ID', 'X-Playground-Source', 'sentry-trace', 'baggage', '*'],
     allowMethods: ['*'],
     exposeHeaders: ['*'],
   })
@@ -21,21 +21,27 @@ app.use(
 
 app.post('/api/chat', async (c) => {
   try {
-    let apiKey = c.req.header('X-Anthropic-API-Key');
+    const isPlaygroundRequest = c.req.header('X-Playground-Source') === 'mcp-b-playground';
 
-    if (!apiKey) {
+    let apiKey: string | undefined;
+    if (isPlaygroundRequest) {
       apiKey = c.env?.ANTHROPIC_API_KEY;
+    } else {
+      apiKey = c.req.header('X-Anthropic-API-Key');
+      if (!apiKey) {
+        apiKey = c.env?.ANTHROPIC_API_KEY;
+      }
     }
 
     if (!apiKey) {
       return c.json({ error: 'Anthropic API key is required' }, 401);
     }
 
-    const usingOwnApiKey = c.req.header('X-Anthropic-API-Key') !== undefined;
+    const usingOwnApiKey = !isPlaygroundRequest && c.req.header('X-Anthropic-API-Key') !== undefined;
 
     let quotaStub: DurableObjectStub<UsageQuota> | null = null;
     let deviceId: string | null = null;
-    if (!usingOwnApiKey) {
+    if (!usingOwnApiKey && !isPlaygroundRequest) {
       deviceId = c.req.header('X-Device-ID') || null;
       if (!deviceId) {
         return c.json({ error: 'Device ID required when using default API key' }, 400);
