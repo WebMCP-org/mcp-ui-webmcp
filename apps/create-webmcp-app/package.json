@@ -11,7 +11,8 @@
     "templates"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "pnpm run copy-templates && tsc",
+    "copy-templates": "rm -rf templates && mkdir -p templates && cp -r ../../templates/react templates/react && cp -r ../../templates/vanilla templates/vanilla && find templates -name 'node_modules' -type d -prune -exec rm -rf '{}' + && find templates -name 'dist' -type d -prune -exec rm -rf '{}' + && find templates -name '.turbo' -type d -prune -exec rm -rf '{}' + && find templates -name 'tsconfig.tsbuildinfo' -delete && find templates -name 'worker-configuration.d.ts' -delete",
     "dev": "tsc --watch",
     "prepublishOnly": "npm run build"
   },

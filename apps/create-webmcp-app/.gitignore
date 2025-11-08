@@ -3,3 +3,7 @@ node_modules
 
 # Don't ignore dist - it's needed for npx
 # dist/
+
+# Copied templates (generated during build)
+templates
+*.tgz
