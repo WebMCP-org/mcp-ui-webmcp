@@ -77,6 +77,16 @@ Open http://localhost:5173 and ask the AI to show you a TicTacToe game.
 
 ## Architecture
 
+### Key Principle: Decoupled Architecture
+
+**The chat UI and embedded apps have no custom knowledge of each other.** They communicate exclusively through standard protocols:
+
+- **Chat UI** discovers tools via the MCP protocol (HTTP/SSE)
+- **Embedded apps** register tools via the WebMCP protocol (postMessage)
+- **Prompts and tools** declared in the MCP server are automatically discovered and available in the UI
+
+No hardcoding, no configuration files. Just standards-based protocols enabling dynamic composition.
+
 ### WebMCP vs MCP-B
 
 **WebMCP** is the W3C standard specification for bidirectional tool registration in browsers, defining the `navigator.modelContext` API. **MCP-B** is the reference implementation and polyfill that makes WebMCP available today.

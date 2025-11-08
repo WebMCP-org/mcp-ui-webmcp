@@ -366,12 +366,26 @@ apps/chat-ui/
 
 ## MCP Integration
 
+### Decoupled Architecture
+
+**This chat UI has no custom knowledge of MCP servers or embedded apps.** Everything is dynamically discovered through standard protocols:
+
+- **Tools & Prompts**: Automatically discovered from the MCP server via HTTP/SSE
+- **Embedded Apps**: Register tools dynamically via WebMCP (postMessage protocol)
+- **No Configuration**: Add new tools to your MCP server and they immediately appear in the UI
+- **No Hardcoding**: Embedded apps can register/unregister tools at runtime without UI changes
+
+### How It Works
+
 The chat UI connects to an MCP server and:
 
-1. Lists available tools from the server
-2. Allows the AI to call tools dynamically
-3. Displays MCP UI resources (iframes, HTML) in the side panel
-4. Supports WebMCP for dynamic tool registration from embedded apps
+1. **Discovers** available tools and prompts from the server via MCP protocol
+2. **Executes** AI tool calls dynamically based on discovered capabilities
+3. **Renders** MCP UI resources (iframes, HTML) in the side panel
+4. **Listens** for WebMCP tool registrations from embedded apps via postMessage
+5. **Routes** tool calls to the appropriate handler (MCP server or embedded app)
+
+This architecture enables complete separation of concerns: the chat UI is a generic MCP client that works with any MCP server, and embedded apps are self-contained modules that register their own capabilities.
 
 ## Development Workflow
 
