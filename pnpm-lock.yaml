@@ -390,7 +390,7 @@ importers:
         specifier: ^4.1.10
         version: 4.1.16
       zod:
-        specifier: 'catalog:'
+        specifier: ^3.25.1
         version: 3.25.76
     devDependencies:
       '@cloudflare/vite-plugin':
@@ -399,6 +399,9 @@ importers:
       '@eslint/js':
         specifier: ^9.33.0
         version: 9.39.1
+      '@types/node':
+        specifier: ^24.9.2
+        version: 24.10.0
       '@types/react':
         specifier: ^19.1.10
         version: 19.2.2
