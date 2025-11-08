@@ -13,13 +13,14 @@
   "homepage": "https://github.com/WebMCP-org/mcp-ui-webmcp/tree/main/templates/react#readme",
   "license": "MIT",
   "scripts": {
-    "build": "tsc -b && vite build",
+    "build": "pnpm cf-typegen && tsc -b && vite build",
     "cf-typegen": "wrangler types",
     "deploy": "bash deploy.sh",
     "dev": "wrangler dev --port 8888",
     "lint": "eslint .",
-    "typecheck": "tsc -b --noEmit",
-    "preview": "vite preview"
+    "typecheck": "pnpm cf-typegen && tsc -b --noEmit",
+    "preview": "vite preview",
+    "postinstall": "pnpm cf-typegen"
   },
   "dependencies": {
     "@mcp-b/global": "^1.1.2",

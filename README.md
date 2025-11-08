@@ -45,7 +45,7 @@ This pattern works for any embedded application: forms, visualizations, interact
 Use our interactive CLI to scaffold a new project:
 
 ```bash
-npx create-webmcp-app
+npx @mcp-b/create-webmcp-app
 ```
 
 Choose between:

@@ -17,7 +17,8 @@
     "deploy": "bash deploy.sh",
     "dev": "wrangler dev --port 8889",
     "lint": "eslint .",
-    "typecheck": "tsc -b --noEmit"
+    "typecheck": "pnpm cf-typegen && tsc -b --noEmit",
+    "postinstall": "pnpm cf-typegen"
   },
   "dependencies": {
     "@mcp-ui/server": "^5.2.0",

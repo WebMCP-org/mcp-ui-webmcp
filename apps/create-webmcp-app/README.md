@@ -6,16 +6,16 @@ Interactive CLI for scaffolding new WebMCP applications.
 
 ```bash
 # Using npx (recommended)
-npx create-webmcp-app
+npx @mcp-b/create-webmcp-app
 
 # Using pnpm
-pnpm create webmcp-app
+pnpm dlx @mcp-b/create-webmcp-app
 
 # Using npm
-npm create webmcp-app
+npx @mcp-b/create-webmcp-app
 
 # Using bun
-bun create webmcp-app
+bunx @mcp-b/create-webmcp-app
 ```
 
 ## What It Does
@@ -64,7 +64,7 @@ Perfect for:
 ## Example
 
 ```bash
-$ npx create-webmcp-app
+$ npx @mcp-b/create-webmcp-app
 
 ┌  create-webmcp-app
 │

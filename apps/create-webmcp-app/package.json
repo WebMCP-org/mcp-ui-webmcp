@@ -1,6 +1,6 @@
 {
-  "name": "create-webmcp-app",
-  "version": "1.0.0",
+  "name": "@mcp-b/create-webmcp-app",
+  "version": "1.0.1",
   "description": "Create a new WebMCP app with interactive template selection",
   "type": "module",
   "bin": {
