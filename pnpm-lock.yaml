@@ -244,12 +244,24 @@ importers:
         specifier: ^1.1.1
         version: 1.1.1
     devDependencies:
+      '@eslint/js':
+        specifier: ^9.33.0
+        version: 9.39.1
       '@types/node':
         specifier: 'catalog:'
         version: 24.10.0
+      eslint:
+        specifier: ^9.33.0
+        version: 9.39.1(jiti@2.6.1)
+      globals:
+        specifier: ^16.3.0
+        version: 16.5.0
       typescript:
         specifier: 'catalog:'
         version: 5.8.3
+      typescript-eslint:
+        specifier: ^8.39.1
+        version: 8.46.3(eslint@9.39.1(jiti@2.6.1))(typescript@5.8.3)
 
   apps/mcp-server:
     dependencies:

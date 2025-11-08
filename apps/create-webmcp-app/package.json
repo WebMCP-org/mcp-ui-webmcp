@@ -13,6 +13,8 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -35,7 +37,11 @@
     "picocolors": "^1.1.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.33.0",
     "@types/node": "catalog:",
-    "typescript": "catalog:"
+    "eslint": "^9.33.0",
+    "globals": "^16.3.0",
+    "typescript": "catalog:",
+    "typescript-eslint": "^8.39.1"
   }
 }
