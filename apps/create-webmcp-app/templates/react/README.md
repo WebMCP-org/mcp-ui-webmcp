@@ -43,6 +43,18 @@ This starts:
 - **SSE endpoint**: http://localhost:8888/sse
 - **Template app**: http://localhost:8888/
 
+### Testing WebMCP Tools
+
+You can test the WebMCP tools registered by your app using the [MCP-B Chrome Extension](https://chromewebstore.google.com/detail/mcp-b/fkhbffeojcfadbkpldmbjlbfocgknjlj):
+
+1. Start the development server: `pnpm dev`
+2. Visit http://localhost:8888/ in Chrome
+3. Open the MCP-B Chrome Extension
+4. You'll see your registered WebMCP tools (`template_get_message`, `template_update_message`, `template_reset`)
+5. Test calling the tools directly from the extension
+
+This is perfect for debugging and testing your tools without needing a full chat UI!
+
 ### Building
 
 ```bash

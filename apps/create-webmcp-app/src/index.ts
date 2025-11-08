@@ -102,25 +102,14 @@ async function main() {
   // Copy template files
   s.start('Copying template files');
   const templateType = project.template as string; // 'vanilla' or 'react'
-  const templateSource = join(__dirname, '..', '..', '..', 'templates', templateType);
+  const templateSource = join(__dirname, '..', 'templates', templateType);
 
-  // Check if we're in the repo (development) or using published package
-  const isInRepo = existsSync(templateSource);
-
-  if (isInRepo) {
-    // Development mode - copy from repo
-    copyTemplate(templateSource, targetDir, templateType);
-  } else {
-    // Published package mode - templates are bundled
-    const bundledTemplate = join(__dirname, '..', 'templates', templateType);
-    if (existsSync(bundledTemplate)) {
-      copyTemplate(bundledTemplate, targetDir, templateType);
-    } else {
-      p.cancel(`Template not found: ${templateType}`);
-      process.exit(1);
-    }
+  if (!existsSync(templateSource)) {
+    p.cancel(`Template not found: ${templateType}`);
+    process.exit(1);
   }
 
+  copyTemplate(templateSource, targetDir, templateType);
   s.stop('Template files copied');
 
   // Install dependencies
