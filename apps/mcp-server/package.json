@@ -16,6 +16,7 @@
     "build": "tsc -b && vite build",
     "cf-typegen": "wrangler types",
     "deploy": "bash deploy.sh",
+    "predev": "pnpm run build",
     "dev": "wrangler dev --port 8888",
     "lint": "eslint .",
     "typecheck": "tsc -b --noEmit",

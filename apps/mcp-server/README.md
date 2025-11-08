@@ -47,6 +47,8 @@ pnpm install
 pnpm dev
 ```
 
+**Note**: The dev script automatically runs `pnpm build` first to ensure static assets are available. This is required because the MCP server needs the compiled UI assets in the `dist/` directory to serve the web application.
+
 This starts:
 - **MCP endpoint**: http://localhost:8888/mcp
 - **SSE endpoint**: http://localhost:8888/sse
