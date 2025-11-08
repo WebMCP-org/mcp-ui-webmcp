@@ -4,6 +4,12 @@ node_modules
 # Don't ignore dist - it's needed for npx
 # dist/
 
-# Copied templates (generated during build)
-templates
+# Build artifacts
 *.tgz
+
+# Generated files in templates (from local development)
+templates/**/node_modules
+templates/**/dist
+templates/**/.turbo
+templates/**/tsconfig.tsbuildinfo
+templates/**/worker-configuration.d.ts
