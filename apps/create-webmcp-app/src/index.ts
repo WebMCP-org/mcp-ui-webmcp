@@ -10,8 +10,13 @@
 import * as p from '@clack/prompts';
 import { execSync } from 'child_process';
 import { existsSync, mkdirSync, cpSync, writeFileSync, readFileSync } from 'fs';
-import { join, resolve } from 'path';
+import { join, resolve, dirname } from 'path';
+import { fileURLToPath } from 'url';
 import pc from 'picocolors';
+
+// ES module __dirname polyfill
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 interface Template {
   name: string;
