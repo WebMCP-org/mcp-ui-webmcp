@@ -29,8 +29,8 @@
   "dependencies": {
     "@mcp-b/global": "^1.1.2",
     "@mcp-b/react-webmcp": "^0.1.5",
-    "@mcp-ui/server": "^5.2.0",
-    "@modelcontextprotocol/sdk": "^1.20.2",
+    "@mcp-ui/server": "^5.13.1",
+    "@modelcontextprotocol/sdk": "^1.21.1",
     "@tailwindcss/vite": "^4.1.17",
     "agents": "^0.2.20",
     "clsx": "^2.1.1",

@@ -21,8 +21,8 @@
     "postinstall": "pnpm cf-typegen"
   },
   "dependencies": {
-    "@mcp-ui/server": "^5.2.0",
-    "@modelcontextprotocol/sdk": "^1.20.2",
+    "@mcp-ui/server": "^5.13.1",
+    "@modelcontextprotocol/sdk": "^1.21.1",
     "agents": "^0.2.20",
     "hono": "^4.10.4"
   },
