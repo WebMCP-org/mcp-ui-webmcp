@@ -55,7 +55,7 @@ importers:
         version: 0.1.5(react@19.2.0)(zod@3.25.76)
       '@mcp-b/transports':
         specifier: ^1.1.1
-        version: 1.1.1(@modelcontextprotocol/sdk@1.21.0)
+        version: 1.1.1(@modelcontextprotocol/sdk@1.21.1)
       '@mcp-b/webmcp-ts-sdk':
         specifier: ^1.0.1
         version: 1.0.1
@@ -63,8 +63,8 @@ importers:
         specifier: ^5.14.1
         version: 5.14.1(@preact/signals-core@1.12.1)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@modelcontextprotocol/sdk':
-        specifier: ^1.20.2
-        version: 1.21.0
+        specifier: ^1.21.1
+        version: 1.21.1
       '@radix-ui/react-avatar':
         specifier: ^1.1.10
         version: 1.1.11(@types/react-dom@19.2.2(@types/react@19.2.2))(@types/react@19.2.2)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -267,16 +267,16 @@ importers:
     dependencies:
       '@mcp-b/global':
         specifier: ^1.1.2
-        version: 1.1.2(@modelcontextprotocol/sdk@1.21.0)
+        version: 1.1.2(@modelcontextprotocol/sdk@1.21.1)
       '@mcp-b/react-webmcp':
         specifier: ^0.1.5
         version: 0.1.5(react@19.2.0)(zod@3.25.76)
       '@mcp-ui/server':
-        specifier: ^5.2.0
+        specifier: ^5.13.1
         version: 5.13.1
       '@modelcontextprotocol/sdk':
-        specifier: ^1.20.2
-        version: 1.21.0
+        specifier: ^1.21.1
+        version: 1.21.1
       '@tailwindcss/vite':
         specifier: ^4.1.17
         version: 4.1.17(vite@7.1.12(@types/node@24.10.0)(jiti@2.6.1)(lightningcss@1.30.2))
@@ -1388,8 +1388,8 @@ packages:
     resolution: {integrity: sha512-67hnl/ROKdb03Vuu0YOr+baKTvf1/5YBHBm9KnZdjdAh8hjt4FRCPD5ucwxGB237sBpzlqQsLy1PFu7z/ekZ9Q==}
     engines: {node: '>=18'}
 
-  '@modelcontextprotocol/sdk@1.21.0':
-    resolution: {integrity: sha512-YFBsXJMFCyI1zP98u7gezMFKX4lgu/XpoZJk7ufI6UlFKXLj2hAMUuRlQX/nrmIPOmhRrG6tw2OQ2ZA/ZlXYpQ==}
+  '@modelcontextprotocol/sdk@1.21.1':
+    resolution: {integrity: sha512-UyLFcJLDvUuZbGnaQqXFT32CpPpGj7VS19roLut6gkQVhb439xUzYWbsUvdI3ZPL+2hnFosuugtYWE0Mcs1rmQ==}
     engines: {node: '>=18'}
     peerDependencies:
       '@cfworker/json-schema': ^4.1.1
@@ -5617,10 +5617,10 @@ snapshots:
       - '@modelcontextprotocol/sdk'
       - supports-color
 
-  '@mcp-b/global@1.1.2(@modelcontextprotocol/sdk@1.21.0)':
+  '@mcp-b/global@1.1.2(@modelcontextprotocol/sdk@1.21.1)':
     dependencies:
       '@composio/json-schema-to-zod': 0.1.18(zod@3.25.76)
-      '@mcp-b/transports': 1.1.1(@modelcontextprotocol/sdk@1.21.0)
+      '@mcp-b/transports': 1.1.1(@modelcontextprotocol/sdk@1.21.1)
       '@mcp-b/webmcp-ts-sdk': 1.0.1
       zod: 3.25.76
     transitivePeerDependencies:
@@ -5643,9 +5643,9 @@ snapshots:
       '@modelcontextprotocol/sdk': 1.15.0
       zod: 3.25.76
 
-  '@mcp-b/transports@1.1.1(@modelcontextprotocol/sdk@1.21.0)':
+  '@mcp-b/transports@1.1.1(@modelcontextprotocol/sdk@1.21.1)':
     dependencies:
-      '@modelcontextprotocol/sdk': 1.21.0
+      '@modelcontextprotocol/sdk': 1.21.1
       zod: 3.25.76
 
   '@mcp-b/webmcp-ts-sdk@1.0.1':
@@ -5656,7 +5656,7 @@ snapshots:
 
   '@mcp-ui/client@5.14.1(@preact/signals-core@1.12.1)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)':
     dependencies:
-      '@modelcontextprotocol/sdk': 1.21.0
+      '@modelcontextprotocol/sdk': 1.21.1
       '@quilted/threads': 3.3.1(@preact/signals-core@1.12.1)
       '@r2wc/react-to-web-component': 2.1.0(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
       '@remote-dom/core': 1.10.1(@preact/signals-core@1.12.1)
@@ -5671,7 +5671,7 @@ snapshots:
 
   '@mcp-ui/server@5.13.1':
     dependencies:
-      '@modelcontextprotocol/sdk': 1.21.0
+      '@modelcontextprotocol/sdk': 1.21.1
     transitivePeerDependencies:
       - '@cfworker/json-schema'
       - supports-color
@@ -5693,7 +5693,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@modelcontextprotocol/sdk@1.21.0':
+  '@modelcontextprotocol/sdk@1.21.1':
     dependencies:
       ajv: 8.17.1
       ajv-formats: 3.0.1(ajv@8.17.1)
@@ -6928,7 +6928,7 @@ snapshots:
   agents@0.2.20(@cloudflare/workers-types@4.20251014.0)(react@19.2.0)(typescript@5.8.3):
     dependencies:
       '@ai-sdk/openai': 2.0.53(zod@3.25.76)
-      '@modelcontextprotocol/sdk': 1.21.0
+      '@modelcontextprotocol/sdk': 1.21.1
       ai: 5.0.78(zod@3.25.76)
       cron-schedule: 5.0.4
       json-schema: 0.4.0
