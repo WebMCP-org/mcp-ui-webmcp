@@ -65,17 +65,39 @@
 
   <!-- Application Logic -->
   <script>
-    // App state
+    /**
+     * Get the parent origin for secure postMessage communication
+     *
+     * Priority order:
+     * 1. Environment variable (if using a build tool like Vite)
+     * 2. document.referrer (if available)
+     * 3. '*' as fallback (insecure, should only be used in development)
+     */
+    function getParentOrigin() {
+      if (document.referrer) {
+        try {
+          return new URL(document.referrer).origin;
+        } catch (e) {
+          console.warn('[App] Failed to parse document.referrer:', e);
+        }
+      }
+
+      console.warn(
+        '[App] Using wildcard (*) for parent origin. ' +
+        'For production, configure document.referrer or use a specific origin.'
+      );
+      return '*';
+    }
+
     let isReady = false;
     let message = 'Hello from WebMCP Template!';
+    const parentOrigin = getParentOrigin();
 
-    // DOM elements
     const statusEl = document.getElementById('status');
     const messageEl = document.getElementById('message');
     const btnUpdate = document.getElementById('btn-update');
     const btnReset = document.getElementById('btn-reset');
 
-    // Update UI based on state
     function updateUI() {
       messageEl.textContent = message;
 
@@ -100,8 +122,14 @@
       }
     }
 
-    // Listen for parent ready event
     window.addEventListener('message', (event) => {
+      if (parentOrigin !== '*' && event.origin !== parentOrigin) {
+        console.warn(
+          `[App] Rejected message from origin ${event.origin}, expected ${parentOrigin}`
+        );
+        return;
+      }
+
       if (event.data?.type === 'parent_ready') {
         isReady = true;
         updateUI();
@@ -109,10 +137,8 @@
       }
     });
 
-    // Notify parent we're ready
-    window.parent.postMessage({ type: 'iframe_ready' }, '*');
+    window.parent.postMessage({ type: 'iframe_ready' }, parentOrigin);
 
-    // Button event handlers
     btnUpdate.addEventListener('click', () => {
       const newMessage = prompt('Enter new message:');
       if (newMessage) {

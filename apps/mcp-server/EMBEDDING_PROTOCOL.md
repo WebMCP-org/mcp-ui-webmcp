@@ -415,28 +415,50 @@ try {
 
 ## Security Considerations
 
+**⚠️ IMPORTANT**: For comprehensive security guidance, see [SECURITY.md](../../SECURITY.md) in the repository root. This section provides a quick reference for common security patterns.
+
 ### Origin Validation
 
 Always validate the origin of incoming messages in production:
 
 ```javascript
+const ALLOWED_ORIGINS = [
+  'https://parent.example.com',
+  'http://localhost:5173', // Development only
+];
+
 window.addEventListener("message", (event) => {
-  // Replace with your expected origin
-  if (event.origin !== "https://your-expected-origin.com") {
+  // Validate origin against allowlist
+  if (!ALLOWED_ORIGINS.includes(event.origin)) {
+    console.warn('Rejected message from unauthorized origin:', event.origin);
     return; // Ignore messages from unknown origins
   }
 
+  // Validate message structure
+  if (!isValidMessage(event.data)) {
+    console.warn('Invalid message structure:', event.data);
+    return;
+  }
+
   // Process message
+  handleMessage(event.data);
 });
 ```
 
 ### Target Origin
 
-When sending messages, specify the target origin instead of using `*`:
+When sending messages, **ALWAYS** specify the target origin instead of using `*`:
 
 ```javascript
-window.parent.postMessage(message, "https://parent-origin.com");
+// ❌ NEVER DO THIS (security vulnerability)
+window.parent.postMessage(message, '*');
+
+// ✅ ALWAYS specify the exact origin
+const PARENT_ORIGIN = 'https://parent.example.com';
+window.parent.postMessage(message, PARENT_ORIGIN);
 ```
+
+**Why this matters**: Using `'*'` allows any website to receive your messages, potentially leaking sensitive data.
 
 ### Data Validation
 
@@ -455,14 +477,224 @@ function isValidMessage(data: unknown): data is Message {
 }
 
 window.addEventListener("message", (event) => {
+  // 1. Validate origin
+  if (!ALLOWED_ORIGINS.includes(event.origin)) {
+    return;
+  }
+
+  // 2. Validate message structure
   if (!isValidMessage(event.data)) {
     console.warn('Invalid message received:', event.data);
     return;
   }
 
-  // Process valid message
+  // 3. Validate message source (for parent validating iframe)
+  const expectedIframe = document.getElementById('my-iframe') as HTMLIFrameElement;
+  if (event.source !== expectedIframe?.contentWindow) {
+    console.warn('Message source does not match expected iframe');
+    return;
+  }
+
+  // 4. Process valid message
+  handleMessage(event.data);
 });
 ```
+
+### Iframe Security Attributes
+
+When embedding iframes, apply proper security attributes:
+
+#### Recommended Configuration (Trusted Embed with Authentication)
+
+```html
+<iframe
+  id="trusted-embed"
+  src="https://embed.example.com"
+  sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+  csp="default-src 'self'; connect-src 'self' https://api.embed.example.com; script-src 'self'"
+  allow="storage-access 'src'"
+  style="width: 100%; height: 600px; border: none;"
+></iframe>
+```
+
+**Attributes explained**:
+- `sandbox`: Restricts iframe capabilities (see [Sandbox Flags](#sandbox-flags) below)
+- `csp`: CSP Embedded Enforcement - constrains what the iframe can load/connect to
+- `allow`: Permissions Policy - controls browser feature access
+
+#### Sandbox Flags
+
+Choose sandbox flags based on trust level and requirements:
+
+**For trusted embeds with authentication**:
+```html
+sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
+```
+
+**For untrusted content**:
+```html
+sandbox="allow-scripts"
+```
+
+**⚠️ WARNING**: Never combine `allow-scripts` and `allow-same-origin` for untrusted content. This combination removes sandbox protection.
+
+**Common sandbox flags**:
+- `allow-same-origin`: Allows access to origin's cookies/storage (required for authentication)
+- `allow-scripts`: Enables JavaScript (required for WebMCP)
+- `allow-forms`: Allows form submission
+- `allow-popups`: Permits opening popups
+- `allow-popups-to-escape-sandbox`: Popups escape sandbox (use cautiously)
+- `allow-top-navigation`: Allows navigating parent window (dangerous)
+
+See [SECURITY.md](../../SECURITY.md#2-iframe-sandbox-attributes) for complete sandbox documentation.
+
+#### Content Security Policy (CSP) Embedded Enforcement
+
+Use the `csp` attribute to enforce restrictions on what the iframe can load:
+
+```html
+<iframe
+  src="https://embed.example.com"
+  csp="default-src 'self'; connect-src 'self' https://api.embed.example.com; script-src 'self'; style-src 'self' 'unsafe-inline';"
+  sandbox="allow-same-origin allow-scripts allow-forms"
+></iframe>
+```
+
+**Key CSP directives for iframes**:
+- `default-src 'self'`: Only load resources from iframe's origin
+- `connect-src`: Restricts fetch/XHR/WebSocket destinations
+- `script-src`: Controls JavaScript sources
+- `style-src`: Controls CSS sources
+- `frame-ancestors`: Controls who can embed this iframe (set in iframe's response)
+
+**Benefits**:
+- Parent can grant `allow-same-origin` (real credentials) while constraining network access
+- Prevents iframe from connecting to arbitrary origins
+- Eliminates need for parent-proxy fetches in trusted scenarios
+
+#### Permissions Policy
+
+Control browser feature access with the `allow` attribute:
+
+```html
+<iframe
+  src="https://embed.example.com"
+  sandbox="allow-same-origin allow-scripts allow-forms"
+  allow="camera 'none'; microphone 'none'; geolocation 'none'; payment 'none'; storage-access 'src'"
+></iframe>
+```
+
+**Common permissions**:
+- `camera`, `microphone`: Media device access
+- `geolocation`: Location services
+- `payment`: Payment Request API
+- `storage-access`: Storage Access API (for cookie access)
+- `clipboard-read`, `clipboard-write`: Clipboard operations
+- `fullscreen`: Fullscreen mode
+
+**Syntax**:
+- `'none'`: Deny to all
+- `'self'`: Allow only for parent origin
+- `'src'`: Allow for iframe's origin
+- `'*'`: Allow for all (avoid in production)
+- Specific origins: `https://embed.example.com`
+
+### Content Security Policy Headers (Parent Page)
+
+Set CSP headers on the parent page to control what can be embedded:
+
+```http
+Content-Security-Policy:
+  default-src 'self';
+  frame-src https://trusted-embed.example.com http://localhost:8888;
+  connect-src 'self' https://api.example.com;
+  script-src 'self' 'unsafe-inline' 'unsafe-eval';
+  style-src 'self' 'unsafe-inline';
+```
+
+**Key directives**:
+- `frame-src`: Restricts iframe sources (replaces deprecated `child-src`)
+- `connect-src`: Controls fetch/XHR/WebSocket destinations
+- `default-src`: Fallback for other directives
+
+### CORS Configuration
+
+Restrict CORS headers to specific origins in production:
+
+```typescript
+// ❌ Development (permissive for debugging)
+const devCorsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': '*',
+  'Access-Control-Allow-Methods': '*',
+};
+
+// ✅ Production (restrictive)
+const ALLOWED_ORIGINS = [
+  'https://app.example.com',
+  'https://chat.example.com',
+];
+
+function getProductionCorsHeaders(requestOrigin: string | null) {
+  const isAllowed = requestOrigin && ALLOWED_ORIGINS.includes(requestOrigin);
+
+  return {
+    'Access-Control-Allow-Origin': isAllowed ? requestOrigin : ALLOWED_ORIGINS[0],
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Device-ID',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Max-Age': '86400',
+  };
+}
+```
+
+### Partitioned Cookies (CHIPS)
+
+For embedded apps that need authentication, use partitioned cookies:
+
+```http
+Set-Cookie: session=abc123;
+  SameSite=None;
+  Secure;
+  Partitioned;
+  Path=/;
+  Max-Age=86400
+```
+
+**Benefits**:
+- Cookies keyed by (iframe-origin, top-level-site)
+- Prevents cross-site tracking
+- No user consent required
+- Separate sessions per parent site
+
+**Browser support**: Chrome/Edge 118+, Safari/Firefox (partitioning enabled by default)
+
+### Security Checklist
+
+Before deploying to production:
+
+**For Parent Applications**:
+- [ ] Validate `event.origin` for all incoming postMessages
+- [ ] Validate `event.source` matches expected iframe
+- [ ] Use specific `targetOrigin` when sending postMessages (never `'*'`)
+- [ ] Set iframe `sandbox` attribute with minimal permissions
+- [ ] Set iframe `csp` attribute for CSP Embedded Enforcement
+- [ ] Set iframe `allow` attribute for Permissions Policy
+- [ ] Set CSP header with restricted `frame-src`
+- [ ] Use restrictive CORS headers (not `'*'`)
+- [ ] Implement message schema validation
+- [ ] Set up proper error handling
+
+**For Embedded Applications**:
+- [ ] Validate `event.origin` for all incoming postMessages
+- [ ] Use specific `targetOrigin` when sending postMessages (never `'*'`)
+- [ ] Set `frame-ancestors` CSP directive to whitelist parents
+- [ ] Use partitioned cookies for per-site authentication
+- [ ] Implement Storage Access API for unpartitioned cookies (if needed)
+- [ ] Set appropriate CORS headers
+- [ ] Implement message schema validation
+- [ ] Handle standalone vs. embedded modes
+- [ ] Test across browsers (Chrome, Safari, Firefox)
 
 ## TypeScript Types
 

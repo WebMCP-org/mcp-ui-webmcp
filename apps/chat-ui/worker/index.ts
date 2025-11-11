@@ -9,13 +9,80 @@ import type { UsageQuota } from './usageQuota';
 
 const app = new Hono<{ Bindings: Env }>();
 
-const getCorsHeaders = () => ({
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'Content-Type, X-Anthropic-API-Key, X-Device-ID, X-Playground-Source, sentry-trace, baggage, *',
-  'Access-Control-Allow-Methods': '*',
-  'Access-Control-Expose-Headers': '*',
-});
+/**
+ * Allowed origins for CORS
+ * In production, restrict this to your actual domains
+ */
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'http://localhost:8888',
+  'https://chat.webmcp.org', // Add your production domains here
+];
 
+/**
+ * Get CORS headers with origin validation
+ * Falls back to permissive '*' in development if origin not in allowlist
+ */
+const getCorsHeaders = (requestOrigin: string | null, isDevelopment: boolean = true) => {
+  if (!isDevelopment) {
+    const isAllowed = requestOrigin && ALLOWED_ORIGINS.includes(requestOrigin);
+    const allowedOrigin = isAllowed ? requestOrigin : ALLOWED_ORIGINS[0];
+
+    return {
+      'Access-Control-Allow-Origin': allowedOrigin,
+      'Access-Control-Allow-Headers': 'Content-Type, X-Anthropic-API-Key, X-Device-ID, X-Playground-Source, sentry-trace, baggage',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Max-Age': '86400',
+      'Access-Control-Expose-Headers': 'Content-Type, X-Request-Id',
+    };
+  }
+
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type, X-Anthropic-API-Key, X-Device-ID, X-Playground-Source, sentry-trace, baggage, *',
+    'Access-Control-Allow-Methods': '*',
+    'Access-Control-Expose-Headers': '*',
+  };
+};
+
+/**
+ * Get security headers including CSP
+ */
+const getSecurityHeaders = (isDevelopment: boolean = true) => {
+  const headers: Record<string, string> = {
+    'X-Frame-Options': 'SAMEORIGIN',
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+  };
+
+  if (!isDevelopment) {
+    headers['Content-Security-Policy'] = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: https:",
+      "font-src 'self' data:",
+      "connect-src 'self' https://api.anthropic.com",
+      "frame-src 'self' http://localhost:8888",
+      "frame-ancestors 'self'",
+    ].join('; ');
+  } else {
+    headers['Content-Security-Policy'] = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: https:",
+      "font-src 'self' data:",
+      "connect-src 'self' http://localhost:* ws://localhost:* https://api.anthropic.com",
+      "frame-src 'self' http://localhost:*",
+    ].join('; ');
+  }
+
+  return headers;
+};
+
+// Apply CORS middleware
 app.use(
   '/*',
   cors({
@@ -26,11 +93,26 @@ app.use(
   })
 );
 
-app.options('/api/chat', () => {
-  return new Response(null, { status: 204, headers: getCorsHeaders() });
+app.options('/api/chat', (c) => {
+  const origin = c.req.header('Origin');
+  const isDevelopment = c.env?.ENVIRONMENT !== 'production';
+  return new Response(null, {
+    status: 204,
+    headers: {
+      ...getCorsHeaders(origin, isDevelopment),
+      ...getSecurityHeaders(isDevelopment),
+    },
+  });
 });
 
 app.post('/api/chat', async (c) => {
+  const origin = c.req.header('Origin');
+  const isDevelopment = c.env?.ENVIRONMENT !== 'production';
+
+  const corsHeaders = getCorsHeaders(origin, isDevelopment);
+  const securityHeaders = getSecurityHeaders(isDevelopment);
+  const allHeaders = { ...corsHeaders, ...securityHeaders };
+
   try {
     const isPlaygroundRequest = c.req.header('X-Playground-Source') === 'mcp-b-playground';
 
@@ -45,7 +127,7 @@ app.post('/api/chat', async (c) => {
     }
 
     if (!apiKey) {
-      return c.json({ error: 'Anthropic API key is required' }, 401, getCorsHeaders());
+      return c.json({ error: 'Anthropic API key is required' }, 401, allHeaders);
     }
 
     const usingOwnApiKey = !isPlaygroundRequest && c.req.header('X-Anthropic-API-Key') !== undefined;
@@ -55,7 +137,7 @@ app.post('/api/chat', async (c) => {
     if (!usingOwnApiKey && !isPlaygroundRequest) {
       deviceId = c.req.header('X-Device-ID') || null;
       if (!deviceId) {
-        return c.json({ error: 'Device ID required when using default API key' }, 400, getCorsHeaders());
+        return c.json({ error: 'Device ID required when using default API key' }, 400, allHeaders);
       }
 
       const quotaId = c.env.USAGE_QUOTA.idFromName(deviceId);
@@ -72,7 +154,7 @@ app.post('/api/chat', async (c) => {
             quotaLimit: quotaCheck.quotaLimit,
           },
           429,
-          getCorsHeaders()
+          allHeaders
         );
       }
     }
@@ -122,8 +204,7 @@ app.post('/api/chat', async (c) => {
     });
 
     const streamResponse = result.toUIMessageStreamResponse();
-    const corsHeaders = getCorsHeaders();
-    Object.entries(corsHeaders).forEach(([key, value]) => {
+    Object.entries(allHeaders).forEach(([key, value]) => {
       streamResponse.headers.set(key, value);
     });
     return streamResponse;
@@ -138,7 +219,7 @@ app.post('/api/chat', async (c) => {
         message: error instanceof Error ? error.message : 'Unknown error',
       },
       500,
-      getCorsHeaders()
+      allHeaders
     );
   }
 });

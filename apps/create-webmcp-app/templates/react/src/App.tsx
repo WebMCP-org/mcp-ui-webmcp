@@ -8,8 +8,40 @@
  */
 
 import { useWebMCP } from '@mcp-b/react-webmcp';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { z } from 'zod';
+
+/**
+ * Get the parent origin from environment or detect it dynamically
+ *
+ * Priority order:
+ * 1. VITE_PARENT_ORIGIN environment variable
+ * 2. document.referrer (if available)
+ * 3. '*' as fallback (insecure, should only be used in development)
+ */
+function getParentOrigin(): string {
+  const envOrigin = import.meta.env.VITE_PARENT_ORIGIN;
+  if (envOrigin) {
+    return envOrigin;
+  }
+
+  if (typeof document !== 'undefined' && document.referrer) {
+    try {
+      return new URL(document.referrer).origin;
+    } catch (e) {
+      console.warn('[App] Failed to parse document.referrer:', e);
+    }
+  }
+
+  if (import.meta.env.DEV) {
+    console.warn(
+      '[App] Using wildcard (*) for parent origin. ' +
+      'Set VITE_PARENT_ORIGIN environment variable for better security.'
+    );
+  }
+
+  return '*';
+}
 
 /**
  * Main application component for WebMCP template.
@@ -32,22 +64,28 @@ import { z } from 'zod';
  * ```
  */
 export default function App() {
-  // Track connection to parent window
   const [isReady, setIsReady] = useState(false);
   const [message, setMessage] = useState('Hello from WebMCP Template!');
+  const parentOriginRef = useRef<string>(getParentOrigin());
 
-  // Listen for parent ready event
   useEffect(() => {
+    const parentOrigin = parentOriginRef.current;
+
     const handleMessage = (event: MessageEvent) => {
+      if (parentOrigin !== '*' && event.origin !== parentOrigin) {
+        console.warn(
+          `[App] Rejected message from origin ${event.origin}, expected ${parentOrigin}`
+        );
+        return;
+      }
+
       if (event.data?.type === 'parent_ready') {
         setIsReady(true);
       }
     };
 
     window.addEventListener('message', handleMessage);
-
-    // Notify parent we're ready
-    window.parent.postMessage({ type: 'iframe_ready' }, '*');
+    window.parent.postMessage({ type: 'iframe_ready' }, parentOrigin);
 
     return () => window.removeEventListener('message', handleMessage);
   }, []);

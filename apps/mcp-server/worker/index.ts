@@ -6,8 +6,78 @@ import { MyMCP } from './mcpServer';
 export { MyMCP, GameStatsStorage };
 
 /**
+ * Allowed origins for CORS
+ * In production, restrict this to your actual domains
+ */
+const ALLOWED_ORIGINS = [
+  'http://localhost:5173',
+  'http://localhost:8888',
+  'https://chat.webmcp.org', // Add your production domains here
+];
+
+/**
+ * Get CORS headers with origin validation
+ * Falls back to permissive '*' in development if origin not in allowlist
+ */
+const getCorsHeaders = (requestOrigin: string | null, isDevelopment: boolean = true) => {
+  if (!isDevelopment) {
+    const isAllowed = requestOrigin && ALLOWED_ORIGINS.includes(requestOrigin);
+    const allowedOrigin = isAllowed ? requestOrigin : ALLOWED_ORIGINS[0];
+
+    return {
+      'Access-Control-Allow-Origin': allowedOrigin,
+      'Access-Control-Allow-Headers': 'Content-Type, X-Anthropic-API-Key',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Credentials': 'true',
+      'Access-Control-Max-Age': '86400',
+    };
+  }
+
+  return {
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Headers': 'Content-Type, X-Anthropic-API-Key, *',
+    'Access-Control-Allow-Methods': '*',
+  };
+};
+
+/**
+ * Get security headers including CSP
+ */
+const getSecurityHeaders = (isDevelopment: boolean = true) => {
+  const headers: Record<string, string> = {
+    'X-Frame-Options': 'ALLOWALL',
+    'X-Content-Type-Options': 'nosniff',
+    'Referrer-Policy': 'strict-origin-when-cross-origin',
+  };
+
+  if (!isDevelopment) {
+    headers['Content-Security-Policy'] = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: https:",
+      "font-src 'self' data:",
+      "connect-src 'self' https://api.anthropic.com",
+      "frame-ancestors 'self' http://localhost:5173 https://chat.webmcp.org",
+    ].join('; ');
+  } else {
+    headers['Content-Security-Policy'] = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: https:",
+      "font-src 'self' data:",
+      "connect-src 'self' http://localhost:* ws://localhost:* https://api.anthropic.com",
+      "frame-ancestors 'self' http://localhost:*",
+    ].join('; ');
+  }
+
+  return headers;
+};
+
+/**
  * Hono-based Cloudflare Worker
- * Routes requests to the appropriate MCP endpoints with CORS support
+ * Routes requests to the appropriate MCP endpoints with CORS and security headers
  */
 const app = new Hono<{ Bindings: Env }>();
 
@@ -19,6 +89,17 @@ app.use(
     allowMethods: ['*'],
   })
 );
+
+app.use('/*', async (c, next) => {
+  const isDevelopment = c.env?.ENVIRONMENT !== 'production';
+  const securityHeaders = getSecurityHeaders(isDevelopment);
+
+  await next();
+
+  Object.entries(securityHeaders).forEach(([key, value]) => {
+    c.res.headers.set(key, value);
+  });
+});
 
 app.all('/sse/*', async (c) => {
   return await MyMCP.serveSSE('/sse').fetch(c.req.raw, c.env, c.executionCtx);
