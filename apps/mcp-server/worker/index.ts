@@ -20,7 +20,6 @@ const ALLOWED_ORIGINS = [
  * Falls back to permissive '*' in development if origin not in allowlist
  */
 const getCorsHeaders = (requestOrigin: string | null, isDevelopment: boolean = true) => {
-  // In production, only allow origins from the allowlist
   if (!isDevelopment) {
     const isAllowed = requestOrigin && ALLOWED_ORIGINS.includes(requestOrigin);
     const allowedOrigin = isAllowed ? requestOrigin : ALLOWED_ORIGINS[0];
@@ -34,7 +33,6 @@ const getCorsHeaders = (requestOrigin: string | null, isDevelopment: boolean = t
     };
   }
 
-  // Development: permissive CORS for easier debugging
   return {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, X-Anthropic-API-Key, *',
@@ -47,17 +45,12 @@ const getCorsHeaders = (requestOrigin: string | null, isDevelopment: boolean = t
  */
 const getSecurityHeaders = (isDevelopment: boolean = true) => {
   const headers: Record<string, string> = {
-    // Allow embedding in iframes (needed for MCP UI)
     'X-Frame-Options': 'ALLOWALL',
-    // XSS protection
     'X-Content-Type-Options': 'nosniff',
-    // Referrer policy
     'Referrer-Policy': 'strict-origin-when-cross-origin',
   };
 
-  // Content Security Policy - allow being embedded
   if (!isDevelopment) {
-    // Production CSP
     headers['Content-Security-Policy'] = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
@@ -65,11 +58,9 @@ const getSecurityHeaders = (isDevelopment: boolean = true) => {
       "img-src 'self' data: https:",
       "font-src 'self' data:",
       "connect-src 'self' https://api.anthropic.com",
-      // Allow being embedded by trusted parents
       "frame-ancestors 'self' http://localhost:5173 https://chat.webmcp.org",
     ].join('; ');
   } else {
-    // Development CSP: permissive
     headers['Content-Security-Policy'] = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
@@ -90,24 +81,21 @@ const getSecurityHeaders = (isDevelopment: boolean = true) => {
  */
 const app = new Hono<{ Bindings: Env }>();
 
-// Apply CORS middleware
 app.use(
   '/*',
   cors({
-    origin: '*', // Hono CORS middleware - actual origin checking done in getCorsHeaders
+    origin: '*',
     allowHeaders: ['Content-Type', 'X-Anthropic-API-Key', '*'],
     allowMethods: ['*'],
   })
 );
 
-// Apply security headers middleware
 app.use('/*', async (c, next) => {
   const isDevelopment = c.env?.ENVIRONMENT !== 'production';
   const securityHeaders = getSecurityHeaders(isDevelopment);
 
   await next();
 
-  // Add security headers to response
   Object.entries(securityHeaders).forEach(([key, value]) => {
     c.res.headers.set(key, value);
   });

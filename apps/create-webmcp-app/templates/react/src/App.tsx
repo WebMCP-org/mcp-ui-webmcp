@@ -20,13 +20,11 @@ import { z } from 'zod';
  * 3. '*' as fallback (insecure, should only be used in development)
  */
 function getParentOrigin(): string {
-  // Check environment variable first (configured via .env file)
   const envOrigin = import.meta.env.VITE_PARENT_ORIGIN;
   if (envOrigin) {
     return envOrigin;
   }
 
-  // Try to get parent origin from document.referrer
   if (typeof document !== 'undefined' && document.referrer) {
     try {
       return new URL(document.referrer).origin;
@@ -35,7 +33,6 @@ function getParentOrigin(): string {
     }
   }
 
-  // Fallback to wildcard (insecure)
   if (import.meta.env.DEV) {
     console.warn(
       '[App] Using wildcard (*) for parent origin. ' +
@@ -67,17 +64,14 @@ function getParentOrigin(): string {
  * ```
  */
 export default function App() {
-  // Track connection to parent window
   const [isReady, setIsReady] = useState(false);
   const [message, setMessage] = useState('Hello from WebMCP Template!');
   const parentOriginRef = useRef<string>(getParentOrigin());
 
-  // Listen for parent ready event
   useEffect(() => {
     const parentOrigin = parentOriginRef.current;
 
     const handleMessage = (event: MessageEvent) => {
-      // Validate origin if not using wildcard
       if (parentOrigin !== '*' && event.origin !== parentOrigin) {
         console.warn(
           `[App] Rejected message from origin ${event.origin}, expected ${parentOrigin}`
@@ -91,8 +85,6 @@ export default function App() {
     };
 
     window.addEventListener('message', handleMessage);
-
-    // Notify parent we're ready (using specific origin for security)
     window.parent.postMessage({ type: 'iframe_ready' }, parentOrigin);
 
     return () => window.removeEventListener('message', handleMessage);

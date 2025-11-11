@@ -19,13 +19,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  * 3. '*' as fallback (insecure, should only be used in development)
  */
 function getParentOrigin(): string {
-  // Check environment variable first
   const envOrigin = import.meta.env.VITE_PARENT_ORIGIN;
   if (envOrigin) {
     return envOrigin;
   }
 
-  // Try to get parent origin from document.referrer
   if (typeof document !== 'undefined' && document.referrer) {
     try {
       return new URL(document.referrer).origin;
@@ -34,7 +32,6 @@ function getParentOrigin(): string {
     }
   }
 
-  // Fallback to wildcard (insecure)
   if (import.meta.env.DEV) {
     console.warn(
       '[useParentCommunication] Using wildcard (*) for parent origin. ' +
@@ -117,9 +114,8 @@ export function useParentCommunication(): UseParentCommunicationReturn {
     };
 
     const handleMessage = (event: MessageEvent) => {
-      // Validate origin if not using wildcard
       if (parentOrigin !== '*' && event.origin !== parentOrigin) {
-        // Don't log for every message, only for suspicious ones
+        // Only log protocol messages to avoid noise from other window messages
         if (event.data?.type?.startsWith('ui-') || event.data?.type === 'parent-ready') {
           console.warn(
             `[useParentCommunication] Rejected message from origin ${event.origin}, ` +

@@ -35,10 +35,8 @@ export function useIframeLifecycle() {
 
   const setupIframe = useCallback(
     async (iframe: HTMLIFrameElement, sourceId: string) => {
-      // Get iframe origin from URL for secure postMessage targeting
       const iframeOrigin = iframe.src ? new URL(iframe.src).origin : '*';
 
-      // Warn in development if using wildcard
       if (iframeOrigin === '*' && import.meta.env.DEV) {
         console.warn(
           '[useIframeLifecycle] Using wildcard (*) for postMessage targetOrigin. ' +
@@ -51,7 +49,6 @@ export function useIframeLifecycle() {
           return;
         }
 
-        // Validate origin matches iframe source (if not wildcard)
         if (iframeOrigin !== '*' && event.origin !== iframeOrigin) {
           console.warn(
             `[useIframeLifecycle] Rejected message from origin ${event.origin}, ` +

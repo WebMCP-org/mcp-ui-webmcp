@@ -24,7 +24,6 @@ const ALLOWED_ORIGINS = [
  * Falls back to permissive '*' in development if origin not in allowlist
  */
 const getCorsHeaders = (requestOrigin: string | null, isDevelopment: boolean = true) => {
-  // In production, only allow origins from the allowlist
   if (!isDevelopment) {
     const isAllowed = requestOrigin && ALLOWED_ORIGINS.includes(requestOrigin);
     const allowedOrigin = isAllowed ? requestOrigin : ALLOWED_ORIGINS[0];
@@ -39,7 +38,6 @@ const getCorsHeaders = (requestOrigin: string | null, isDevelopment: boolean = t
     };
   }
 
-  // Development: permissive CORS for easier debugging
   return {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, X-Anthropic-API-Key, X-Device-ID, X-Playground-Source, sentry-trace, baggage, *',
@@ -53,29 +51,23 @@ const getCorsHeaders = (requestOrigin: string | null, isDevelopment: boolean = t
  */
 const getSecurityHeaders = (isDevelopment: boolean = true) => {
   const headers: Record<string, string> = {
-    // Prevent clickjacking
     'X-Frame-Options': 'SAMEORIGIN',
-    // XSS protection (legacy, but still useful)
     'X-Content-Type-Options': 'nosniff',
-    // Referrer policy
     'Referrer-Policy': 'strict-origin-when-cross-origin',
   };
 
-  // Content Security Policy
   if (!isDevelopment) {
-    // Production CSP: restrictive
     headers['Content-Security-Policy'] = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // React requires unsafe-inline/eval
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: https:",
       "font-src 'self' data:",
       "connect-src 'self' https://api.anthropic.com",
-      "frame-src 'self' http://localhost:8888", // Allow MCP server iframes
+      "frame-src 'self' http://localhost:8888",
       "frame-ancestors 'self'",
     ].join('; ');
   } else {
-    // Development CSP: permissive for hot reload
     headers['Content-Security-Policy'] = [
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
@@ -94,7 +86,7 @@ const getSecurityHeaders = (isDevelopment: boolean = true) => {
 app.use(
   '/*',
   cors({
-    origin: '*', // Hono CORS middleware - actual origin checking done in getCorsHeaders
+    origin: '*',
     allowHeaders: ['Content-Type', 'X-Anthropic-API-Key', 'X-Device-ID', 'X-Playground-Source', 'sentry-trace', 'baggage', '*'],
     allowMethods: ['*'],
     exposeHeaders: ['*'],
@@ -117,7 +109,6 @@ app.post('/api/chat', async (c) => {
   const origin = c.req.header('Origin');
   const isDevelopment = c.env?.ENVIRONMENT !== 'production';
 
-  // Get headers once for reuse
   const corsHeaders = getCorsHeaders(origin, isDevelopment);
   const securityHeaders = getSecurityHeaders(isDevelopment);
   const allHeaders = { ...corsHeaders, ...securityHeaders };
@@ -213,7 +204,6 @@ app.post('/api/chat', async (c) => {
     });
 
     const streamResponse = result.toUIMessageStreamResponse();
-    // Apply all headers to streaming response
     Object.entries(allHeaders).forEach(([key, value]) => {
       streamResponse.headers.set(key, value);
     });
