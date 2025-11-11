@@ -65,9 +65,36 @@
 
   <!-- Application Logic -->
   <script>
+    /**
+     * Get the parent origin for secure postMessage communication
+     *
+     * Priority order:
+     * 1. Environment variable (if using a build tool like Vite)
+     * 2. document.referrer (if available)
+     * 3. '*' as fallback (insecure, should only be used in development)
+     */
+    function getParentOrigin() {
+      // Try to get parent origin from document.referrer
+      if (document.referrer) {
+        try {
+          return new URL(document.referrer).origin;
+        } catch (e) {
+          console.warn('[App] Failed to parse document.referrer:', e);
+        }
+      }
+
+      // Fallback to wildcard (insecure)
+      console.warn(
+        '[App] Using wildcard (*) for parent origin. ' +
+        'For production, configure document.referrer or use a specific origin.'
+      );
+      return '*';
+    }
+
     // App state
     let isReady = false;
     let message = 'Hello from WebMCP Template!';
+    const parentOrigin = getParentOrigin();
 
     // DOM elements
     const statusEl = document.getElementById('status');
@@ -100,8 +127,16 @@
       }
     }
 
-    // Listen for parent ready event
+    // Listen for parent ready event with origin validation
     window.addEventListener('message', (event) => {
+      // Validate origin if not using wildcard
+      if (parentOrigin !== '*' && event.origin !== parentOrigin) {
+        console.warn(
+          `[App] Rejected message from origin ${event.origin}, expected ${parentOrigin}`
+        );
+        return;
+      }
+
       if (event.data?.type === 'parent_ready') {
         isReady = true;
         updateUI();
@@ -109,8 +144,8 @@
       }
     });
 
-    // Notify parent we're ready
-    window.parent.postMessage({ type: 'iframe_ready' }, '*');
+    // Notify parent we're ready (using specific origin for security)
+    window.parent.postMessage({ type: 'iframe_ready' }, parentOrigin);
 
     // Button event handlers
     btnUpdate.addEventListener('click', () => {

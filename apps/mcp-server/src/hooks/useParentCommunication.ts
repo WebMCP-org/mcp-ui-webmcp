@@ -8,7 +8,42 @@
  * the parent is ready before sending messages, preventing race conditions.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
+
+/**
+ * Get the parent origin from environment or detect it dynamically
+ *
+ * Priority order:
+ * 1. VITE_PARENT_ORIGIN environment variable
+ * 2. document.referrer (if available)
+ * 3. '*' as fallback (insecure, should only be used in development)
+ */
+function getParentOrigin(): string {
+  // Check environment variable first
+  const envOrigin = import.meta.env.VITE_PARENT_ORIGIN;
+  if (envOrigin) {
+    return envOrigin;
+  }
+
+  // Try to get parent origin from document.referrer
+  if (typeof document !== 'undefined' && document.referrer) {
+    try {
+      return new URL(document.referrer).origin;
+    } catch (e) {
+      console.warn('[useParentCommunication] Failed to parse document.referrer:', e);
+    }
+  }
+
+  // Fallback to wildcard (insecure)
+  if (import.meta.env.DEV) {
+    console.warn(
+      '[useParentCommunication] Using wildcard (*) for parent origin. ' +
+      'Set VITE_PARENT_ORIGIN environment variable for better security.'
+    );
+  }
+
+  return '*';
+}
 
 /**
  * Return type for the useParentCommunication hook
@@ -55,6 +90,7 @@ export interface UseParentCommunicationReturn {
  */
 export function useParentCommunication(): UseParentCommunicationReturn {
   const [isParentReady, setIsParentReady] = useState<boolean>(false);
+  const parentOriginRef = useRef<string>(getParentOrigin());
 
   /**
    * Parent Readiness Protocol
@@ -74,11 +110,25 @@ export function useParentCommunication(): UseParentCommunicationReturn {
       return;
     }
 
+    const parentOrigin = parentOriginRef.current;
+
     const markReady = () => {
       setIsParentReady((prev) => (prev ? prev : true));
     };
 
     const handleMessage = (event: MessageEvent) => {
+      // Validate origin if not using wildcard
+      if (parentOrigin !== '*' && event.origin !== parentOrigin) {
+        // Don't log for every message, only for suspicious ones
+        if (event.data?.type?.startsWith('ui-') || event.data?.type === 'parent-ready') {
+          console.warn(
+            `[useParentCommunication] Rejected message from origin ${event.origin}, ` +
+            `expected ${parentOrigin}`
+          );
+        }
+        return;
+      }
+
       const data = event.data;
       if (!data || typeof data !== 'object') {
         return;
@@ -128,7 +178,7 @@ export function useParentCommunication(): UseParentCommunicationReturn {
     };
 
     window.addEventListener('message', handleMessage);
-    window.parent.postMessage({ type: 'ui-lifecycle-iframe-ready' }, '*');
+    window.parent.postMessage({ type: 'ui-lifecycle-iframe-ready' }, parentOrigin);
 
     return () => {
       window.removeEventListener('message', handleMessage);
@@ -149,12 +199,13 @@ export function useParentCommunication(): UseParentCommunicationReturn {
         return;
       }
 
+      const parentOrigin = parentOriginRef.current;
       window.parent.postMessage(
         {
           type: 'notify',
           payload: { message: content },
         },
-        '*'
+        parentOrigin
       );
     },
     [isParentReady]
@@ -172,6 +223,7 @@ export function useParentCommunication(): UseParentCommunicationReturn {
       return;
     }
 
+    const parentOrigin = parentOriginRef.current;
     const height = document.documentElement.scrollHeight;
     const width = document.documentElement.scrollWidth;
 
@@ -180,7 +232,7 @@ export function useParentCommunication(): UseParentCommunicationReturn {
         type: 'ui-size-change',
         payload: { height, width },
       },
-      '*'
+      parentOrigin
     );
   }, []);
 

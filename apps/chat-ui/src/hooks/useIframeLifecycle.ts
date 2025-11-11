@@ -35,14 +35,37 @@ export function useIframeLifecycle() {
 
   const setupIframe = useCallback(
     async (iframe: HTMLIFrameElement, sourceId: string) => {
+      // Get iframe origin from URL for secure postMessage targeting
+      const iframeOrigin = iframe.src ? new URL(iframe.src).origin : '*';
+
+      // Warn in development if using wildcard
+      if (iframeOrigin === '*' && import.meta.env.DEV) {
+        console.warn(
+          '[useIframeLifecycle] Using wildcard (*) for postMessage targetOrigin. ' +
+          'This is insecure and should only be used in development.'
+        );
+      }
+
       const handleIframeLifecycleMessage = (event: MessageEvent) => {
         if (event.source !== iframe.contentWindow) {
           return;
         }
 
+        // Validate origin matches iframe source (if not wildcard)
+        if (iframeOrigin !== '*' && event.origin !== iframeOrigin) {
+          console.warn(
+            `[useIframeLifecycle] Rejected message from origin ${event.origin}, ` +
+            `expected ${iframeOrigin}`
+          );
+          return;
+        }
+
         if (event.data?.type === 'ui-lifecycle-iframe-ready') {
           console.log('[useIframeLifecycle] Iframe ready, sending parent-ready signal');
-          iframe.contentWindow?.postMessage({ type: 'parent-ready', payload: {} }, '*');
+          iframe.contentWindow?.postMessage(
+            { type: 'parent-ready', payload: {} },
+            iframeOrigin
+          );
         }
       };
 

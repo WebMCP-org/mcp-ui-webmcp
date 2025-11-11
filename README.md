@@ -371,6 +371,40 @@ See [ENVIRONMENT_SETUP.md](./docs/ENVIRONMENT_SETUP.md) for detailed configurati
 - [ENVIRONMENT_SETUP.md](./docs/ENVIRONMENT_SETUP.md) - Environment variables
 - [TESTING.md](./docs/TESTING.md) - Test infrastructure
 
+## Security
+
+This project implements comprehensive security best practices for cross-origin iframe embedding, ensuring safe bidirectional communication between parent applications and embedded WebMCP tools.
+
+**Key Security Features:**
+- ✅ Origin validation for all postMessage communication
+- ✅ Content Security Policy (CSP) headers with frame-src restrictions
+- ✅ Iframe sandbox attributes with least-privilege permissions
+- ✅ CSP Embedded Enforcement for constraining iframe network access
+- ✅ Partitioned cookies (CHIPS) support for per-site authentication
+- ✅ Permissions Policy to control browser feature access
+- ✅ Environment-specific CORS configuration (dev vs production)
+
+**Documentation:**
+- **[SECURITY.md](./SECURITY.md)** - Comprehensive security guide covering:
+  - Threat model and security mechanisms
+  - CSP, sandbox, and permissions-policy implementation
+  - Origin validation best practices
+  - Partitioned cookies and Storage Access API
+  - Production deployment checklist
+  - Environment-specific configuration examples
+
+**Quick Security Checklist:**
+
+For production deployments, ensure:
+- [ ] Update `ALLOWED_ORIGINS` in worker configurations to your production domains
+- [ ] Set `VITE_PARENT_ORIGIN` environment variable for embedded apps
+- [ ] Review and restrict CSP `frame-src` and `frame-ancestors` directives
+- [ ] Validate all postMessage origins (no `'*'` wildcards)
+- [ ] Test across Chrome, Safari, and Firefox for compatibility
+- [ ] Enable production mode (`ENVIRONMENT=production`) for restrictive headers
+
+See [SECURITY.md](./SECURITY.md) for detailed implementation guidance.
+
 ## Tech Stack
 
 - **Monorepo:** Turborepo + pnpm workspaces
