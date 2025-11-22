@@ -49,9 +49,6 @@ Use this as a starting point to build your own interactive apps!`,
       {},
       async () => {
         try {
-          // Construct iframe URL from environment variable
-          // In dev: http://localhost:8888
-          // In prod: https://your-worker.workers.dev
           const iframeUrl = `${this.env.APP_URL}/`;
 
           const uiResource = createUIResource({
