@@ -13,12 +13,16 @@ export { TemplateMCP };
 const app = new Hono<{ Bindings: Env }>();
 
 // Apply CORS middleware to all routes
+// Super lax CORS policy for maximum embedding compatibility
 app.use(
   '/*',
   cors({
     origin: '*',
-    allowHeaders: ['Content-Type', 'X-Anthropic-API-Key', '*'],
+    allowHeaders: ['*'],
     allowMethods: ['*'],
+    exposeHeaders: ['*'],
+    credentials: true,
+    maxAge: 86400,
   })
 );
 
