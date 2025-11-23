@@ -54,7 +54,6 @@ Perfect for learning WebMCP or building simple interactive tools!`,
       {},
       async () => {
         try {
-          // Construct iframe URL from environment variable
           const iframeUrl = `${this.env.APP_URL}/`;
 
           const uiResource = createUIResource({

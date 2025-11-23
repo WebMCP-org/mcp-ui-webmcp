@@ -32,11 +32,9 @@ import { z } from 'zod';
  * ```
  */
 export default function App() {
-  // Track connection to parent window
   const [isReady, setIsReady] = useState(false);
   const [message, setMessage] = useState('Hello from WebMCP Template!');
 
-  // Listen for parent ready event
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data?.type === 'parent_ready') {
@@ -46,7 +44,6 @@ export default function App() {
 
     window.addEventListener('message', handleMessage);
 
-    // Notify parent we're ready
     window.parent.postMessage({ type: 'iframe_ready' }, '*');
 
     return () => window.removeEventListener('message', handleMessage);
@@ -109,7 +106,6 @@ export default function App() {
     },
   });
 
-  // Handle UI button click
   const handleUpdateClick = useCallback(() => {
     const newMessage = prompt('Enter new message:');
     if (newMessage) {
@@ -126,7 +122,6 @@ export default function App() {
       <div className="text-center">
         <h1 className="mb-4 text-3xl font-bold text-gray-900">WebMCP Template</h1>
 
-        {/* Connection status */}
         <div className="mb-6">
           {isReady ? (
             <div className="inline-flex items-center gap-2 rounded-full bg-green-100 px-4 py-2 text-sm text-green-800">
@@ -141,12 +136,10 @@ export default function App() {
           )}
         </div>
 
-        {/* Current message display */}
         <div className="rounded-lg bg-blue-50 p-6 mb-6">
           <p className="text-xl text-gray-700">{message}</p>
         </div>
 
-        {/* Action buttons */}
         <div className="flex gap-4 justify-center">
           <button
             onClick={handleUpdateClick}
@@ -164,7 +157,6 @@ export default function App() {
           </button>
         </div>
 
-        {/* Info about registered tools */}
         <div className="mt-8 rounded-lg bg-gray-50 p-4 text-left text-sm text-gray-600">
           <h2 className="font-semibold mb-2">Registered WebMCP Tools:</h2>
           <ul className="space-y-1">

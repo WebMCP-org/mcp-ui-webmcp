@@ -12,7 +12,6 @@ export { TemplateMCP };
  */
 const app = new Hono<{ Bindings: Env }>();
 
-// Apply CORS middleware to all routes
 app.use(
   '/*',
   cors({
@@ -22,7 +21,6 @@ app.use(
   })
 );
 
-// Route SSE (Server-Sent Events) endpoints
 app.all('/sse/*', async (c) => {
   return await TemplateMCP.serveSSE('/sse').fetch(c.req.raw, c.env, c.executionCtx);
 });
@@ -31,17 +29,14 @@ app.all('/sse', async (c) => {
   return await TemplateMCP.serveSSE('/sse').fetch(c.req.raw, c.env, c.executionCtx);
 });
 
-// Route MCP protocol endpoint
 app.all('/mcp', async (c) => {
   return await TemplateMCP.serve('/mcp').fetch(c.req.raw, c.env, c.executionCtx);
 });
 
-// 404 handler for unmatched routes
 app.notFound((c) => {
   return c.json({ error: 'Not found', path: c.req.path }, 404);
 });
 
-// Error handler
 app.onError((error, c) => {
   console.error('Worker error:', error);
   return c.json(
