@@ -39,5 +39,8 @@
     "node": ">=22.0.0",
     "pnpm": ">=8"
   },
-  "packageManager": "pnpm@10.14.0"
+  "packageManager": "pnpm@10.14.0",
+  "dependencies": {
+    "@modelcontextprotocol/ext-apps": "github:modelcontextprotocol/ext-apps"
+  }
 }
