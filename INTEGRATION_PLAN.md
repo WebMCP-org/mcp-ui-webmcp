@@ -9,7 +9,13 @@
 
 ## Executive Summary
 
-The Model Context Protocol has officially adopted MCP Apps as an extension (SEP-1865), standardizing interactive UI capabilities inspired by both MCP-UI and OpenAI's Apps SDK. This document outlines a migration plan to align `mcp-ui-webmcp` with the official specification while preserving our unique WebMCP bidirectional tool registration capabilities.
+The Model Context Protocol has officially adopted MCP Apps as an extension (SEP-1865), standardizing interactive UI capabilities inspired by both MCP-UI and OpenAI's Apps SDK. This document outlines a **clean migration** to align `mcp-ui-webmcp` with the official specification while preserving our unique WebMCP bidirectional tool registration capabilities.
+
+**Migration Philosophy:**
+- **Use Official SDK**: Leverage `@modelcontextprotocol/ext-apps` which provides `App` class and `PostMessageTransport`
+- **No Backward Compatibility**: Clean cutover to new spec (no dual-mode complexity)
+- **8-Week Timeline**: Focused implementation with clear milestones
+- **Preserve WebMCP**: Bidirectional tool registration continues to work seamlessly
 
 ### Key Changes in Official Spec
 
@@ -48,9 +54,9 @@ The Model Context Protocol has officially adopted MCP Apps as an extension (SEP-
 
 ## Migration Strategy
 
-### Phase 1: Dual-Mode Support (Recommended)
+### Direct Migration to SEP-1865 (No Backward Compatibility Needed)
 
-Support both legacy MCP-UI and new SEP-1865 patterns simultaneously to enable gradual migration.
+Clean migration to official specification using `@modelcontextprotocol/ext-apps` SDK.
 
 #### Server-Side Changes
 
@@ -118,40 +124,28 @@ server.registerResource(
 **1.3. Update Tool Definitions**
 
 ```typescript
-// Link tool to UI resource via metadata
-server.tool(
+// Register tool with UI resource metadata
+server.registerTool(
   'showTicTacToeGame',
-  'Displays an interactive Tic-Tac-Toe game...',
-  {},
-  async () => {
-    // Check if client supports new spec
-    const supportsNewSpec = clientCapabilities?.extensions?.['io.modelcontextprotocol/ui'];
-
-    if (supportsNewSpec) {
-      // NEW: Return text content only, UI referenced via metadata
-      return {
-        content: [{
-          type: 'text',
-          text: 'Tic-Tac-Toe game started. Use tictactoe_get_state to view the board.'
-        }],
-        // Tool metadata handled during registration
-      };
-    } else {
-      // LEGACY: Return inline UI resource
-      const uiResource = createUIResource({
-        uri: 'ui://tictactoe-game',
-        content: { type: 'externalUrl', iframeUrl: `${this.env.APP_URL}/` },
-        encoding: 'blob',
-      });
-      return { content: [{ type: 'text', text: '...' }, uiResource] };
+  {
+    title: 'Show Tic-Tac-Toe Game',
+    description: 'Displays an interactive Tic-Tac-Toe game where you (AI) can play as player O...',
+    inputSchema: {},
+    // NEW: Link to UI resource via metadata
+    _meta: {
+      'ui/resourceUri': 'ui://tictactoe-game'
     }
+  },
+  async () => {
+    // Return text content only - UI is loaded from resource
+    return {
+      content: [{
+        type: 'text',
+        text: `Tic-Tac-Toe game started. Use tictactoe_get_state to view the board.`
+      }]
+    };
   }
 );
-
-// Add metadata during tool registration
-server.tools.get('showTicTacToeGame')._meta = {
-  'ui/resourceUri': 'ui://tictactoe-game'
-};
 ```
 
 **1.4. HTML Content Fetching Helper**
@@ -291,30 +285,26 @@ async function initializeIframe(iframe: HTMLIFrameElement, toolCallId: string) {
 }
 ```
 
-**2.4. Dual-Mode Resource Rendering**
+**2.4. Resource Rendering**
 
 ```typescript
-// Handle both inline and predeclared resources
+// Render predeclared UI resources
 function renderUIResource(
   toolResult: ToolResult,
   tool: Tool
 ): React.ReactElement {
-  // NEW: Check for predeclared resource
   const resourceUri = tool._meta?.['ui/resourceUri'];
-  if (resourceUri) {
-    const resource = resourceCache.get(resourceUri);
-    if (resource && resource.mimeType === 'text/html+mcp') {
-      return <IframeRenderer htmlContent={resource.text} />;
-    }
+  if (!resourceUri) {
+    return <TextOnlyRenderer content={toolResult.content} />;
   }
 
-  // LEGACY: Check for inline resource in content
-  const uiContent = toolResult.content.find(
-    (c) => c.type === 'resource' && c.resource?.uri.startsWith('ui://')
-  );
-
-  if (uiContent) {
-    return <UIResourceRenderer resource={uiContent.resource} />;
+  const resource = resourceCache.get(resourceUri);
+  if (resource && resource.mimeType === 'text/html+mcp') {
+    return <IframeRenderer
+      htmlContent={resource.text}
+      csp={resource._meta?.ui?.csp}
+      prefersBorder={resource._meta?.ui?.prefersBorder}
+    />;
   }
 
   return <TextOnlyRenderer content={toolResult.content} />;
@@ -323,64 +313,64 @@ function renderUIResource(
 
 #### Embedded App Changes
 
-**3.1. Update Initialization in React Apps**
+**3.1. Use Official App Class from SDK**
 
 ```typescript
 // In apps/mcp-server/src/hooks/useParentCommunication.ts
 
-import { App } from '@modelcontextprotocol/ext-apps/app';
-import { PostMessageTransport } from '@modelcontextprotocol/ext-apps/message-transport';
+import {
+  App,
+  PostMessageTransport,
+  McpUiToolInputNotificationSchema,
+  McpUiToolResultNotificationSchema,
+} from '@modelcontextprotocol/ext-apps';
 
-// NEW: Use official App class for initialization
+// Use official App class - handles all initialization automatically
 const transport = new PostMessageTransport(window.parent, '*');
 const app = new App(
-  {
-    name: 'TicTacToe App',
-    version: '1.0.0'
-  },
-  {
-    experimental: {}
-  }
+  { name: 'TicTacToe App', version: '1.0.0' },  // appInfo
+  { experimental: {} },                          // capabilities
+  { autoResize: true }                           // options (enables auto size notifications)
 );
 
+// Connect automatically does:
+// 1. Send ui/initialize request
+// 2. Receive host capabilities and context
+// 3. Send ui/notifications/initialized
+// 4. Set up auto-resize if enabled
 await app.connect(transport);
 
-// NEW: Send ui/initialize request
-const initResult = await app.request({
-  method: 'ui/initialize',
-  params: {
-    protocolVersion: '2025-06-18',
-    appInfo: { name: 'TicTacToe App', version: '1.0.0' },
-    appCapabilities: { experimental: {} },
-  }
-});
+// Access host info after connection
+const hostCapabilities = app._hostCapabilities;
+const hostInfo = app._hostInfo;
 
-// Host context is available in initResult.hostContext
-const { theme, viewport, toolInfo } = initResult.hostContext;
-
-// NEW: Send initialized notification
-await app.notification({
-  method: 'ui/notifications/initialized',
-  params: {}
-});
-
-// NEW: Listen for tool input
+// Listen for tool input (args from tool call)
 app.setNotificationHandler(
   McpUiToolInputNotificationSchema,
   async (notification) => {
     const args = notification.params.arguments;
     // Initialize app with arguments
+    setGameState(args);
   }
 );
 
-// NEW: Listen for tool results
+// Listen for tool results (when tool execution completes)
 app.setNotificationHandler(
   McpUiToolResultNotificationSchema,
   async (notification) => {
     const result = notification.params;
-    // Handle tool result
+    // Handle tool result if needed
   }
 );
+
+// Use built-in methods for communication
+await app.callServerTool({ name: 'get-weather', arguments: { city: 'Tokyo' } });
+await app.sendMessage({ role: 'user', content: [{ type: 'text', text: 'Hello' }] });
+await app.sendLog({ level: 'info', data: 'User clicked button' });
+await app.sendOpenLink({ url: 'https://example.com' });
+
+// Size changes are automatic with autoResize: true
+// Or manually: app.sendSizeChange({ width: 400, height: 300 });
 ```
 
 **3.2. Preserve WebMCP Functionality**
@@ -404,68 +394,66 @@ useWebMCP({
 
 ---
 
-### Phase 2: Full Migration (Future)
-
-Once Phase 1 is stable and tested:
-
-1. **Remove Legacy Support**: Drop `@mcp-ui/client` and `@mcp-ui/server` dependencies
-2. **Migrate to `text/html+mcp`**: Convert all UI resources to self-contained HTML
-3. **Bundle Apps**: Build mini-apps as single HTML files with inline scripts/styles
-4. **Update Templates**: Modify `create-webmcp-app` templates to use new patterns
-5. **Documentation**: Update all docs to reflect new specification
-
----
-
 ## Implementation Checklist
+
+### Dependencies
+
+- [ ] Add `@modelcontextprotocol/ext-apps` to all apps that need it
+- [ ] Remove `@mcp-ui/client` from chat-ui
+- [ ] Remove `@mcp-ui/server` from mcp-server
+- [ ] Update package.json files
 
 ### Server (apps/mcp-server)
 
 - [ ] Add `io.modelcontextprotocol/ui` extension to capabilities
-- [ ] Create resource registration helpers for `ui://` URIs
-- [ ] Implement HTML content fetching/bundling for mini-apps
+- [ ] Create resource registration for `ui://` URIs
+- [ ] Implement HTML bundling for TicTacToe app (Vite config)
 - [ ] Add `_meta['ui/resourceUri']` to tool definitions
-- [ ] Support dual-mode: detect client capabilities and respond accordingly
+- [ ] Remove `createUIResource()` calls - return text only
 - [ ] Add CSP metadata to resource contents
-- [ ] Implement resource caching/optimization
 - [ ] Update tests to cover new protocol
 
 ### Client (apps/chat-ui)
 
 - [ ] Add `io.modelcontextprotocol/ui` to client capabilities
 - [ ] Implement resource prefetching on tool discovery
-- [ ] Update iframe lifecycle for `ui/initialize` handshake
-- [ ] Add tool input/result notification sending
-- [ ] Implement dual-mode resource rendering
-- [ ] Add PostMessageTransport wrapper using `@modelcontextprotocol/ext-apps`
-- [ ] Update WebMCP integration to work with new initialization
+- [ ] Update iframe lifecycle to use `PostMessageTransport` from ext-apps
+- [ ] Implement host-side of `ui/initialize` handshake
+- [ ] Send `ui/notifications/tool-input` and `ui/notifications/tool-result`
+- [ ] Update resource rendering to use `text/html+mcp`
+- [ ] Remove dependency on `UIResourceRenderer` from `@mcp-ui/client`
+- [ ] Ensure WebMCP integration works with new initialization
 - [ ] Add UI for CSP-restricted iframes (show permissions)
 - [ ] Update tests to cover new protocol
 
 ### Embedded Apps (apps/mcp-server/src)
 
-- [ ] Replace custom initialization with official `App` class
-- [ ] Update to use `ui/initialize` → `ui/notifications/initialized`
-- [ ] Listen for `ui/notifications/tool-input` and `ui/notifications/tool-result`
+- [ ] Replace custom initialization with `App` class from ext-apps
+- [ ] Remove custom postMessage handling - use `PostMessageTransport`
+- [ ] Use `app.connect()` for automatic initialization
+- [ ] Listen for `ui/notifications/tool-input`
+- [ ] Listen for `ui/notifications/tool-result` (if needed)
+- [ ] Use built-in `app.callServerTool()`, `app.sendMessage()`, etc.
+- [ ] Enable `autoResize: true` option (or use manual `sendSizeChange()`)
 - [ ] Maintain WebMCP tool registration (no changes needed)
-- [ ] Add `ui/notifications/size-change` reporting
 - [ ] Handle `ui/resource-teardown` for cleanup
-- [ ] Test with sandbox proxy architecture
 - [ ] Update templates (vanilla & react)
 
 ### Templates (apps/create-webmcp-app/templates)
 
-- [ ] Update template server to use new resource pattern
-- [ ] Update template apps to use official SDK
-- [ ] Add bundling configuration for single-file HTML output
+- [ ] Update template server to use resource registration pattern
+- [ ] Update template apps to use `App` class from ext-apps
+- [ ] Add Vite bundling configuration for single-file HTML output
 - [ ] Update documentation and quickstart guides
 - [ ] Add examples for CSP metadata usage
+- [ ] Remove references to `@mcp-ui/client` and `@mcp-ui/server`
 
 ### Documentation
 
-- [ ] Create migration guide for existing projects
-- [ ] Update architecture diagrams
-- [ ] Document dual-mode operation
-- [ ] Add troubleshooting section for common migration issues
+- [ ] Update README.md with new architecture
+- [ ] Update architecture diagrams (remove MCP-UI, add ext-apps)
+- [ ] Update AGENTS.md with new patterns
+- [ ] Add troubleshooting section for bundling
 - [ ] Update CONTRIBUTING.md with new patterns
 - [ ] Add examples for different use cases
 
@@ -475,14 +463,14 @@ Once Phase 1 is stable and tested:
 
 ### Breaking Changes
 
-**Risk**: Existing deployments break if we switch completely
-**Mitigation**: Phase 1 dual-mode support maintains backward compatibility
+**Risk**: Existing deployments will break during migration
+**Mitigation**: This is acceptable - we'll do a clean cutover with proper testing
 
-**Risk**: `externalUrl` is deferred in MVP spec
-**Mitigation**: Bundle apps as self-contained HTML with our Cloudflare Worker serving them
+**Risk**: `externalUrl` is deferred in MVP spec (we currently use it for TicTacToe)
+**Mitigation**: Bundle apps as self-contained HTML with Vite inline configuration
 
-**Risk**: `remoteDom` is deferred in MVP spec
-**Mitigation**: Consider proposing `remoteDom` as a future extension, or convert to inline scripts in HTML
+**Risk**: `remoteDom` is deferred in MVP spec (we use it for some demos)
+**Mitigation**: Convert to inline scripts in HTML or propose as future extension
 
 ### Technical Challenges
 
@@ -518,41 +506,44 @@ export default {
 
 ## Timeline Recommendation
 
-### Week 1-2: Research & Prototyping
-- Set up ext-apps SDK locally
-- Create proof-of-concept with single tool
-- Validate bundling strategy for HTML apps
-- Test dual-mode compatibility
+### Week 1: Setup & Prototyping
+- Install `@modelcontextprotocol/ext-apps` dependency
+- Create proof-of-concept with TicTacToe using `App` class
+- Validate HTML bundling strategy with Vite
+- Test end-to-end with simple example
 
-### Week 3-4: Server Implementation
-- Implement resource registration
+### Week 2-3: Server Implementation
+- Replace `@mcp-ui/server` with resource registration
 - Add capability negotiation
-- Update tool definitions
-- Create HTML bundling pipeline
+- Update all tool definitions with `_meta['ui/resourceUri']`
+- Implement HTML bundling pipeline for mini-apps
+- Add CSP metadata
 
-### Week 5-6: Client Implementation
-- Update iframe lifecycle
-- Add resource prefetching
-- Implement dual-mode rendering
-- Update WebMCP integration
+### Week 4-5: Client Implementation
+- Remove `@mcp-ui/client` dependency
+- Implement resource prefetching
+- Update iframe lifecycle with `PostMessageTransport`
+- Implement host-side initialization handshake
+- Send tool input/result notifications
+- Ensure WebMCP integration works
 
-### Week 7-8: Embedded Apps & Templates
-- Migrate TicTacToe app
-- Update templates
-- Test WebMCP functionality
-- Create migration examples
+### Week 6: Embedded Apps & Templates
+- Update TicTacToe to use `App` class
+- Update template applications
+- Update `create-webmcp-app` templates
+- Test WebMCP functionality with new initialization
 
-### Week 9-10: Testing & Documentation
+### Week 7: Testing & Documentation
 - Comprehensive E2E testing
-- Update all documentation
-- Create migration guide
-- Deploy to staging
+- Update README, AGENTS.md, architecture docs
+- Update all diagrams
+- Test deployment to staging
 
-### Week 11-12: Production Rollout
-- Deploy to production with dual-mode
+### Week 8: Production Rollout
+- Deploy to production
 - Monitor for issues
 - Gather feedback
-- Iterate on improvements
+- Document any edge cases
 
 ---
 
@@ -583,12 +574,14 @@ export default {
 ## Success Metrics
 
 - ✅ Zero regression in existing WebMCP functionality
-- ✅ Successful dual-mode operation with both legacy and new clients
-- ✅ All tools work with SEP-1865 compliant clients
-- ✅ Documentation updated and migration guide published
-- ✅ Templates updated to use new patterns
-- ✅ E2E tests passing for both modes
+- ✅ All tools work with SEP-1865 specification
+- ✅ Successfully using `@modelcontextprotocol/ext-apps` SDK
+- ✅ All dependencies on `@mcp-ui/*` removed
+- ✅ Documentation updated with new architecture
+- ✅ Templates updated to use `App` class
+- ✅ E2E tests passing with new protocol
 - ✅ Performance improvement from resource prefetching
+- ✅ Clean HTML bundling working for all mini-apps
 
 ---
 
@@ -605,14 +598,22 @@ export default {
 
 ## Conclusion
 
-The official MCP Apps specification (SEP-1865) represents a significant step forward in standardizing interactive UI capabilities in MCP. While it requires architectural changes to our current implementation, the core value proposition of **WebMCP bidirectional tool registration** remains intact and complementary.
+The official MCP Apps specification (SEP-1865) represents a significant step forward in standardizing interactive UI capabilities in MCP. The migration requires architectural changes but is straightforward thanks to the official `@modelcontextprotocol/ext-apps` SDK which handles most of the complexity.
 
-By adopting a phased approach with dual-mode support, we can:
-1. Align with the official standard
-2. Maintain backward compatibility during transition
-3. Preserve our unique WebMCP innovations
-4. Continue serving as a reference implementation for the community
+**Key Benefits of Migration:**
+1. **Standards Alignment**: Join the official MCP ecosystem
+2. **Better Performance**: Resource prefetching improves load times
+3. **Simpler Code**: Use official `App` class instead of custom implementations
+4. **Future-Proof**: Stay current with MCP specification evolution
+5. **Preserved Innovation**: WebMCP bidirectional tools remain intact and complementary
 
-The migration is substantial but achievable, with clear benefits in terms of interoperability, performance (resource prefetching), and long-term maintainability as the ecosystem adopts the standard.
+**Migration Approach:**
+- Clean migration without backward compatibility complexity
+- Use official SDK's `App` class and `PostMessageTransport`
+- Bundle React apps as self-contained HTML
+- 8-week timeline with clear milestones
+- WebMCP functionality continues to work seamlessly
 
-**Recommended Next Step**: Begin Week 1-2 prototyping to validate the technical approach and bundling strategy before committing to full migration.
+The core value proposition of **WebMCP bidirectional tool registration** not only remains intact but becomes even more powerful when combined with the official MCP Apps standard. This positions the project as the reference implementation for **MCP Apps + WebMCP integration**.
+
+**Recommended Next Step**: Begin Week 1 setup and prototyping - install `@modelcontextprotocol/ext-apps` and create a proof-of-concept with the TicTacToe app using the official `App` class.
