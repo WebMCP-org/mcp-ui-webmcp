@@ -22,7 +22,7 @@ import {
   ResetButton,
   RoleSelectionModal,
 } from './components';
-import { useGameState, useGameStats, useParentCommunication } from './hooks';
+import { useGameState, useGameStats, useParentCommunication, useMcpApp } from './hooks';
 import {
   formatGameStateMarkdown,
   formatMoveMarkdown,
@@ -65,6 +65,7 @@ export default function App({ animated = true }: AppProps) {
   const game = useGameState();
   const { isParentReady, postNotifyMarkdown, notifyParentOfCurrentDocumentSize } =
     useParentCommunication();
+  const { isConnected: isMcpConnected, sendLog } = useMcpApp();
   const { stats, notifyGameComplete } = useGameStats();
 
   const [showRoleModal, setShowRoleModal] = useState(true);
@@ -238,6 +239,17 @@ export default function App({ animated = true }: AppProps) {
       return formatResetMarkdown(game.board, game.humanPlayer, game.aiPlayer);
     },
   });
+
+  /**
+   * Side Effect: Log MCP connection status
+   * Demonstrates official SDK integration
+   */
+  useEffect(() => {
+    if (isMcpConnected) {
+      sendLog('TicTacToe app connected via official MCP Apps SDK', 'info');
+      console.log('[App] MCP Apps SDK connected successfully');
+    }
+  }, [isMcpConnected, sendLog]);
 
   /**
    * Side Effect: Notify parent of document size changes

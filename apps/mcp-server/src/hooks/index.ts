@@ -5,3 +5,4 @@
 export * from './useGameState';
 export * from './useParentCommunication';
 export * from './useGameStats';
+export * from './useMcpApp';
