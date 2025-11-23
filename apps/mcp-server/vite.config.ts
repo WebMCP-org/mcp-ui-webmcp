@@ -71,15 +71,13 @@ export default defineConfig(() => ({
     }),
     tailwindcss(),
     cloudflare(),
-    inlineAssets(), // NEW: Inline all assets for single-file HTML
+    inlineAssets(),
   ],
   build: {
-    // Inline all assets (images, fonts, etc.) as data URLs
-    assetsInlineLimit: 100000000, // 100MB - inline everything
-    cssCodeSplit: false, // Single CSS bundle
+    assetsInlineLimit: 100000000,
+    cssCodeSplit: false,
     rollupOptions: {
       output: {
-        // Single JS bundle (will be inlined by plugin)
         inlineDynamicImports: true,
         manualChunks: undefined,
       },

@@ -116,7 +116,6 @@ export function useMcpApp(): UseMcpAppReturn {
       McpUiToolInputNotificationSchema,
       async (notification) => {
         console.log('[MCP App] Received tool input:', notification.params.arguments);
-        // Could use this to initialize state from tool arguments
       }
     );
 
@@ -124,7 +123,6 @@ export function useMcpApp(): UseMcpAppReturn {
       McpUiToolResultNotificationSchema,
       async (notification) => {
         console.log('[MCP App] Received tool result:', notification.params);
-        // Could use this to handle tool execution completion
       }
     );
 
@@ -135,7 +133,6 @@ export function useMcpApp(): UseMcpAppReturn {
       .connect(transport)
       .then(() => {
         console.log('[MCP App] Connected to host via official SDK');
-        // Host capabilities and info are stored privately in the App instance
         setIsConnected(true);
         isInitializedRef.current = true;
       })

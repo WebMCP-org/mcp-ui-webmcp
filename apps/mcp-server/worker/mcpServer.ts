@@ -17,7 +17,6 @@ export class MyMCP extends McpAgent<Cloudflare.Env> {
     {
       capabilities: {
         logging: {},
-        // NEW: Advertise MCP Apps extension support (SEP-1865)
         extensions: {
           'io.modelcontextprotocol/ui': {
             mimeTypes: ['text/html+mcp'],
@@ -32,8 +31,6 @@ export class MyMCP extends McpAgent<Cloudflare.Env> {
    * Reads the self-contained HTML file built by Vite
    */
   private async getTicTacToeHTML(): Promise<string> {
-    // In production, read from dist/client/index.html
-    // For now, we'll return the bundled HTML from the built artifact
     const response = await fetch(`${this.env.APP_URL}/index.html`);
     if (!response.ok) {
       throw new Error(`Failed to fetch TicTacToe HTML: ${response.statusText}`);
@@ -71,8 +68,8 @@ export class MyMCP extends McpAgent<Cloudflare.Env> {
               _meta: {
                 ui: {
                   csp: {
-                    connect_domains: [], // Self-contained, no external connections
-                    resource_domains: [], // All assets inline
+                    connect_domains: [],
+                    resource_domains: [],
                   },
                   prefersBorder: true,
                 },
@@ -208,12 +205,10 @@ After calling this tool, the game UI will appear. The game registers WebMCP tool
 Use this tool when the user wants to play Tic-Tac-Toe. After the UI loads, use tictactoe_get_state to see the board and begin playing.`,
         inputSchema: {},
         _meta: {
-          // NEW: Link to UI resource (SEP-1865)
           'ui/resourceUri': tictactoeResource.uri,
         },
       },
       async () => {
-        // NEW: Return text-only content - UI is loaded from resource
         return {
           content: [
             {
