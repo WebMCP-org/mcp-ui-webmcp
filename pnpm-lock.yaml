@@ -119,6 +119,9 @@ importers:
       ai:
         specifier: ^5.0.87
         version: 5.0.87(zod@3.25.76)
+      ajv:
+        specifier: ^8.17.1
+        version: 8.17.1
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1

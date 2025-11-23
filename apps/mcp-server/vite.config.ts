@@ -16,6 +16,8 @@ import { defineConfig } from 'vite';
  * - dist/mcp_ui_with_webmcp_my_mcp_server/ - Cloudflare Worker bundle
  *
  * The Cloudflare plugin handles both dev and production builds.
+ *
+ * Note: For the color picker, we'll build it separately or serve it as a static file
  */
 export default defineConfig(() => ({
   plugins: [
