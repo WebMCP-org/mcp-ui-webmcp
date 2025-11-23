@@ -3,18 +3,85 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpAgent } from 'agents/mcp';
 
 /**
- * MCP UI with WebMCP Agent
+ * MCP Apps with WebMCP Agent
  *
- * Demonstrates UI resources that can be displayed in MCP clients,
- * including a Tic-Tac-Toe game that uses WebMCP for dynamic tool registration.
+ * Demonstrates official MCP Apps (SEP-1865) with WebMCP integration.
+ * Uses predeclared resources and tool metadata per the official specification.
  */
 export class MyMCP extends McpAgent<Cloudflare.Env> {
-  server = new McpServer({
-    name: 'mcp-ui-webmcp-cloudflare',
-    version: '1.0.0',
-  });
+  server = new McpServer(
+    {
+      name: 'mcp-ui-webmcp-cloudflare',
+      version: '2.0.0',
+    },
+    {
+      capabilities: {
+        logging: {},
+        // NEW: Advertise MCP Apps extension support (SEP-1865)
+        extensions: {
+          'io.modelcontextprotocol/ui': {
+            mimeTypes: ['text/html+mcp'],
+          },
+        },
+      },
+    }
+  );
+
+  /**
+   * Get bundled TicTacToe HTML content
+   * Reads the self-contained HTML file built by Vite
+   */
+  private async getTicTacToeHTML(): Promise<string> {
+    // In production, read from dist/client/index.html
+    // For now, we'll return the bundled HTML from the built artifact
+    const response = await fetch(`${this.env.APP_URL}/index.html`);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch TicTacToe HTML: ${response.statusText}`);
+    }
+    return response.text();
+  }
 
   async init() {
+    /**
+     * NEW: Register TicTacToe UI Resource (SEP-1865 pattern)
+     *
+     * Resources are predeclared and served via resources/read,
+     * then linked to tools via _meta['ui/resourceUri']
+     */
+    const tictactoeResource = {
+      name: 'tictactoe-game-ui',
+      uri: 'ui://tictactoe-game',
+      title: 'TicTacToe Game UI',
+      description: 'Interactive Tic-Tac-Toe game built with React and WebMCP',
+      mimeType: 'text/html+mcp',
+    };
+
+    this.server.registerResource(
+      tictactoeResource.name,
+      tictactoeResource.uri,
+      tictactoeResource,
+      async () => {
+        const htmlContent = await this.getTicTacToeHTML();
+        return {
+          contents: [
+            {
+              uri: tictactoeResource.uri,
+              mimeType: tictactoeResource.mimeType,
+              text: htmlContent,
+              _meta: {
+                ui: {
+                  csp: {
+                    connect_domains: [], // Self-contained, no external connections
+                    resource_domains: [], // All assets inline
+                  },
+                  prefersBorder: true,
+                },
+              },
+            },
+          ],
+        };
+      }
+    );
     /**
      * Tool 1: Show External URL
      *
@@ -114,22 +181,24 @@ export class MyMCP extends McpAgent<Cloudflare.Env> {
     );
 
     /**
-     * Tool 4: Show Tic-Tac-Toe Game (WebMCP Integration Demo)
+     * Tool 4: Show Tic-Tac-Toe Game (MCP Apps + WebMCP Integration)
      *
-     * This is the most comprehensive example, demonstrating:
-     * - MCP UI: Serving an interactive web app via iframe
-     * - WebMCP: The iframe registers tools back to the MCP server
-     * - Bidirectional communication between AI and embedded UI
+     * NEW: Uses official MCP Apps (SEP-1865) pattern:
+     * - Tool links to predeclared resource via _meta['ui/resourceUri']
+     * - Returns text-only content (UI loaded from resource)
+     * - Client prefetches and caches the UI resource
      *
-     * The TicTacToe game is built with React and dynamically registers
-     * three WebMCP tools that become available after the UI loads:
+     * WebMCP integration (unchanged):
+     * The TicTacToe game dynamically registers tools after loading:
      * - tictactoe_get_state: Get current board state
      * - tictactoe_ai_move: Make a move (AI plays as O)
      * - tictactoe_reset: Reset the game
      */
-    this.server.tool(
+    this.server.registerTool(
       'showTicTacToeGame',
-      `Displays an interactive Tic-Tac-Toe game where you (AI) can play as player O against a human player X.
+      {
+        title: 'Show Tic-Tac-Toe Game',
+        description: `Displays an interactive Tic-Tac-Toe game where you (AI) can play as player O against a human player X.
 
 After calling this tool, the game UI will appear. The game registers WebMCP tools that become available:
 - tictactoe_get_state: Check current board state and whose turn it is
@@ -137,24 +206,19 @@ After calling this tool, the game UI will appear. The game registers WebMCP tool
 - tictactoe_reset: Start a new game
 
 Use this tool when the user wants to play Tic-Tac-Toe. After the UI loads, use tictactoe_get_state to see the board and begin playing.`,
-      {},
+        inputSchema: {},
+        _meta: {
+          // NEW: Link to UI resource (SEP-1865)
+          'ui/resourceUri': tictactoeResource.uri,
+        },
+      },
       async () => {
-        try {
-          const iframeUrl = `${this.env.APP_URL}/`;
-          const uiResource = createUIResource({
-            uri: 'ui://tictactoe-game',
-            content: {
-              type: 'externalUrl',
-              iframeUrl: iframeUrl,
-            },
-            encoding: 'blob',
-          });
-
-          return {
-            content: [
-              {
-                type: 'text',
-                text: `# Tic-Tac-Toe Game Started
+        // NEW: Return text-only content - UI is loaded from resource
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `# Tic-Tac-Toe Game Started
 
 The game board is now displayed in the side panel.
 
@@ -170,14 +234,9 @@ The game board is now displayed in the side panel.
 - \`tictactoe_reset\` - Start a new game
 
 Wait for the human player to make the first move, then check the state and respond!`,
-              },
-              uiResource,
-            ],
-          };
-        } catch (error) {
-          console.error('Error creating TicTacToe game resource:', error);
-          throw error;
-        }
+            },
+          ],
+        };
       }
     );
 
