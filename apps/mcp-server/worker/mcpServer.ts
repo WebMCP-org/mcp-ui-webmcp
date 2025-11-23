@@ -250,6 +250,145 @@ ${
     );
 
     /**
+     * Tool 6: Choose Color (Rich Elicitation Demo)
+     *
+     * Demonstrates the Rich Elicitation Protocol with UI Delegation.
+     * This tool requests a color from the user via a custom color picker UI.
+     *
+     * Flow:
+     * 1. Server sends elicitation/create with ui.uri parameter
+     * 2. Host spawns color picker UI in iframe
+     * 3. Host sends ui/notifications/elicitation-context to UI
+     * 4. User selects color and submits via ui/submit-elicitation
+     * 5. Host validates against requestedSchema
+     * 6. Host forwards validated result to server
+     */
+    this.server.tool(
+      'chooseColor',
+      `Request the user to choose a color using an interactive color picker.
+
+This demonstrates the Rich Elicitation Protocol where:
+- The server delegates rendering to a custom UI component
+- The Host manages the elicitation lifecycle
+- The UI submits validated data back to the server
+
+Returns the selected color in hex format (e.g., #3b82f6) and optional color name.`,
+      {
+        // Optional: provide a default color
+        defaultColor: {
+          type: 'string',
+          description: 'Default color to show in the picker (hex format)',
+          optional: true,
+        },
+        // Optional: provide a theme preference
+        theme: {
+          type: 'string',
+          description: 'UI theme preference: "light" or "dark"',
+          optional: true,
+        },
+      },
+      async ({ defaultColor, theme }) => {
+        try {
+          // NOTE: This is a simulated elicitation response
+          // In a real implementation, the server would:
+          // 1. Send elicitation/create to the Host
+          // 2. Wait for elicitation/result from the Host
+          // 3. Return the result to the caller
+          //
+          // For this demo, we return instructions for the Host to handle elicitation
+
+          const colorPickerUrl = `${this.env.APP_URL}/color-picker.html`;
+          const uiResource = createUIResource({
+            uri: 'ui://color-picker',
+            content: {
+              type: 'externalUrl',
+              iframeUrl: colorPickerUrl,
+            },
+            encoding: 'blob',
+          });
+
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `# Color Picker
+
+Please use the color picker interface to select a color.
+
+**Elicitation Request:**
+- **Message:** "Please select a color for your theme"
+- **Schema:**
+  \`\`\`json
+  {
+    "type": "object",
+    "properties": {
+      "color": {
+        "type": "string",
+        "pattern": "^#[0-9a-fA-F]{6}$",
+        "description": "Hex color code"
+      },
+      "name": {
+        "type": "string",
+        "description": "Optional color name"
+      }
+    },
+    "required": ["color"]
+  }
+  \`\`\`
+- **UI Resource:** ${colorPickerUrl}
+- **Context:**
+  - Default Color: ${defaultColor || '#3b82f6'}
+  - Theme: ${theme || 'light'}
+
+**Note:** This is a demonstration of the Rich Elicitation Protocol.
+The actual elicitation flow would be handled by the Host (chat-ui) which would:
+1. Render the UI resource in an iframe
+2. Send \`ui/notifications/elicitation-context\` to the iframe
+3. Receive \`ui/submit-elicitation\` from the iframe
+4. Validate the submission against the schema
+5. Forward the validated result back to this server
+`,
+              },
+              uiResource,
+            ],
+            // Metadata to signal elicitation request (not standard MCP, for demo purposes)
+            metadata: {
+              elicitation: {
+                message: 'Please select a color for your theme',
+                requestedSchema: {
+                  type: 'object',
+                  properties: {
+                    color: {
+                      type: 'string',
+                      pattern: '^#[0-9a-fA-F]{6}$',
+                      description: 'Hex color code',
+                    },
+                    name: {
+                      type: 'string',
+                      description: 'Optional color name',
+                    },
+                  },
+                  required: ['color'],
+                },
+                ui: {
+                  uri: 'ui://color-picker',
+                  mode: 'modal' as const,
+                  context: {
+                    defaultColor: defaultColor || '#3b82f6',
+                    theme: theme || 'light',
+                  },
+                },
+              },
+            },
+          };
+        } catch (error) {
+          console.error('Error creating color picker resource:', error);
+          throw error;
+        }
+      }
+    );
+
+    /**
      * Prompt: Play Tic Tac Toe
      *
      * A convenience prompt that users can trigger to start a game.

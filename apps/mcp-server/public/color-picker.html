@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Color Picker - MCP Elicitation</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1.5rem;
+      min-height: 400px;
+    }
+
+    .container.dark {
+      background-color: #1f2937;
+      color: white;
+    }
+
+    .container.light {
+      background-color: white;
+      color: #1f2937;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+
+    .error {
+      background-color: #fee2e2;
+      border: 1px solid #ef4444;
+      color: #991b1b;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+    }
+
+    .status {
+      font-size: 0.875rem;
+      color: #6b7280;
+    }
+
+    .preview-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .color-preview {
+      width: 100%;
+      height: 8rem;
+      border-radius: 0.5rem;
+      border: 2px solid #d1d5db;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s;
+    }
+
+    .color-value {
+      text-align: center;
+      font-family: 'Courier New', monospace;
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    label {
+      font-weight: 500;
+    }
+
+    input[type="color"] {
+      width: 100%;
+      height: 3rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      border: none;
+    }
+
+    input[type="text"] {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 0.375rem;
+      font-size: 1rem;
+    }
+
+    .dark input[type="text"] {
+      background-color: #374151;
+      border-color: #4b5563;
+      color: white;
+    }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.5rem;
+    }
+
+    .preset-button {
+      width: 100%;
+      height: 2.5rem;
+      border-radius: 0.375rem;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .preset-button:hover:not(:disabled) {
+      transform: scale(1.1);
+    }
+
+    .preset-button.selected {
+      border-color: #000;
+    }
+
+    .preset-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 0.5rem;
+      padding-top: 1rem;
+    }
+
+    button {
+      flex: 1;
+      font-weight: 600;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      font-size: 1rem;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background-color: #3b82f6;
+      color: white;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background-color: #2563eb;
+    }
+
+    .btn-secondary {
+      background-color: #e5e7eb;
+      color: #1f2937;
+    }
+
+    .btn-secondary.dark {
+      background-color: #4b5563;
+      color: white;
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background-color: #d1d5db;
+    }
+
+    .btn-secondary.dark:hover:not(:disabled) {
+      background-color: #374151;
+    }
+
+    .btn-danger {
+      background-color: #ef4444;
+      color: white;
+    }
+
+    .btn-danger:hover:not(:disabled) {
+      background-color: #dc2626;
+    }
+
+    .debug-info {
+      margin-top: 1rem;
+      font-size: 0.75rem;
+      color: #6b7280;
+    }
+
+    .debug-info summary {
+      cursor: pointer;
+      margin-bottom: 0.5rem;
+    }
+
+    .debug-info pre {
+      background-color: #f3f4f6;
+      padding: 0.5rem;
+      border-radius: 0.375rem;
+      overflow: auto;
+      max-height: 200px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app" class="container light">
+    <div>
+      <h2 id="message">Choose a color</h2>
+      <div id="error-container" style="display: none;" class="error"></div>
+      <div id="status-container" class="status" style="display: none;">Connecting to parent...</div>
+    </div>
+
+    <div class="preview-container">
+      <div id="color-preview" class="color-preview" style="background-color: #3b82f6;"></div>
+      <div id="color-value" class="color-value">#3b82f6</div>
+    </div>
+
+    <div class="input-group">
+      <label for="color-input">Select Color:</label>
+      <input id="color-input" type="color" value="#3b82f6" disabled />
+    </div>
+
+    <div class="input-group">
+      <label for="name-input">Color Name (Optional):</label>
+      <input id="name-input" type="text" placeholder="e.g., Ocean Blue" disabled />
+    </div>
+
+    <div class="input-group">
+      <label>Presets:</label>
+      <div id="preset-grid" class="preset-grid"></div>
+    </div>
+
+    <div class="button-group">
+      <button id="submit-btn" class="btn-primary" disabled>Select Color</button>
+      <button id="cancel-btn" class="btn-secondary" disabled>Cancel</button>
+      <button id="decline-btn" class="btn-danger" disabled>Decline</button>
+    </div>
+
+    <details class="debug-info">
+      <summary>Debug Info</summary>
+      <pre id="debug-output"></pre>
+    </details>
+  </div>
+
+  <script type="module">
+    // State
+    let isParentReady = false;
+    let elicitationContext = null;
+    let selectedColor = '#3b82f6';
+    let colorName = '';
+
+    // Preset colors
+    const presets = [
+      { color: '#ef4444', name: 'Red' },
+      { color: '#f97316', name: 'Orange' },
+      { color: '#eab308', name: 'Yellow' },
+      { color: '#22c55e', name: 'Green' },
+      { color: '#3b82f6', name: 'Blue' },
+      { color: '#a855f7', name: 'Purple' },
+      { color: '#ec4899', name: 'Pink' },
+      { color: '#64748b', name: 'Slate' },
+      { color: '#000000', name: 'Black' },
+      { color: '#ffffff', name: 'White' },
+      { color: '#6b7280', name: 'Gray' },
+      { color: '#0891b2', name: 'Cyan' },
+    ];
+
+    // DOM elements
+    const app = document.getElementById('app');
+    const messageEl = document.getElementById('message');
+    const errorContainer = document.getElementById('error-container');
+    const statusContainer = document.getElementById('status-container');
+    const colorPreview = document.getElementById('color-preview');
+    const colorValue = document.getElementById('color-value');
+    const colorInput = document.getElementById('color-input');
+    const nameInput = document.getElementById('name-input');
+    const presetGrid = document.getElementById('preset-grid');
+    const submitBtn = document.getElementById('submit-btn');
+    const cancelBtn = document.getElementById('cancel-btn');
+    const declineBtn = document.getElementById('decline-btn');
+    const debugOutput = document.getElementById('debug-output');
+
+    // Initialize preset buttons
+    presets.forEach(({ color, name }) => {
+      const btn = document.createElement('button');
+      btn.className = 'preset-button';
+      btn.style.backgroundColor = color;
+      btn.title = name;
+      btn.disabled = true;
+      btn.onclick = () => setColor(color);
+      presetGrid.appendChild(btn);
+    });
+
+    // Set color
+    function setColor(color) {
+      selectedColor = color;
+      colorInput.value = color;
+      colorPreview.style.backgroundColor = color;
+      colorValue.textContent = color;
+      updatePresetSelection();
+      updateDebug();
+    }
+
+    // Update preset selection
+    function updatePresetSelection() {
+      Array.from(presetGrid.children).forEach((btn, idx) => {
+        btn.classList.toggle('selected', presets[idx].color === selectedColor);
+      });
+    }
+
+    // Update debug output
+    function updateDebug() {
+      debugOutput.textContent = JSON.stringify({
+        isParentReady,
+        elicitationContext,
+        selectedColor,
+        colorName,
+      }, null, 2);
+    }
+
+    // Enable UI
+    function enableUI() {
+      colorInput.disabled = false;
+      nameInput.disabled = false;
+      submitBtn.disabled = false;
+      cancelBtn.disabled = false;
+      declineBtn.disabled = false;
+      Array.from(presetGrid.children).forEach(btn => btn.disabled = false);
+      statusContainer.style.display = 'none';
+    }
+
+    // Apply theme
+    function applyTheme(theme) {
+      app.className = `container ${theme}`;
+      cancelBtn.classList.toggle('dark', theme === 'dark');
+    }
+
+    // Show error
+    function showError(message) {
+      errorContainer.textContent = message;
+      errorContainer.style.display = 'block';
+      setTimeout(() => {
+        errorContainer.style.display = 'none';
+      }, 5000);
+    }
+
+    // Parent readiness protocol
+    const embedded = window.parent !== window;
+    if (!embedded) {
+      isParentReady = true;
+      enableUI();
+      statusContainer.style.display = 'none';
+    } else {
+      statusContainer.style.display = 'block';
+    }
+
+    // Message handler
+    function handleMessage(event) {
+      const data = event.data;
+      if (!data || typeof data !== 'object') return;
+
+      // Handle elicitation context
+      if (data.jsonrpc === '2.0' && data.method === 'ui/notifications/elicitation-context') {
+        console.log('[ColorPicker] Received elicitation context:', data.params);
+        elicitationContext = data.params;
+        isParentReady = true;
+
+        // Update UI
+        if (data.params.message) {
+          messageEl.textContent = data.params.message;
+        }
+
+        if (data.params.context?.defaultColor) {
+          setColor(data.params.context.defaultColor);
+        }
+
+        if (data.params.context?.theme) {
+          applyTheme(data.params.context.theme);
+        }
+
+        if (data.params.context?.error) {
+          showError(data.params.context.error);
+        }
+
+        enableUI();
+        updateDebug();
+        notifySize();
+        return;
+      }
+
+      // Handle legacy parent-ready
+      if (data.type === 'parent-ready' || data.type === 'ui-lifecycle-iframe-render-data') {
+        isParentReady = true;
+        enableUI();
+        updateDebug();
+        return;
+      }
+    }
+
+    // Notify parent of size changes
+    function notifySize() {
+      if (typeof window === 'undefined' || window.parent === window) return;
+
+      const height = document.documentElement.scrollHeight;
+      const width = document.documentElement.scrollWidth;
+
+      window.parent.postMessage({
+        type: 'ui-size-change',
+        payload: { height, width },
+      }, '*');
+    }
+
+    // Submit color
+    function submitColor() {
+      if (!isParentReady || window.parent === window) return;
+
+      window.parent.postMessage({
+        jsonrpc: '2.0',
+        method: 'ui/submit-elicitation',
+        params: {
+          action: 'accept',
+          content: {
+            color: selectedColor,
+            name: colorName || undefined,
+          },
+        },
+      }, '*');
+    }
+
+    // Cancel
+    function cancel() {
+      if (!isParentReady || window.parent === window) return;
+
+      window.parent.postMessage({
+        jsonrpc: '2.0',
+        method: 'ui/submit-elicitation',
+        params: {
+          action: 'cancel',
+          content: null,
+        },
+      }, '*');
+    }
+
+    // Decline
+    function decline() {
+      if (!isParentReady || window.parent === window) return;
+
+      window.parent.postMessage({
+        jsonrpc: '2.0',
+        method: 'ui/submit-elicitation',
+        params: {
+          action: 'decline',
+          content: null,
+        },
+      }, '*');
+    }
+
+    // Event listeners
+    window.addEventListener('message', handleMessage);
+    colorInput.addEventListener('input', (e) => setColor(e.target.value));
+    nameInput.addEventListener('input', (e) => {
+      colorName = e.target.value;
+      updateDebug();
+    });
+    submitBtn.addEventListener('click', submitColor);
+    cancelBtn.addEventListener('click', cancel);
+    declineBtn.addEventListener('click', decline);
+
+    // Signal ready to parent
+    if (embedded) {
+      window.parent.postMessage({ type: 'ui-lifecycle-iframe-ready' }, '*');
+    }
+
+    // Watch for size changes
+    const resizeObserver = new ResizeObserver(notifySize);
+    resizeObserver.observe(document.documentElement);
+
+    // Initial state
+    updatePresetSelection();
+    updateDebug();
+  </script>
+</body>
+</html>
