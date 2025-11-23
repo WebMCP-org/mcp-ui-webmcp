@@ -16,8 +16,11 @@ app.use(
   '/*',
   cors({
     origin: '*',
-    allowHeaders: ['Content-Type', 'X-Anthropic-API-Key', '*'],
+    allowHeaders: ['*'],
     allowMethods: ['*'],
+    exposeHeaders: ['*'],
+    credentials: true,
+    maxAge: 86400,
   })
 );
 
