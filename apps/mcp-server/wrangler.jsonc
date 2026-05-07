@@ -14,7 +14,7 @@
       "tag": "v1"
     },
     {
-      "new_classes": ["GameStatsStorage"],
+      "new_sqlite_classes": ["GameStatsStorage"],
       "tag": "v2"
     }
   ],

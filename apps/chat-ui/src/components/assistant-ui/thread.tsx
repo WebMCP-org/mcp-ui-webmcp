@@ -23,6 +23,7 @@ import {
   CheckIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
+  Clock,
   Code,
   CopyIcon,
   FileText,
@@ -341,8 +342,10 @@ const ToolResponsePanel: FC = () => {
   );
 
   const handleToolCall = useCallback(
-    async (toolName: string, args: Record<string, unknown>, sourceId?: string) => {
-      return await callTool({ name: toolName, arguments: args }, sourceId);
+    async (toolName: string, args: Record<string, unknown>, sourceId?: string, toolCallId?: string) => {
+      // Generate synthetic ID for manual tool execution if not provided
+      const syntheticId = toolCallId || `manual-${toolName}-${crypto.randomUUID()}`;
+      return await callTool({ name: toolName, arguments: args }, sourceId, syntheticId);
     },
     [callTool]
   );
@@ -398,10 +401,13 @@ const ToolResponsePanel: FC = () => {
               onUIAction={handleUIAction}
               htmlProps={{
                 iframeProps: {
+                  allow: 'tools',
                   ref: selectedResource.iframeRef as React.RefObject<HTMLIFrameElement>,
                   onLoad: async (e) => {
                     await setupIframe(e.currentTarget, selectedResource.id);
                   },
+                } as React.IframeHTMLAttributes<HTMLIFrameElement> & {
+                  ref: React.RefObject<HTMLIFrameElement>;
                 },
               }}
               remoteDomProps={{
@@ -537,13 +543,17 @@ const ResourcesList: FC<{
 };
 
 const Composer: FC = () => {
-  const { tools, resources, callTool } = useMCP();
+  const { tools, resources, callTool, pendingElicitations } = useMCP();
   const [showTools, setShowTools] = useState(false);
   const { handleResetThread } = useThreadReset();
 
+  const hasPendingElicitations = pendingElicitations.size > 0;
+
   const handleToolCall = useCallback(
-    async (toolName: string, args: Record<string, unknown>, sourceId?: string) => {
-      return await callTool({ name: toolName, arguments: args }, sourceId);
+    async (toolName: string, args: Record<string, unknown>, sourceId?: string, toolCallId?: string) => {
+      // Generate synthetic ID for manual tool execution if not provided
+      const syntheticId = toolCallId || `manual-${toolName}-${crypto.randomUUID()}`;
+      return await callTool({ name: toolName, arguments: args }, sourceId, syntheticId);
     },
     [callTool]
   );
@@ -560,7 +570,9 @@ const Composer: FC = () => {
         />
       )}
 
-      <ComposerPrimitive.Root className="focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10 flex w-full flex-col gap-1.5 rounded-xl border border-border/60 bg-background shadow-xl backdrop-blur-sm transition-all ease-in-out sm:gap-2 sm:rounded-2xl max-[500px]:gap-1">
+      <ComposerPrimitive.Root
+        className="focus-within:border-primary/50 focus-within:ring-4 focus-within:ring-primary/10 flex w-full flex-col gap-1.5 rounded-xl border border-border/60 bg-background shadow-xl backdrop-blur-sm transition-all ease-in-out sm:gap-2 sm:rounded-2xl max-[500px]:gap-1"
+      >
         <div className="flex items-end gap-1.5 px-3 pt-3 pb-2 sm:gap-2 sm:px-4 sm:pt-4 sm:pb-3 max-[500px]:px-2 max-[500px]:pt-2 max-[500px]:pb-1.5">
           {tools.length > 0 && (
             <Tooltip>
@@ -594,7 +606,7 @@ const Composer: FC = () => {
             className="placeholder:text-muted-foreground max-h-48 min-h-9 flex-1 resize-none border-none bg-transparent py-2 text-base leading-relaxed outline-none disabled:cursor-not-allowed sm:min-h-10 sm:py-2.5"
             enterKeyHint="send"
           />
-          <ComposerAction />
+          <ComposerAction disabled={hasPendingElicitations} />
         </div>
 
         <ThreadPrimitive.If empty={false}>
@@ -633,17 +645,18 @@ const Composer: FC = () => {
   );
 };
 
-const ComposerAction: FC = () => {
+const ComposerAction: FC<{ disabled?: boolean }> = ({ disabled = false }) => {
   return (
     <>
       <ThreadPrimitive.If running={false}>
         <ComposerPrimitive.Send asChild>
           <TooltipIconButton
-            tooltip="Send"
+            tooltip={disabled ? 'Complete pending requests first' : 'Send'}
             variant="default"
             className="my-2 size-11 p-2.5 transition-opacity ease-in"
+            disabled={disabled}
           >
-            <SendHorizontalIcon />
+            {disabled ? <Clock className="size-4" /> : <SendHorizontalIcon />}
           </TooltipIconButton>
         </ComposerPrimitive.Send>
       </ThreadPrimitive.If>

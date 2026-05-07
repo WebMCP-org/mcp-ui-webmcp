@@ -37,6 +37,7 @@ export default defineConfig((env) => {
   return {
     plugins,
     resolve: {
+      dedupe: ['react', 'react-dom', 'zod'],
       alias: {
         '@': path.resolve(__dirname, './src'),
       },

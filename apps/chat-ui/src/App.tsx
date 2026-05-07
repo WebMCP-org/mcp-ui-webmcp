@@ -42,23 +42,35 @@ function App() {
   }, []);
 
   const callTool = useCallback(
-    async (request: CallToolRequest['params'], sourceId?: string): Promise<CallToolResult> => {
-      if (sourceId) {
-        return webMcpIntegration.callTool(request, sourceId);
+    async (request: CallToolRequest['params'], sourceId?: string, toolCallId?: string): Promise<CallToolResult> => {
+      // Register the tool call if toolCallId is provided
+      if (toolCallId) {
+        mcpConnection.registerToolCall(toolCallId, request.name);
       }
 
-      if (!mcpConnection.clientRef.current) {
-        throw new Error('MCP client not connected');
-      }
       try {
+        if (sourceId) {
+          const result = await webMcpIntegration.callTool(request, sourceId);
+          return result;
+        }
+
+        if (!mcpConnection.clientRef.current) {
+          throw new Error('MCP client not connected');
+        }
+
         const result = await mcpConnection.clientRef.current.callTool(request);
         return result as CallToolResult;
       } catch (error) {
         console.error('[HTTP Client] Tool call failed:', error);
         throw error;
+      } finally {
+        // Unregister the tool call when done
+        if (toolCallId) {
+          mcpConnection.unregisterToolCall(toolCallId);
+        }
       }
     },
-    [mcpConnection.clientRef, webMcpIntegration]
+    [mcpConnection, webMcpIntegration]
   );
 
   const mcpContextValue: MCPContextValue = useMemo(
@@ -76,6 +88,11 @@ function App() {
       registerWebMcpClient: webMcpIntegration.registerWebMcpClient,
       registerWebMcpTools: webMcpIntegration.registerWebMcpTools,
       unregisterWebMcpClient: webMcpIntegration.unregisterWebMcpClient,
+      pendingElicitations: mcpConnection.pendingElicitations,
+      submitElicitation: mcpConnection.submitElicitation,
+      assignElicitation: mcpConnection.assignElicitation,
+      registerToolCall: mcpConnection.registerToolCall,
+      unregisterToolCall: mcpConnection.unregisterToolCall,
     }),
     [mcpConnection, webMcpIntegration, callTool]
   );

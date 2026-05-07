@@ -11,6 +11,9 @@ type ToolWithSource = MCPTool & { _sourceId?: string };
  * Bridge component that registers a single MCP tool with assistant-ui
  *
  * Handles tool execution and UI resource extraction from tool results.
+ *
+ * NOTE: Tool call registration is handled by ToolFallback component, which has
+ * access to the real assistant-ui toolCallId.
  */
 const McpToolBridge: FC<{
   toolName: string;
