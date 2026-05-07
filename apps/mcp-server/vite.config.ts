@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { cloudflare } from '@cloudflare/vite-plugin';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
@@ -33,8 +34,14 @@ export default defineConfig(() => ({
     port: 8888,
     strictPort: true,
   },
+  resolve: {
+    dedupe: ['react', 'react-dom', 'zod'],
+  },
   preview: {
     port: 8888,
     strictPort: true,
+  },
+  ssr: {
+    noExternal: ['ajv'],
   },
 }));

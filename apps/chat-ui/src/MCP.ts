@@ -1,9 +1,9 @@
-import { Client, type ClientOptions } from '@modelcontextprotocol/sdk/client';
+import { Client, type ClientOptions } from '@modelcontextprotocol/sdk/client/index.js';
 import {
   StreamableHTTPClientTransport,
   type StreamableHTTPClientTransportOptions,
 } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import type { Implementation } from '@modelcontextprotocol/sdk/types.js';
+import type { ClientCapabilities, Implementation } from '@modelcontextprotocol/sdk/types.js';
 
 /**
  * Create an MCP client and transport for connecting to a remote MCP server
@@ -25,13 +25,20 @@ export const createClient = (
   clientConfig: {
     _clientInfo: Implementation;
     options?: ClientOptions;
+    capabilities?: ClientCapabilities;
   },
   transportConfig: {
     url: URL;
     opts?: StreamableHTTPClientTransportOptions;
   }
 ) => {
-  const client = new Client(clientConfig._clientInfo, clientConfig.options);
+  const client = new Client(clientConfig._clientInfo, {
+    ...clientConfig.options,
+    capabilities: {
+      ...clientConfig.options?.capabilities,
+      ...clientConfig.capabilities,
+    },
+  });
 
   const transport = new StreamableHTTPClientTransport(transportConfig.url, transportConfig.opts);
 

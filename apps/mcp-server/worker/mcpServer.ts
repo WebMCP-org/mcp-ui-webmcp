@@ -1,6 +1,9 @@
 import { createUIResource } from '@mcp-ui/server';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { McpAgent } from 'agents/mcp';
+import * as z from 'zod';
+import { CfWorkerJsonSchemaValidator } from "@modelcontextprotocol/sdk/validation/cfworker-provider.js";
+import { WorkerTransport } from "agents/mcp";
 
 /**
  * MCP UI with WebMCP Agent
@@ -9,9 +12,27 @@ import { McpAgent } from 'agents/mcp';
  * including a Tic-Tac-Toe game that uses WebMCP for dynamic tool registration.
  */
 export class MyMCP extends McpAgent<Cloudflare.Env> {
-  server = new McpServer({
-    name: 'mcp-ui-webmcp-cloudflare',
-    version: '1.0.0',
+  server = new McpServer(
+    {
+      name: "test",
+      version: "1.0.0"
+    },
+    {
+      jsonSchemaValidator: new CfWorkerJsonSchemaValidator()
+    }
+  );
+
+  transport = new WorkerTransport({
+    sessionIdGenerator: () => this.name,
+
+  // storage: {
+  //   get: () => {
+  //     return this.ctx.storage.kv.get<TransportState>(STATE_KEY);
+  //   },
+  //   set: (state: TransportState) => {
+  //     this.ctx.storage.kv.put<TransportState>(STATE_KEY, state);
+  //   }
+  // }
   });
 
   async init() {
@@ -21,10 +42,12 @@ export class MyMCP extends McpAgent<Cloudflare.Env> {
      * Demonstrates how to display an external URL in an iframe.
      * This is useful for showing web pages from other domains.
      */
-    this.server.tool(
+    this.server.registerTool(
       'showExternalUrl',
-      'Creates a UI resource displaying an external URL (example.com). This demonstrates iframe embedding of external websites.',
-      {},
+      {
+        description: 'Creates a UI resource displaying an external URL (example.com). This demonstrates iframe embedding of external websites.',
+        inputSchema: {},
+      },
       async () => {
         try {
           const uiResource = createUIResource({
@@ -49,10 +72,12 @@ export class MyMCP extends McpAgent<Cloudflare.Env> {
      * Demonstrates how to render raw HTML content directly.
      * The HTML is sandboxed for security.
      */
-    this.server.tool(
+    this.server.registerTool(
       'showRawHtml',
-      'Creates a UI resource displaying raw HTML. This demonstrates rendering HTML content directly without an external URL.',
-      {},
+      {
+        description: 'Creates a UI resource displaying raw HTML. This demonstrates rendering HTML content directly without an external URL.',
+        inputSchema: {},
+      },
       async () => {
         try {
           const uiResource = createUIResource({
@@ -81,10 +106,12 @@ export class MyMCP extends McpAgent<Cloudflare.Env> {
      * Demonstrates how to execute JavaScript that builds a DOM dynamically.
      * The script runs in the client and has access to a special 'root' element.
      */
-    this.server.tool(
+    this.server.registerTool(
       'showRemoteDom',
-      'Creates a UI resource displaying a remote DOM script. This demonstrates dynamic UI generation via JavaScript.',
-      {},
+      {
+        description: 'Creates a UI resource displaying a remote DOM script. This demonstrates dynamic UI generation via JavaScript.',
+        inputSchema: {},
+      },
       async () => {
         try {
           const remoteDomScript = `
@@ -127,9 +154,10 @@ export class MyMCP extends McpAgent<Cloudflare.Env> {
      * - tictactoe_ai_move: Make a move (AI plays as O)
      * - tictactoe_reset: Reset the game
      */
-    this.server.tool(
+    this.server.registerTool(
       'showTicTacToeGame',
-      `Displays an interactive Tic-Tac-Toe game where you (AI) can play as player O against a human player X.
+      {
+        description: `Displays an interactive Tic-Tac-Toe game where you (AI) can play as player O against a human player X.
 
 After calling this tool, the game UI will appear. The game registers WebMCP tools that become available:
 - tictactoe_get_state: Check current board state and whose turn it is
@@ -137,7 +165,8 @@ After calling this tool, the game UI will appear. The game registers WebMCP tool
 - tictactoe_reset: Start a new game
 
 Use this tool when the user wants to play Tic-Tac-Toe. After the UI loads, use tictactoe_get_state to see the board and begin playing.`,
-      {},
+        inputSchema: {},
+      },
       async () => {
         try {
           const iframeUrl = `${this.env.APP_URL}/`;
@@ -187,10 +216,12 @@ Wait for the human player to make the first move, then check the state and respo
      * Fetches global statistics for all TicTacToe games played.
      * Tracks wins for Clankers (AI) and Carbon Units (humans), plus draws and live games.
      */
-    this.server.tool(
+    this.server.registerTool(
       'tictactoe_get_stats',
-      'Get global statistics for all TicTacToe games. Shows wins for Clankers (AI) vs Carbon Units (humans), draws, live games, and total games played.',
-      {},
+      {
+        description: 'Get global statistics for all TicTacToe games. Shows wins for Clankers (AI) vs Carbon Units (humans), draws, live games, and total games played.',
+        inputSchema: {},
+      },
       async () => {
         try {
           const id = this.env.GAME_STATS.idFromName('global-stats');
@@ -232,13 +263,12 @@ Wait for the human player to make the first move, then check the state and respo
 
 **Last updated:** ${new Date(stats.lastUpdated).toLocaleString()}
 
-${
-  stats.clankersWins > stats.carbonUnitsWins
-    ? '🏆 Clankers are currently dominating!'
-    : stats.carbonUnitsWins > stats.clankersWins
-      ? '🏆 Carbon Units are holding strong!'
-      : "⚖️ It's a tie! The battle continues..."
-}`,
+${stats.clankersWins > stats.carbonUnitsWins
+                    ? '🏆 Clankers are currently dominating!'
+                    : stats.carbonUnitsWins > stats.clankersWins
+                      ? '🏆 Carbon Units are holding strong!'
+                      : "⚖️ It's a tie! The battle continues..."
+                  }`,
               },
             ],
           };
@@ -263,9 +293,10 @@ ${
      * 5. Host validates against requestedSchema
      * 6. Host forwards validated result to server
      */
-    this.server.tool(
+    this.server.registerTool(
       'chooseColor',
-      `Request the user to choose a color using an interactive color picker.
+      {
+        description: `Request the user to choose a color using an interactive color picker.
 
 This demonstrates the Rich Elicitation Protocol where:
 - The server delegates rendering to a custom UI component
@@ -273,21 +304,14 @@ This demonstrates the Rich Elicitation Protocol where:
 - The UI submits validated data back to the server
 
 Returns the selected color in hex format (e.g., #3b82f6) and optional color name.`,
-      {
+        inputSchema: {
         // Optional: provide a default color
-        defaultColor: {
-          type: 'string',
-          description: 'Default color to show in the picker (hex format)',
-          optional: true,
-        },
-        // Optional: provide a theme preference
-        theme: {
-          type: 'string',
-          description: 'UI theme preference: "light" or "dark"',
-          optional: true,
+          defaultColor: z.string().optional().describe('Default color to show in the picker (hex format)'),
+          // Optional: provide a theme preference
+          theme: z.string().optional().describe('UI theme preference: "light" or "dark"'),
         },
       },
-      async ({ defaultColor, theme }) => {
+      async ({ defaultColor, theme }: { defaultColor?: string; theme?: string }) => {
         try {
           // NOTE: This is a simulated elicitation response
           // In a real implementation, the server would:
@@ -389,28 +413,105 @@ The actual elicitation flow would be handled by the Host (chat-ui) which would:
     );
 
     /**
+     * Tool 7: Test Elicitation
+     *
+     * Demonstrates the form elicitation capability.
+     */
+    this.server.registerTool(
+      'testElicitation',
+      {
+        description: 'Test the elicitation capability by asking the user for their name and age.',
+        inputSchema: {
+          confirm: z.boolean().describe('Do you want to provide your details?'),
+        },
+      },
+      async ({ confirm }, extra) => {
+        if (!confirm) {
+          return {
+            content: [{ type: 'text', text: 'Elicitation cancelled.' }],
+          };
+        }
+
+        try {
+          const result = await this.server.server.elicitInput(
+            {
+              message: 'Please provide your details',
+              requestedSchema: {
+                type: 'object',
+                properties: {
+                  name: {
+                    type: 'string',
+                    title: 'Name',
+                    description: 'Your full name',
+                  },
+                  age: {
+                    type: 'number',
+                    title: 'Age',
+                    description: 'Your age in years',
+                  },
+                },
+                required: ['name', 'age'],
+              },
+            },
+            { relatedRequestId: extra.requestId }
+          );
+
+          console.log('Elicitation result:', result);
+
+          if (result.action !== 'accept' || !result.content) {
+            return {
+              content: [{ type: 'text', text: 'Elicitation cancelled by user.' }],
+            };
+          }
+
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Thank you! Received:\n- Name: ${result.content.name}\n- Age: ${result.content.age}`,
+              },
+            ],
+          };
+        } catch (error) {
+          console.error('Error in testElicitation:', error);
+          return {
+            content: [
+              {
+                type: 'text',
+                text: `Error: ${error instanceof Error ? error.message : String(error)}`,
+              },
+            ],
+            isError: true,
+          };
+        }
+      }
+    );
+
+    /**
      * Prompt: Play Tic Tac Toe
      *
      * A convenience prompt that users can trigger to start a game.
      * Prompts are pre-defined message templates that can be invoked by name.
      */
-    this.server.prompt('PlayTicTacToe', 'Start a game of Tic Tac Toe', async () => {
-      try {
-        return {
-          messages: [
-            {
-              role: 'user',
-              content: {
-                type: 'text',
-                text: "Hey, let's play a game of Tic Tac Toe!",
+    this.server.registerPrompt('PlayTicTacToe',
+      { description: 'Start a game of Tic Tac Toe' },
+      async () => {
+        try {
+          return {
+            messages: [
+              {
+                role: 'user',
+                content: {
+                  type: 'text',
+                  text: "Hey, let's play a game of Tic Tac Toe!",
+                },
               },
-            },
-          ],
-        };
-      } catch (error) {
-        console.error('Error creating prompt:', error);
-        throw error;
-      }
-    });
+            ],
+          };
+        } catch (error) {
+          console.error('Error creating prompt:', error);
+          throw error;
+        }
+      });
   }
 }

@@ -1,6 +1,6 @@
 import type { ToolCallMessagePartComponent } from '@assistant-ui/react';
 import { ChevronDown, ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useMCP } from '@/hooks/useMCP';
@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { ToolSourceBadge } from './tool-source-badge';
 import { type ToolStatus, ToolStatusBadge } from './tool-status-badge';
 import { type ToolCallStatus } from './types';
+import { ElicitationInlineForm, type ElicitationRequest } from '../ElicitationInlineForm';
 
 /**
  * Map assistant-ui status to simplified ToolStatus type
@@ -58,15 +59,32 @@ function getBorderColor(status: ToolCallStatus, isError?: boolean): string {
 }
 
 export const ToolFallback: ToolCallMessagePartComponent = ({
+  toolCallId,
   toolName,
   argsText,
   result,
   status,
   isError,
+  addResult: _addResult,
+  interrupt,
+  resume,
 }) => {
-  const { tools } = useMCP();
+  const { tools, pendingElicitations, submitElicitation, registerToolCall, unregisterToolCall } = useMCP();
   const tool = tools.find((t) => t.name === toolName);
   const sourceId = tool ? (tool as typeof tool & { _sourceId?: string })._sourceId : undefined;
+
+  // Register this tool call with the tracking system
+  // Keep it registered even after completion to handle late-arriving elicitations
+  // Only unregister when component unmounts
+  useEffect(() => {
+    console.log('[ToolFallback] Registering tool call:', { toolCallId, toolName, status: status.type });
+    registerToolCall(toolCallId, toolName);
+
+    return () => {
+      console.log('[ToolFallback] Unregistering tool call on unmount:', { toolCallId, toolName });
+      unregisterToolCall(toolCallId);
+    };
+  }, [toolCallId, toolName, registerToolCall, unregisterToolCall]);
 
   const formattedResult = result !== undefined ? formatMcpResult(result) : null;
   const resultIsError = formattedResult?.isError || isError;
@@ -78,6 +96,72 @@ export const ToolFallback: ToolCallMessagePartComponent = ({
   const toolStatus = mapToToolStatus(status, resultIsError);
   const borderColor = getBorderColor(status, resultIsError);
 
+  // Find the elicitation assigned to this tool call
+  // NOTE: Elicitations are now auto-assigned in useMCPConnection when they arrive
+  // NOTE: Don't check isRunning - elicitation should persist even after tool finishes
+  const toolElicitation = useMemo(() => {
+    console.log('[ToolFallback] Looking for elicitation:', {
+      toolCallId,
+      toolName,
+      pendingElicitationsSize: pendingElicitations.size,
+      pendingElicitations: Array.from(pendingElicitations.entries()).map(([id, e]) => ({
+        requestId: id,
+        assignedToolCallId: e.assignedToolCallId,
+      })),
+    });
+
+    if (pendingElicitations.size === 0) return null;
+
+    for (const elicitation of pendingElicitations.values()) {
+      if (elicitation.assignedToolCallId === toolCallId) {
+        console.log('[ToolFallback] Found matching elicitation!', {
+          requestId: elicitation.requestId,
+          toolCallId,
+        });
+        return elicitation;
+      }
+    }
+
+    console.log('[ToolFallback] No matching elicitation found for toolCallId:', toolCallId);
+    return null;
+  }, [pendingElicitations, toolCallId, toolName]);
+
+  if (status.type === 'requires-action' && interrupt) {
+    return (
+      <div
+        className={cn(
+          'aui-tool-fallback-root mb-4 flex w-full max-w-full flex-col gap-3 rounded-lg border py-3 transition-colors',
+          borderColor
+        )}
+      >
+        <div className="aui-tool-fallback-header flex items-center gap-2 px-3 sm:px-4">
+          <p className="aui-tool-fallback-title grow flex items-center gap-1.5 text-xs sm:gap-2 sm:text-sm min-w-0">
+            <span className="text-muted-foreground shrink-0">Used tool:</span>{' '}
+            <b className="font-semibold truncate">{toolName}</b>
+            <ToolSourceBadge sourceId={sourceId} iconOnly />
+          </p>
+          <ToolStatusBadge status="waiting" isError={false} className="shrink-0" />
+        </div>
+        <div className="px-3 sm:px-4">
+          <ElicitationInlineForm
+            request={{ params: interrupt.payload as ElicitationRequest['params'] }}
+            onSubmit={(res: { action: 'accept' | 'decline' | 'cancel'; data?: unknown }) => {
+              if (res.action === 'accept') {
+                resume(res.data);
+              } else {
+                // TODO: Handle cancellation properly if needed, for now we just don't submit
+                // Ideally we should probably cancel the tool call
+              }
+            }}
+            onCancel={() => {
+              // TODO: Handle cancellation
+            }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn(
@@ -86,7 +170,8 @@ export const ToolFallback: ToolCallMessagePartComponent = ({
       )}
     >
       <div className="aui-tool-fallback-header flex items-center gap-2 px-3 sm:px-4">
-        <p className="aui-tool-fallback-title flex-grow flex items-center gap-1.5 text-xs sm:gap-2 sm:text-sm min-w-0">
+        <p className="aui-tool-fallback-title grow flex items-center gap-1.5 text-xs sm:gap-2 sm:text-sm min-w-0">
+
           <span className="text-muted-foreground shrink-0">Used tool:</span>{' '}
           <b className="font-semibold truncate">{toolName}</b>
           <ToolSourceBadge sourceId={sourceId} iconOnly />
@@ -107,6 +192,24 @@ export const ToolFallback: ToolCallMessagePartComponent = ({
           )}
         </Button>
       </div>
+
+      {/* Show elicitation for this specific tool call */}
+      {toolElicitation && (
+        <div className="px-3 sm:px-4">
+          <ElicitationInlineForm
+            request={toolElicitation}
+            onSubmit={(res: { action: 'accept' | 'decline' | 'cancel'; data?: unknown }) => {
+              submitElicitation(toolElicitation.requestId, {
+                action: res.action,
+                data: res.data as any,
+              });
+            }}
+            onCancel={() => {
+              submitElicitation(toolElicitation.requestId, { action: 'cancel' });
+            }}
+          />
+        </div>
+      )}
 
       {!isCollapsed && (
         <div className="aui-tool-fallback-content flex flex-col gap-3 border-t pt-3 min-w-0">
@@ -131,7 +234,7 @@ export const ToolFallback: ToolCallMessagePartComponent = ({
               {/* Display formatted text prominently */}
               <div
                 className={cn(
-                  'aui-tool-fallback-result-content rounded-md p-2 text-xs sm:p-3 whitespace-pre-wrap break-words max-w-full',
+                  'aui-tool-fallback-result-content rounded-md p-2 text-xs sm:p-3 whitespace-pre-wrap wrap-break-word max-w-full',
                   resultIsError
                     ? 'bg-destructive/10 text-destructive border border-destructive/20'
                     : 'bg-muted'
