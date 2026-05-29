@@ -123,7 +123,7 @@ Unlike the React template, this version has **NO build step** for the frontend:
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- @mcp-b/global IIFE build via CDN -->
-  <script src="https://unpkg.com/@mcp-b/global@latest/dist/index.iife.js"></script>
+  <script src="https://unpkg.com/@mcp-b/global@3.0.0/dist/index.iife.js"></script>
 </head>
 <body>
   <!-- Your app here -->
@@ -263,7 +263,7 @@ Example games you can build:
 
 ### Tools Not Registering
 
-1. Check that the IIFE script loaded: `<script src="https://unpkg.com/@mcp-b/global@latest/dist/index.iife.js"></script>`
+1. Check that the IIFE script loaded: `<script src="https://unpkg.com/@mcp-b/global@3.0.0/dist/index.iife.js"></script>`
 2. Verify `window.navigator.modelContext` exists in console
 3. Check that `provideContext()` is called after the script loads
 
@@ -273,7 +273,7 @@ If unpkg.com is blocked, download the files locally:
 
 ```bash
 # Download @mcp-b/global IIFE build
-curl -o public/webmcp.js https://unpkg.com/@mcp-b/global@latest/dist/index.iife.js
+curl -o public/webmcp.js https://unpkg.com/@mcp-b/global@3.0.0/dist/index.iife.js
 
 # Update your HTML
 <script src="./webmcp.js"></script>
