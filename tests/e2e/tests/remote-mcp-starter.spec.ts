@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 test.describe('Remote MCP with UI Starter App E2E Tests', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('/');
+    await page.goto('http://localhost:8888/');
   });
 
   test('should load the remote MCP starter application', async ({ page }) => {
@@ -36,8 +36,9 @@ test.describe('Remote MCP with UI Starter App E2E Tests', () => {
       errors.push(error.message);
     });
 
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.goto('http://localhost:8888/');
+    await page.waitForLoadState('domcontentloaded');
+    await expect(page.locator('#root')).toBeVisible();
 
     const criticalErrors = errors.filter((error) => {
       return !error.includes('favicon.ico');
@@ -56,8 +57,9 @@ test.describe('Remote MCP with UI Starter App E2E Tests', () => {
       }
     });
 
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.goto('http://localhost:8888/');
+    await page.waitForLoadState('domcontentloaded');
+    await expect(page.locator('#root')).toBeVisible();
 
     expect(failedRequests).toEqual([]);
   });
@@ -68,7 +70,7 @@ test.describe('Remote MCP with UI Starter App E2E Tests', () => {
   });
 
   test('should have proper viewport and be responsive', async ({ page }) => {
-    await page.goto('/');
+    await page.goto('http://localhost:8888/');
 
     const viewports = [
       { width: 1920, height: 1080, name: 'Desktop' },
