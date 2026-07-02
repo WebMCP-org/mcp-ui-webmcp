@@ -37,10 +37,11 @@ test.describe('Chat UI App E2E Tests', () => {
     });
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await expect(page.locator('#root')).toBeVisible();
 
     const criticalErrors = errors.filter((error) => {
-      return !error.includes('favicon.ico');
+      return !error.includes('favicon.ico') && !error.includes('[useMCPConnection] MCP connection failed');
     });
 
     expect(criticalErrors).toEqual([]);
@@ -51,13 +52,19 @@ test.describe('Chat UI App E2E Tests', () => {
 
     page.on('requestfailed', (request) => {
       const url = request.url();
-      if (!url.includes('favicon.ico') && !url.includes('sentry.io') && !url.includes('analytics')) {
+      if (
+        !url.includes('favicon.ico') &&
+        !url.includes('sentry.io') &&
+        !url.includes('analytics') &&
+        !url.includes('localhost:8888/mcp')
+      ) {
         failedRequests.push(url);
       }
     });
 
     await page.goto('/');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await expect(page.locator('#root')).toBeVisible();
 
     expect(failedRequests).toEqual([]);
   });

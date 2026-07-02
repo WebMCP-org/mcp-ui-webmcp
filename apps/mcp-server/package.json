@@ -27,8 +27,8 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@mcp-b/global": "3.0.0",
-    "@mcp-b/react-webmcp": "3.0.0",
+    "@mcp-b/global": "4.0.0",
+    "@mcp-b/react-webmcp": "4.0.0",
     "@mcp-ui/server": "^5.13.1",
     "@modelcontextprotocol/sdk": "^1.22.0",
     "@tailwindcss/vite": "^4.1.17",

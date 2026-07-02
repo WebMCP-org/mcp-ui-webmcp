@@ -1,4 +1,5 @@
 import type { ToolCallMessagePartComponent } from '@assistant-ui/react';
+import type { ClientResult } from '@modelcontextprotocol/sdk/types.js';
 import { ChevronDown, ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -201,7 +202,7 @@ export const ToolFallback: ToolCallMessagePartComponent = ({
             onSubmit={(res: { action: 'accept' | 'decline' | 'cancel'; data?: unknown }) => {
               submitElicitation(toolElicitation.requestId, {
                 action: res.action,
-                data: res.data as any,
+                data: res.data as ClientResult,
               });
             }}
             onCancel={() => {

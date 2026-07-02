@@ -39,7 +39,8 @@ test.describe('MCP Server + Chat UI Integration Tests', () => {
     });
 
     await page.goto('http://localhost:5173');
-    await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
+    await expect(page.locator('#root')).toBeVisible();
 
     const mcpPage = await context.newPage();
 
@@ -54,7 +55,8 @@ test.describe('MCP Server + Chat UI Integration Tests', () => {
     });
 
     await mcpPage.goto('http://localhost:8888');
-    await mcpPage.waitForLoadState('networkidle');
+    await mcpPage.waitForLoadState('domcontentloaded');
+    await expect(mcpPage.locator('#root')).toBeVisible();
 
     const criticalErrors = errors.filter((error) => {
       return !error.error.includes('favicon.ico');
