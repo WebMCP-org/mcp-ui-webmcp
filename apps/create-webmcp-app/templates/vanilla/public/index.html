@@ -7,7 +7,7 @@
 
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <script src="https://unpkg.com/@mcp-b/global@3.0.0/dist/index.iife.js"></script>
+  <script src="https://unpkg.com/@mcp-b/global@6.0.0-beta.20261001010549/dist/index.iife.js"></script>
 
   <style>
     body {
@@ -113,77 +113,89 @@
       updateUI();
     });
 
-    window.navigator.modelContext.provideContext({
-      tools: [
-        {
-          name: 'template_get_message',
-          description: 'Get the current message displayed in the app',
-          inputSchema: {
-            type: 'object',
-            properties: {}
-          },
-          async execute() {
-            console.log('[Tool] template_get_message called');
-            return {
-              content: [{
-                type: 'text',
-                text: `Current message: ${message}`
-              }]
-            };
-          }
+    const tools = [
+      {
+        name: 'template_get_message',
+        description: 'Get the current message displayed in the app',
+        inputSchema: {
+          type: 'object',
+          properties: {}
         },
-        {
-          name: 'template_update_message',
-          description: 'Update the message displayed in the app',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              newMessage: {
-                type: 'string',
-                description: 'The new message to display'
-              }
-            },
-            required: ['newMessage']
-          },
-          async execute({ newMessage }) {
-            console.log('[Tool] template_update_message called with:', newMessage);
-            message = newMessage;
-            updateUI();
-            return {
-              content: [{
-                type: 'text',
-                text: `Message updated to: ${message}`
-              }]
-            };
-          }
-        },
-        {
-          name: 'template_reset',
-          description: 'Reset the message to its default value',
-          inputSchema: {
-            type: 'object',
-            properties: {}
-          },
-          async execute() {
-            console.log('[Tool] template_reset called');
-            const defaultMessage = 'Hello from WebMCP Template!';
-            message = defaultMessage;
-            updateUI();
-            return {
-              content: [{
-                type: 'text',
-                text: `Message reset to: ${message}`
-              }]
-            };
-          }
+        async execute() {
+          console.log('[Tool] template_get_message called');
+          return {
+            content: [{
+              type: 'text',
+              text: `Current message: ${message}`
+            }]
+          };
         }
-      ]
-    });
+      },
+      {
+        name: 'template_update_message',
+        description: 'Update the message displayed in the app',
+        inputSchema: {
+          type: 'object',
+          properties: {
+            newMessage: {
+              type: 'string',
+              description: 'The new message to display'
+            }
+          },
+          required: ['newMessage']
+        },
+        async execute({ newMessage }) {
+          console.log('[Tool] template_update_message called with:', newMessage);
+          message = newMessage;
+          updateUI();
+          return {
+            content: [{
+              type: 'text',
+              text: `Message updated to: ${message}`
+            }]
+          };
+        }
+      },
+      {
+        name: 'template_reset',
+        description: 'Reset the message to its default value',
+        inputSchema: {
+          type: 'object',
+          properties: {}
+        },
+        async execute() {
+          console.log('[Tool] template_reset called');
+          const defaultMessage = 'Hello from WebMCP Template!';
+          message = defaultMessage;
+          updateUI();
+          return {
+            content: [{
+              type: 'text',
+              text: `Message reset to: ${message}`
+            }]
+          };
+        }
+      }
+    ];
+
+    // `document.modelContext` is optional: it exists only where the browser ships
+    // WebMCP or the @mcp-b/global script above installed the polyfill.
+    const modelContext = document.modelContext;
+
+    if (modelContext) {
+      Promise.all(tools.map((tool) => modelContext.registerTool(tool)))
+        .then(async () => {
+          console.log('[App] WebMCP tools registered successfully');
+          console.log('[App] Tools:', await modelContext.getTools());
+        })
+        .catch((error) => {
+          console.error('[App] WebMCP tool registration failed:', error);
+        });
+    } else {
+      console.warn('[App] WebMCP is unavailable; tools were not registered.');
+    }
 
     updateUI();
-
-    console.log('[App] WebMCP tools registered successfully');
-    console.log('[App] Tools:', window.navigator.modelContext);
   </script>
 </body>
 </html>

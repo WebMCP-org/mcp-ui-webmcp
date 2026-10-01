@@ -9,7 +9,6 @@
 
 import { useWebMCP } from '@mcp-b/react-webmcp';
 import { useCallback, useEffect, useState } from 'react';
-import { z } from 'zod';
 
 /**
  * Main application component for WebMCP template.
@@ -61,7 +60,7 @@ export default function App() {
       readOnlyHint: true,
       idempotentHint: true,
     },
-    handler: async () => {
+    execute: async () => {
       return `Current message: ${message}`;
     },
   });
@@ -76,12 +75,16 @@ export default function App() {
     name: 'template_update_message',
     description: 'Update the message displayed in the app',
     inputSchema: {
-      newMessage: z.string().describe('The new message to display'),
+      type: 'object',
+      properties: {
+        newMessage: { type: 'string', description: 'The new message to display' },
+      },
+      required: ['newMessage'],
     },
     annotations: {
       idempotentHint: false,
     },
-    handler: async ({ newMessage }) => {
+    execute: async ({ newMessage }) => {
       setMessage(newMessage);
       return `Message updated to: ${newMessage}`;
     },
@@ -99,7 +102,7 @@ export default function App() {
       destructiveHint: true,
       idempotentHint: true,
     },
-    handler: async () => {
+    execute: async () => {
       const defaultMessage = 'Hello from WebMCP Template!';
       setMessage(defaultMessage);
       return `Message reset to: ${defaultMessage}`;

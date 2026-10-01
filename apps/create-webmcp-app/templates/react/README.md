@@ -166,15 +166,18 @@ In `src/App.tsx`:
 
 ```typescript
 import { useWebMCP } from '@mcp-b/react-webmcp';
-import { z } from 'zod';
 
 useWebMCP({
   name: "my_tool",
   description: "What this tool does",
   inputSchema: {
-    param: z.string().describe("Parameter description")
+    type: "object",
+    properties: {
+      param: { type: "string", description: "Parameter description" }
+    },
+    required: ["param"]
   },
-  handler: async (params) => {
+  execute: async (params) => {
     // Your logic here
     return `Processed: ${params.param}`;
   }
@@ -209,7 +212,7 @@ Your React app registers tools dynamically:
 useWebMCP({
   name: "template_get_message",
   description: "Get the current message",
-  handler: async () => {
+  execute: async () => {
     return `Current message: ${message}`;
   }
 });

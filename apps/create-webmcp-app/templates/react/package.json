@@ -24,8 +24,8 @@
     "postinstall": "pnpm cf-typegen"
   },
   "dependencies": {
-    "@mcp-b/global": "3.0.0",
-    "@mcp-b/react-webmcp": "3.0.0",
+    "@mcp-b/global": "6.0.0-beta.20261001010549",
+    "@mcp-b/react-webmcp": "6.0.0-beta.20261001010549",
     "@mcp-ui/server": "^5.13.1",
     "@modelcontextprotocol/sdk": "^1.21.1",
     "@tailwindcss/vite": "^4.1.10",

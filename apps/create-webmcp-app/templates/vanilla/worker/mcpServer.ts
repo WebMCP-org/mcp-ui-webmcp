@@ -157,14 +157,14 @@ The vanilla template uses:
 - Pure HTML/CSS/JavaScript
 - Tailwind CSS via CDN for styling
 - @mcp-b/global IIFE build via script tag for WebMCP
-- window.navigator.modelContext API for tool registration
+- document.modelContext API for tool registration
 
 Project structure:
 - public/index.html - Everything in one file!
 
 The template pattern is:
 1. Build game logic in vanilla JavaScript
-2. Register WebMCP tools using window.navigator.modelContext.provideContext()
+2. Register WebMCP tools using document.modelContext.registerTool() (guard: document.modelContext is optional)
 3. Both UI buttons and WebMCP tools call the same game logic functions
 4. No transpiling, no bundling - just refresh the browser!
 

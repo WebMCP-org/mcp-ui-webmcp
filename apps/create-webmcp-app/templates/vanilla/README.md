@@ -14,7 +14,7 @@ This template provides the **simplest possible** way to build MCP servers with e
 
 It demonstrates:
 - **MCP UI**: Serving interactive web apps within AI assistants
-- **WebMCP**: Embedded apps dynamically registering tools using the W3C `navigator.modelContext` API
+- **WebMCP**: Embedded apps dynamically registering tools using the W3C `document.modelContext` API
 - **Vanilla JS**: Pure JavaScript with Tailwind CSS via CDN
 - **IIFE Build**: @mcp-b/global loaded via `<script>` tag
 
@@ -80,7 +80,7 @@ pnpm deploy
 
 ### Example WebMCP Tools (Registered by the App)
 
-The vanilla app registers three WebMCP tools using `window.navigator.modelContext.provideContext()`:
+The vanilla app registers three WebMCP tools using `document.modelContext.registerTool()`:
 1. **template_get_message** - Get current message
 2. **template_update_message** - Update the message
 3. **template_reset** - Reset to default
@@ -123,34 +123,30 @@ Unlike the React template, this version has **NO build step** for the frontend:
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- @mcp-b/global IIFE build via CDN -->
-  <script src="https://unpkg.com/@mcp-b/global@3.0.0/dist/index.iife.js"></script>
+  <script src="https://unpkg.com/@mcp-b/global@6.0.0-beta.20261001010549/dist/index.iife.js"></script>
 </head>
 <body>
   <!-- Your app here -->
 
   <script>
-    // window.navigator.modelContext is already available!
-    window.navigator.modelContext.provideContext({
-      tools: [
-        {
-          name: 'my_tool',
-          description: 'What this tool does',
-          inputSchema: {
-            type: 'object',
-            properties: {
-              param: { type: 'string' }
-            }
-          },
-          async execute({ param }) {
-            return {
-              content: [{
-                type: 'text',
-                text: `Processed: ${param}`
-              }]
-            };
-          }
+    // document.modelContext is optional -- guard before using it.
+    document.modelContext?.registerTool({
+      name: 'my_tool',
+      description: 'What this tool does',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          param: { type: 'string' }
         }
-      ]
+      },
+      async execute({ param }) {
+        return {
+          content: [{
+            type: 'text',
+            text: `Processed: ${param}`
+          }]
+        };
+      }
     });
   </script>
 </body>
@@ -163,33 +159,31 @@ Unlike the React template, this version has **NO build step** for the frontend:
 
 ### Adding WebMCP Tools
 
-Edit `public/index.html` and add tools to the `provideContext()` call:
+Edit `public/index.html` and add an entry to the `tools` array:
 
 ```javascript
-window.navigator.modelContext.provideContext({
-  tools: [
-    // Your existing tools...
-    {
-      name: 'my_new_tool',
-      description: 'Description here',
-      inputSchema: {
-        type: 'object',
-        properties: {
-          // Define parameters
-        }
-      },
-      async execute(params) {
-        // Your logic here
-        return {
-          content: [{
-            type: 'text',
-            text: 'Result...'
-          }]
-        };
+const tools = [
+  // Your existing tools...
+  {
+    name: 'my_new_tool',
+    description: 'Description here',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        // Define parameters
       }
+    },
+    async execute(params) {
+      // Your logic here
+      return {
+        content: [{
+          type: 'text',
+          text: 'Result...'
+        }]
+      };
     }
-  ]
-});
+  }
+];
 ```
 
 ### Styling with Tailwind
@@ -263,9 +257,9 @@ Example games you can build:
 
 ### Tools Not Registering
 
-1. Check that the IIFE script loaded: `<script src="https://unpkg.com/@mcp-b/global@3.0.0/dist/index.iife.js"></script>`
-2. Verify `window.navigator.modelContext` exists in console
-3. Check that `provideContext()` is called after the script loads
+1. Check that the IIFE script loaded: `<script src="https://unpkg.com/@mcp-b/global@6.0.0-beta.20261001010549/dist/index.iife.js"></script>`
+2. Verify `document.modelContext` exists in console
+3. Check that `registerTool()` is called after the script loads
 
 ### CDN Not Loading
 
@@ -273,7 +267,7 @@ If unpkg.com is blocked, download the files locally:
 
 ```bash
 # Download @mcp-b/global IIFE build
-curl -o public/webmcp.js https://unpkg.com/@mcp-b/global@3.0.0/dist/index.iife.js
+curl -o public/webmcp.js https://unpkg.com/@mcp-b/global@6.0.0-beta.20261001010549/dist/index.iife.js
 
 # Update your HTML
 <script src="./webmcp.js"></script>
