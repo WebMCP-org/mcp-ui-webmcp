@@ -123,7 +123,7 @@ async function main() {
     try {
       execSync('pnpm install', { cwd: targetDir, stdio: 'inherit' });
       s.stop('Dependencies installed');
-    } catch (error) {
+    } catch {
       s.stop('Failed to install dependencies');
       p.note(
         `You can install them manually:\n  cd ${project.path}\n  pnpm install`,
