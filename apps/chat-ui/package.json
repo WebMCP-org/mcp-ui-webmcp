@@ -31,9 +31,7 @@
     "@assistant-ui/react-ai-sdk": "^1.1.9",
     "@assistant-ui/react-markdown": "^0.11.4",
     "@hookform/resolvers": "^5.2.2",
-    "@mcp-b/react-webmcp": "4.0.0",
     "@mcp-b/transports": "4.0.0",
-    "@mcp-b/webmcp-ts-sdk": "4.0.0",
     "@mcp-ui/client": "^5.14.1",
     "@modelcontextprotocol/sdk": "^1.21.1",
     "@radix-ui/react-avatar": "^1.1.10",
@@ -57,7 +55,6 @@
     "ajv": "^8.17.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "date-fns": "^4.1.0",
     "hono": "^4.10.4",
     "lucide-react": "^0.548.0",
     "motion": "^12.23.24",
@@ -69,8 +66,7 @@
     "remark-gfm": "^4.0.1",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.10",
-    "zod": "catalog:",
-    "zustand": "^5.0.8"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.13.17",
@@ -78,7 +74,6 @@
     "@sentry/vite-plugin": "^4.6.0",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.1.0",
-    "@testing-library/user-event": "^14.5.2",
     "@types/node": "^24.9.2",
     "@types/react": "^19.1.10",
     "@types/react-dom": "^19.1.7",
