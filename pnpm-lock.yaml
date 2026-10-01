@@ -168,6 +168,9 @@ importers:
       '@vitest/ui':
         specifier: ^2.1.8
         version: 2.1.9(vitest@2.1.9)
+      babel-plugin-react-compiler:
+        specifier: ^1.0.0
+        version: 1.0.0
       eslint:
         specifier: ^9.33.0
         version: 9.39.1(jiti@2.6.1)
