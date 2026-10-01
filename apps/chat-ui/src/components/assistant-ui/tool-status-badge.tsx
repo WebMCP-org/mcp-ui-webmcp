@@ -18,7 +18,7 @@ export type ToolStatusInfo = {
 /**
  * Get status badge information based on status and error flag
  */
-export function getToolStatusInfo(status: ToolStatus, isError?: boolean): ToolStatusInfo {
+function getToolStatusInfo(status: ToolStatus, isError?: boolean): ToolStatusInfo {
   if (status === 'running') {
     return {
       label: 'Running',
