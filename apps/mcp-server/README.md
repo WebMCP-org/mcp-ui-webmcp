@@ -69,7 +69,7 @@ Outputs:
 
 ```bash
 # Deploy to Cloudflare Workers
-pnpm deploy
+pnpm run deploy
 ```
 
 The deploy script builds the project, then runs `wrangler deploy` with the `vars` from `wrangler.jsonc`.

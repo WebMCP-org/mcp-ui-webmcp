@@ -41,7 +41,7 @@ pnpm dev
 # → Loads .dev.vars automatically
 
 # Production
-pnpm deploy
+pnpm run deploy
 # → Builds, then runs wrangler deploy
 # → Uses vars from wrangler.jsonc
 ```
@@ -146,7 +146,7 @@ VITE_ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
 
 ```bash
 cd apps/mcp-server
-pnpm deploy
+pnpm run deploy
 ```
 
 This will:
@@ -255,7 +255,7 @@ When forking this template:
 4. **Deploy:**
    ```bash
    # Deploy MCP server
-   cd apps/mcp-server && pnpm deploy
+   cd apps/mcp-server && pnpm run deploy
 
    # Build and deploy chat UI
    cd apps/chat-ui && pnpm build

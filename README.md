@@ -338,7 +338,7 @@ pnpm test:debug                 # Debug mode
 ```bash
 cd apps/mcp-server
 pnpm build
-pnpm deploy  # or: wrangler deploy
+pnpm run deploy  # or: wrangler deploy
 ```
 
 Set `vars.APP_URL` in `apps/mcp-server/wrangler.jsonc` to your worker URL.

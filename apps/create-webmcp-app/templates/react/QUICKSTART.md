@@ -419,7 +419,7 @@ Use the **Game Builder Prompt** to scaffold common games:
 When ready to deploy:
 
 1. Update `.prod.vars` with your Cloudflare Workers URL
-2. Run `pnpm deploy`
+2. Run `pnpm run deploy`
 3. Test at your production URL
 
 ---

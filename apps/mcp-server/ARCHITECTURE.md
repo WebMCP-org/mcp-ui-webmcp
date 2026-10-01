@@ -312,7 +312,7 @@ export default defineConfig({
 ### Deployment
 
 ```bash
-pnpm deploy
+pnpm run deploy
 ```
 
 Runs `pnpm build`, then deploys to Cloudflare Workers with `wrangler deploy`.
