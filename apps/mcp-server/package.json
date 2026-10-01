@@ -32,7 +32,7 @@
     "@mcp-ui/server": "^5.13.1",
     "@modelcontextprotocol/sdk": "^1.22.0",
     "@tailwindcss/vite": "^4.1.17",
-    "agents": "^0.2.23",
+    "agents": "0.2.23",
     "clsx": "^2.1.1",
     "hono": "^4.10.6",
     "react": "^19.1.1",
