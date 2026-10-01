@@ -206,7 +206,7 @@ pnpm test      # Run E2E tests locally (REQUIRED before submitting PR)
 
 **IMPORTANT - Running E2E Tests Before PR Submission:**
 
-E2E tests require Cloudflare Workers runtime and do **NOT** run in CI due to network restrictions. You **MUST** run them locally before submitting a PR:
+E2E tests run in CI (`.github/workflows/e2e.yml`). You **MUST** also run them locally before submitting a PR:
 
 ```bash
 # Run all E2E tests (REQUIRED)
@@ -282,7 +282,7 @@ Before submitting changes, verify:
 - [ ] **Clean code**: JSDoc on public APIs, no inline comments
 - [ ] **Lint & typecheck pass**: `pnpm check` succeeds with no errors
 - [ ] **Build succeeds**: `pnpm build` completes without errors
-- [ ] **E2E tests pass**: `pnpm test` runs successfully (REQUIRED - the GitHub `e2e.yml` workflow is manual, so run locally and share the results)
+- [ ] **E2E tests pass**: `pnpm test` runs successfully (REQUIRED)
 - [ ] **Documentation updated**: If changing APIs or architecture
 - [ ] **Follows patterns**: Matches existing code style and structure
 
