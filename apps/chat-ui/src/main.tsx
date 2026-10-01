@@ -4,7 +4,7 @@ import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { UIResourceProvider } from './contexts/UIResourceContext';
+import { UIResourceProvider } from './contexts/UIResourceProvider';
 
 // Without native WebMCP, cross-origin iframes need the host polyfill to grant allow="tools".
 installWebMCP();

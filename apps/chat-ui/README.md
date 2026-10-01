@@ -237,7 +237,7 @@ For production deployments, you should store your Anthropic API key in [Cloudfla
 
 3. **Deploy your worker**:
    ```bash
-   pnpm deploy
+   pnpm run deploy
    ```
 
 **How it works:**
@@ -427,7 +427,7 @@ Make sure to set the `VITE_MCP_SERVER_URL` environment variable in your hosting 
 You can also deploy to Cloudflare Workers (already configured):
 
 ```bash
-pnpm deploy
+pnpm run deploy
 ```
 
 This uses the Cloudflare Vite plugin for serverless deployment.

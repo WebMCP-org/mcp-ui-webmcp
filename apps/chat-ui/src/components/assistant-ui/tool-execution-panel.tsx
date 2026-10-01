@@ -86,6 +86,7 @@ export const ToolExecutionPanel: FC<ToolExecutionPanelProps> = ({
 }) => {
   const { addResource } = useUIResources();
   const [toolStates, setToolStates] = useState<Record<string, ToolCallState>>({});
+  const [openTools, setOpenTools] = useState<Record<string, boolean>>({});
 
   const handleToolCall = useCallback(
     async (toolName: string, args: Record<string, unknown>) => {
@@ -189,8 +190,8 @@ export const ToolExecutionPanel: FC<ToolExecutionPanelProps> = ({
           return (
             <Collapsible
               key={tool.name}
-              defaultOpen={hasExecuted}
-              open={hasExecuted ? true : undefined}
+              open={hasExecuted || !!openTools[tool.name]}
+              onOpenChange={(open) => setOpenTools((prev) => ({ ...prev, [tool.name]: open }))}
             >
               <div
                 className={cn(

@@ -66,7 +66,7 @@ This is perfect for debugging and testing your tools without needing a full chat
 
 ```bash
 # Deploy to Cloudflare Workers
-pnpm deploy
+pnpm run deploy
 ```
 
 **⚠️ Important**: Update `APP_URL` in `.prod.vars` to your actual Cloudflare Workers URL before deploying!

@@ -78,7 +78,7 @@ export const ToolFallback: ToolCallMessagePartComponent = ({
   // Keep it registered even after completion to handle late-arriving elicitations
   // Only unregister when component unmounts
   useEffect(() => {
-    console.log('[ToolFallback] Registering tool call:', { toolCallId, toolName, status: status.type });
+    console.log('[ToolFallback] Registering tool call:', { toolCallId, toolName });
     registerToolCall(toolCallId, toolName);
 
     return () => {

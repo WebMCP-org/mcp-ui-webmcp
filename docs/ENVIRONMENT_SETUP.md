@@ -10,12 +10,11 @@ Both the **chat-ui** and **mcp-server** apps use environment-specific configurat
 
 ### 1. Remote MCP Server (`apps/mcp-server`)
 
-Uses Wrangler's `.vars` files for Cloudflare Workers deployment:
+Uses Wrangler variables for Cloudflare Workers deployment:
 
 #### Files
-- `.dev.vars` - Development environment
-- `.prod.vars` - Production environment
-- `deploy.sh` - Custom script to load production vars
+- `.dev.vars` - Development environment (overrides `vars` locally)
+- `wrangler.jsonc` - Production `vars`
 
 #### Configuration
 
@@ -24,12 +23,14 @@ Uses Wrangler's `.vars` files for Cloudflare Workers deployment:
 APP_URL=http://localhost:8888
 ```
 
-**Production (`.prod.vars`):**
-```env
-APP_URL=https://mcp-ui-with-webmcp-my-mcp-server.alexmnahas.workers.dev
+**Production (`wrangler.jsonc`):**
+```jsonc
+"vars": {
+  "APP_URL": "https://beattheclankers.com"
+}
 ```
 
-**⚠️ IMPORTANT FOR FORKERS:** Update `.prod.vars` with YOUR production URL!
+**⚠️ IMPORTANT FOR FORKERS:** Update `vars.APP_URL` in `wrangler.jsonc` with YOUR production URL!
 
 #### Usage
 
@@ -40,10 +41,9 @@ pnpm dev
 # → Loads .dev.vars automatically
 
 # Production
-pnpm deploy
-# → Runs deploy.sh
-# → Loads .prod.vars
-# → Deploys to Cloudflare Workers
+pnpm run deploy
+# → Builds, then runs wrangler deploy
+# → Uses vars from wrangler.jsonc
 ```
 
 ### 2. Chat UI (`apps/chat-ui`)
@@ -126,7 +126,7 @@ For personal development settings, create `.local` files (gitignored):
 
 **Remote MCP Server:**
 ```bash
-# .dev.vars.local or .prod.vars.local
+# .dev.vars.local
 APP_URL=http://localhost:3000
 ```
 
@@ -146,14 +146,13 @@ VITE_ANTHROPIC_API_KEY=sk-ant-api03-your-key-here
 
 ```bash
 cd apps/mcp-server
-pnpm deploy
+pnpm run deploy
 ```
 
 This will:
 1. Build the project
-2. Load variables from `.prod.vars`
-3. Deploy to Cloudflare Workers
-4. Live at: https://mcp-ui-with-webmcp-my-mcp-server.alexmnahas.workers.dev
+2. Deploy to Cloudflare Workers with the `vars` from `wrangler.jsonc`
+3. Live at: https://beattheclankers.com
 
 ### Chat UI
 
@@ -172,7 +171,7 @@ Make sure your hosting service is configured to point to your production MCP ser
 
 ## Why Are These Files Committed?
 
-Unlike typical `.env` files that contain secrets, our committed environment files (`.env.development`, `.env.production`, `.dev.vars`, `.prod.vars`) only contain **public URLs**:
+Unlike typical `.env` files that contain secrets, our committed environment files (`.env.development`, `.env.production`, `.dev.vars`) only contain **public URLs**:
 
 - ✅ MCP server URLs are publicly accessible
 - ✅ No sensitive credentials in these files
@@ -193,10 +192,9 @@ Both apps ignore `.local` files for personal overrides:
 
 **Remote MCP Server (`.gitignore`):**
 ```gitignore
-# Track .dev.vars and .prod.vars
+# Track .dev.vars
 # Only ignore local overrides
 .dev.vars.local
-.prod.vars.local
 ```
 
 **Chat UI (`.gitignore`):**
@@ -226,7 +224,7 @@ Both apps ignore `.local` files for personal overrides:
 
 ### Production Deployment Issues
 
-1. Verify URLs in `.prod.vars` and `.env.production` match
+1. Verify `vars.APP_URL` in `apps/mcp-server/wrangler.jsonc` and the URL in `.env.production` match
 2. Test MCP server endpoint:
    ```bash
    curl https://your-worker.workers.dev/mcp
@@ -238,7 +236,7 @@ Both apps ignore `.local` files for personal overrides:
 When forking this template:
 
 1. **Update Remote MCP Server:**
-   - Edit `apps/mcp-server/.prod.vars`
+   - Edit `vars.APP_URL` in `apps/mcp-server/wrangler.jsonc`
    - Replace with your Cloudflare Workers URL
 
 2. **Update Chat UI:**
@@ -257,7 +255,7 @@ When forking this template:
 4. **Deploy:**
    ```bash
    # Deploy MCP server
-   cd apps/mcp-server && pnpm deploy
+   cd apps/mcp-server && pnpm run deploy
 
    # Build and deploy chat UI
    cd apps/chat-ui && pnpm build
@@ -268,7 +266,7 @@ When forking this template:
 
 | App | Dev File | Prod File | Dev URL | Prod URL |
 |-----|----------|-----------|---------|----------|
-| mcp-server | `.dev.vars` | `.prod.vars` | http://localhost:8888 | https://...workers.dev |
+| mcp-server | `.dev.vars` | `wrangler.jsonc` | http://localhost:8888 | https://...workers.dev |
 | chat-ui | `.env.development` | `.env.production` | http://localhost:8888/mcp | https://...workers.dev/mcp |
 
 Both apps are configured to work together out of the box in development, and can be easily customized for production deployment.

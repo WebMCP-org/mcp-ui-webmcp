@@ -338,10 +338,10 @@ pnpm test:debug                 # Debug mode
 ```bash
 cd apps/mcp-server
 pnpm build
-pnpm deploy  # or: wrangler deploy
+pnpm run deploy  # or: wrangler deploy
 ```
 
-Configure `.prod.vars` with your worker URL.
+Set `vars.APP_URL` in `apps/mcp-server/wrangler.jsonc` to your worker URL.
 
 ### Chat UI → Cloudflare Pages
 
