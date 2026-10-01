@@ -43,6 +43,9 @@
   // ],
   "observability": {
     "enabled": true
+  },
+  "vars": {
+    "APP_URL": "https://beattheclankers.com"
   }
   /**
    * Smart Placement

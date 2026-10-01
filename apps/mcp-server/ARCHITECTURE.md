@@ -315,10 +315,7 @@ export default defineConfig({
 pnpm deploy
 ```
 
-Runs `deploy.sh` which:
-1. Runs `pnpm build`
-2. Loads `.prod.vars` environment variables
-3. Deploys to Cloudflare Workers with `wrangler deploy`
+Runs `pnpm build`, then deploys to Cloudflare Workers with `wrangler deploy`.
 
 ## Runtime Behavior
 
@@ -336,7 +333,7 @@ Runs `deploy.sh` which:
 2. Worker serves at `https://your-worker.workers.dev`
 3. MCP endpoint at `/mcp`
 4. TicTacToe app served from root `/`
-5. Iframe URL uses `APP_URL` from `.prod.vars`
+5. Iframe URL uses `APP_URL` from `vars` in `wrangler.jsonc`
 
 ### Environment Variables
 
@@ -345,11 +342,11 @@ Runs `deploy.sh` which:
 APP_URL=http://localhost:8888
 ```
 
-**`.prod.vars` (production):**
-```env
-APP_URL=https://your-worker.workers.dev
-# Or custom domain:
-APP_URL=https://beattheclankers.com
+**`wrangler.jsonc` (production):**
+```jsonc
+"vars": {
+  "APP_URL": "https://beattheclankers.com"
+}
 ```
 
 The MCP server uses `APP_URL` to construct iframe URLs that work in any environment.
@@ -484,7 +481,7 @@ initializeWebModelContext({
 
 ### Environment Variables
 
-`.dev.vars` and `.prod.vars` are **committed to git** because they contain:
+`.dev.vars` and the `vars` in `wrangler.jsonc` are **committed to git** because they contain:
 - Public URLs only
 - No secrets
 
@@ -503,7 +500,7 @@ For actual secrets (API keys), use:
 
 ### Iframe Not Loading
 
-1. Verify `APP_URL` in `.dev.vars` or `.prod.vars`
+1. Verify `APP_URL` in `.dev.vars` or `wrangler.jsonc`
 2. Check CORS configuration
 3. Ensure static assets are built (`pnpm build`)
 4. Check worker logs (`wrangler tail`)

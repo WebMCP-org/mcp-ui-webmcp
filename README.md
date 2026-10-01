@@ -341,7 +341,7 @@ pnpm build
 pnpm deploy  # or: wrangler deploy
 ```
 
-Configure `.prod.vars` with your worker URL.
+Set `vars.APP_URL` in `apps/mcp-server/wrangler.jsonc` to your worker URL.
 
 ### Chat UI → Cloudflare Pages
 

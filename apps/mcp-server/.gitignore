@@ -25,9 +25,8 @@ dist-ssr
 
 # wrangler files
 .wrangler
-# Note: .dev.vars and .prod.vars are tracked because they don't contain secrets
+# Note: .dev.vars is tracked because it doesn't contain secrets
 # Only ignore local override files
 .dev.vars.local
-.prod.vars.local
 .env*
 !.env.example

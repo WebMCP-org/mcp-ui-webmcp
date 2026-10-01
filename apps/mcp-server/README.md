@@ -72,14 +72,11 @@ Outputs:
 pnpm deploy
 ```
 
-The deploy script automatically:
-1. Builds the project
-2. Loads variables from `.prod.vars`
-3. Deploys to Cloudflare Workers
+The deploy script builds the project, then runs `wrangler deploy` with the `vars` from `wrangler.jsonc`.
 
 Your MCP server will be live at: `https://your-worker.workers.dev/mcp`
 
-**⚠️ Important**: Update `APP_URL` in `.prod.vars` to your actual Cloudflare Workers URL before deploying!
+**⚠️ Important**: Update `vars.APP_URL` in `wrangler.jsonc` to your actual Cloudflare Workers URL before deploying!
 
 ## 📦 What's Included
 
@@ -164,8 +161,6 @@ apps/mcp-server/
 │   └── mcp_ui_with_webmcp_my_mcp_server/  # Worker bundle
 │
 ├── .dev.vars                         # Development env variables
-├── .prod.vars                        # Production env variables
-├── deploy.sh                         # Deployment script
 ├── vite.config.ts                    # Vite configuration
 ├── wrangler.jsonc                    # Cloudflare Workers config
 ├── package.json                      # Dependencies & scripts
@@ -234,12 +229,14 @@ useWebMCP({
 APP_URL=http://localhost:8888
 ```
 
-**`.prod.vars`** (Production):
-```env
-APP_URL=https://your-worker.workers.dev
+**`wrangler.jsonc`** (Production):
+```jsonc
+"vars": {
+  "APP_URL": "https://beattheclankers.com"
+}
 ```
 
-Change `APP_URL` in `.prod.vars` to your actual Cloudflare Workers URL.
+Change `vars.APP_URL` to your actual Cloudflare Workers URL. `.dev.vars` overrides it locally.
 
 ## 🔍 How It Works
 
