@@ -25,15 +25,15 @@ app.use(
 );
 
 app.all('/sse/*', async (c) => {
-  return await VanillaTemplateMCP.serveSSE('/sse').fetch(c.req.raw, c.env, c.executionCtx);
+  return await VanillaTemplateMCP.serveSSE('/sse').fetch(c.req.raw, c.env, c.executionCtx as ExecutionContext);
 });
 
 app.all('/sse', async (c) => {
-  return await VanillaTemplateMCP.serveSSE('/sse').fetch(c.req.raw, c.env, c.executionCtx);
+  return await VanillaTemplateMCP.serveSSE('/sse').fetch(c.req.raw, c.env, c.executionCtx as ExecutionContext);
 });
 
 app.all('/mcp', async (c) => {
-  return await VanillaTemplateMCP.serve('/mcp').fetch(c.req.raw, c.env, c.executionCtx);
+  return await VanillaTemplateMCP.serve('/mcp').fetch(c.req.raw, c.env, c.executionCtx as ExecutionContext);
 });
 
 app.notFound((c) => {

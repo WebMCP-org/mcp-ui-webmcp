@@ -25,15 +25,15 @@ app.use(
 );
 
 app.all('/sse/*', async (c) => {
-  return await TemplateMCP.serveSSE('/sse').fetch(c.req.raw, c.env, c.executionCtx);
+  return await TemplateMCP.serveSSE('/sse').fetch(c.req.raw, c.env, c.executionCtx as ExecutionContext);
 });
 
 app.all('/sse', async (c) => {
-  return await TemplateMCP.serveSSE('/sse').fetch(c.req.raw, c.env, c.executionCtx);
+  return await TemplateMCP.serveSSE('/sse').fetch(c.req.raw, c.env, c.executionCtx as ExecutionContext);
 });
 
 app.all('/mcp', async (c) => {
-  return await TemplateMCP.serve('/mcp').fetch(c.req.raw, c.env, c.executionCtx);
+  return await TemplateMCP.serve('/mcp').fetch(c.req.raw, c.env, c.executionCtx as ExecutionContext);
 });
 
 app.notFound((c) => {
