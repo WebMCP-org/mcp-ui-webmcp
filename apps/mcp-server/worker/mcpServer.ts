@@ -14,7 +14,7 @@ import { WorkerTransport } from "agents/mcp";
 export class MyMCP extends McpAgent<Cloudflare.Env> {
   server = new McpServer(
     {
-      name: "test",
+      name: "mcp-ui-webmcp",
       version: "1.0.0"
     },
     {
