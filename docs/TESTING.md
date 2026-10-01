@@ -66,7 +66,7 @@ tests/e2e/
 
 ## CI Expectations
 
-- `.github/workflows/ci.yml` runs lint, type-check, and build on every push/PR using Node 24.3.0 (from `.nvmrc`).
+- `.github/workflows/ci.yml` runs lint, type-check, unit tests, and build on every push/PR using Node 24.3.0 (from `.nvmrc`).
 - `.github/workflows/e2e.yml` is a manual workflow (`workflow_dispatch`) because GitHub-hosted runners currently lack the Cloudflare metadata services needed for the Worker dev server. Until that restriction is lifted, contributors **must** run `pnpm test` locally before opening a PR.
 
 Mention any E2E results in your PR description so reviewers know they were exercised.
