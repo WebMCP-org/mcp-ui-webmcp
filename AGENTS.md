@@ -86,8 +86,8 @@ Mini-apps register tools dynamically using `useWebMCP` hook:
 useWebMCP({
   name: "tool_name",
   description: "What it does",
-  schema: z.object({ /* ... */ }),
-  handler: async (params) => { /* ... */ }
+  inputSchema: { type: "object", properties: { /* ... */ } },
+  execute: async (params) => { /* ... */ }
 });
 ```
 

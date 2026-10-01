@@ -171,15 +171,16 @@ initializeWebModelContext({
 **Tool Registration (src/TicTacToeWithWebMCP.tsx):**
 ```typescript
 import { useWebMCP } from '@mcp-b/react-webmcp';
-import { z } from 'zod';
 
 useWebMCP({
   name: "tictactoe_ai_move",
   description: "Make a move as the AI player",
   inputSchema: {
-    position: z.number().min(0).max(8)
+    type: "object",
+    properties: { position: { type: "integer", minimum: 0, maximum: 8 } },
+    required: ["position"]
   },
-  handler: async ({ position }) => {
+  execute: async ({ position }) => {
     // Game logic executes here
     const result = performMove(position, agentPlayer);
     return formatMoveMarkdown(result);

@@ -131,16 +131,16 @@ src/
  * Register a tool with the MCP server dynamically
  *
  * @param name - Unique tool identifier (e.g., "tictactoe_move")
- * @param schema - Zod schema defining tool parameters
- * @param handler - Async function that executes the tool
+ * @param inputSchema - JSON Schema defining tool parameters
+ * @param execute - Async function that executes the tool
  * @returns Cleanup function to unregister the tool
  *
  * @example
  * ```ts
  * useWebMCP({
  *   name: "my_tool",
- *   schema: z.object({ value: z.string() }),
- *   handler: async (params) => ({ content: [{ type: "text", text: params.value }] })
+ *   inputSchema: { type: "object", properties: { value: { type: "string" } }, required: ["value"] },
+ *   execute: async ({ value }) => value
  * });
  * ```
  */
@@ -318,10 +318,10 @@ this.server.tool(
 useWebMCP({
   name: "tool_name",
   description: "What the tool does",
-  schema: z.object({ /* Zod schema */ }),
-  handler: async (params) => {
-    // Type-safe params from schema
-    return { content: [{ type: "text", text: "Result" }] };
+  inputSchema: { type: "object", properties: { /* JSON Schema */ } },
+  execute: async (params) => {
+    // Type-safe params inferred from inputSchema
+    return "Result";
   }
 });
 ```

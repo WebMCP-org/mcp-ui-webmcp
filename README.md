@@ -89,11 +89,11 @@ No hardcoding, no configuration files. Just standards-based protocols enabling d
 
 ### WebMCP vs MCP-B
 
-**WebMCP** is the W3C standard specification for bidirectional tool registration in browsers, defining the `navigator.modelContext` API. **MCP-B** is the reference implementation and polyfill that makes WebMCP available today.
+**WebMCP** is the W3C standard specification for bidirectional tool registration in browsers, defining the `document.modelContext` API. **MCP-B** is the reference implementation and polyfill that makes WebMCP available today.
 
 - **WebMCP**: Standards-based API specification (W3C Web Machine Learning Community Group)
 - **MCP-B**: Reference implementation providing:
-  - Polyfill for `navigator.modelContext` before browser support
+  - Polyfill for `document.modelContext` before browser support
   - NPM packages ([`@mcp-b/react-webmcp`](https://www.npmjs.com/package/@mcp-b/react-webmcp), [`@mcp-b/transports`](https://www.npmjs.com/package/@mcp-b/transports), etc.)
   - Translation bridge between WebMCP and MCP protocols
   - Browser extension for testing
@@ -208,7 +208,7 @@ sequenceDiagram
 - **IframeParentTransport** (`@mcp-b/transports`): Bidirectional communication channel to embedded apps
 
 #### Embedded Apps (Iframe Context)
-- **MCP-B Polyfill** (`@mcp-b/global`): Implements `navigator.modelContext` API
+- **MCP-B Polyfill** (`@mcp-b/global`): Implements `document.modelContext` API
 - **useWebMCP Hook** (`@mcp-b/react-webmcp`): Registers tools with automatic lifecycle management
 - **IframeChildTransport** (`@mcp-b/transports`): Receives tool calls from parent via postMessage
 - **Parent Communication** ([useParentCommunication.ts](apps/mcp-server/src/hooks/useParentCommunication.ts)): Readiness protocol and notifications
@@ -240,17 +240,16 @@ import { useWebMCP } from '@mcp-b/react-webmcp';
 useWebMCP({
   name: "tictactoe_move",
   description: "Make a move at position",
-  schema: z.object({
-    position: z.number().min(0).max(8)
-  }),
-  handler: async ({ position }) => {
+  inputSchema: {
+    type: "object",
+    properties: {
+      position: { type: "integer", minimum: 0, maximum: 8 }
+    },
+    required: ["position"]
+  },
+  execute: async ({ position }) => {
     // Execute move
-    return {
-      content: [{
-        type: "text",
-        text: `Moved to position ${position}`
-      }]
-    };
+    return `Moved to position ${position}`;
   }
 });
 ```
