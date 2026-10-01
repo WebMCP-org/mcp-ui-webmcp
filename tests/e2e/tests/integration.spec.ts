@@ -1,4 +1,18 @@
-import { expect, test } from '@playwright/test';
+import { expect, type Locator, type Page, test } from '@playwright/test';
+
+const toolPanel = (page: Page, title: string) =>
+  page
+    .locator('div.rounded-xl')
+    .filter({ has: page.getByRole('heading', { name: title, exact: true }) })
+    .last();
+
+async function runTool(panel: Locator, name: string, args: Record<string, string> = {}) {
+  await panel.getByRole('button', { name: new RegExp(`^${name}`) }).click();
+  for (const [key, value] of Object.entries(args)) {
+    await panel.locator(`#root_${key}`).fill(value);
+  }
+  await panel.getByRole('button', { name: 'Submit' }).click();
+}
 
 /**
  * Integration tests for MCP server and Chat UI
@@ -86,5 +100,31 @@ test.describe('MCP Server + Chat UI Integration Tests', () => {
     await expect(mcpRoot).toBeVisible();
 
     await mcpPage.close();
+  });
+});
+
+// chat-ui (:5173) embeds the tic-tac-toe app from mcp-server (:8888), a different origin.
+// Without native WebMCP, the iframe can only register tools if chat-ui runs the polyfill.
+test.describe('WebMCP tools from a cross-origin MCP-UI iframe', () => {
+  test('chat-ui lists and calls the tools the iframe registers', async ({ page }) => {
+    await page.goto('http://localhost:5173');
+
+    const toolsButton = page.getByRole('button', { name: 'View available tools' });
+    await toolsButton.click();
+    await runTool(toolPanel(page, 'Available Tools'), 'showTicTacToeGame');
+    await toolsButton.click();
+
+    const game = page.frameLocator('iframe[src^="http://localhost:8888"]');
+    await game.getByRole('button', { name: 'Play as X' }).click();
+    await game.getByRole('gridcell', { name: 'Cell 0, empty' }).click();
+
+    const iframeTools = page.getByRole('button', { name: 'View 3 tools from showTicTacToeGame' });
+    await expect(iframeTools).toBeVisible({ timeout: 15_000 });
+
+    await iframeTools.click();
+    await runTool(toolPanel(page, 'Tools from showTicTacToeGame'), 'tictactoe_ai_move', {
+      position: '4',
+    });
+    await expect(game.getByRole('gridcell', { name: 'Cell 4, O' })).toBeVisible();
   });
 });
