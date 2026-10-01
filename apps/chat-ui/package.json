@@ -32,6 +32,7 @@
     "@assistant-ui/react-markdown": "^0.11.4",
     "@hookform/resolvers": "^5.2.2",
     "@mcp-b/transports": "6.0.0-beta.20261001010549",
+    "@mcp-b/webmcp-polyfill": "6.0.0-beta.20261001010549",
     "@mcp-ui/client": "^5.14.1",
     "@modelcontextprotocol/sdk": "^1.21.1",
     "@radix-ui/react-collapsible": "^1.1.12",

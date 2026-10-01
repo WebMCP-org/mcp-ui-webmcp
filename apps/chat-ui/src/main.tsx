@@ -1,9 +1,13 @@
+import { installWebMCP } from '@mcp-b/webmcp-polyfill';
 import * as Sentry from '@sentry/react';
 import { createRoot } from 'react-dom/client';
 import './index.css';
 import App from './App.tsx';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { UIResourceProvider } from './contexts/UIResourceContext';
+
+// Without native WebMCP, cross-origin iframes need the host polyfill to grant allow="tools".
+installWebMCP();
 
 const sentryDsn = import.meta.env.VITE_SENTRY_DSN;
 const environment = import.meta.env.VITE_SENTRY_ENVIRONMENT || import.meta.env.MODE;

@@ -50,6 +50,9 @@ importers:
       '@mcp-b/transports':
         specifier: 6.0.0-beta.20261001010549
         version: 6.0.0-beta.20261001010549
+      '@mcp-b/webmcp-polyfill':
+        specifier: 6.0.0-beta.20261001010549
+        version: 6.0.0-beta.20261001010549
       '@mcp-ui/client':
         specifier: ^5.14.1
         version: 5.14.1(@cfworker/json-schema@4.1.1)(@preact/signals-core@1.12.1)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
