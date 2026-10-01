@@ -243,7 +243,7 @@ Wrap your handlers with logging:
 ```typescript
 useWebMCP({
   name: 'my_tool',
-  handler: async (params) => {
+  execute: async (params) => {
     console.log('[Tool:my_tool] Called with params:', params);
 
     try {
@@ -350,7 +350,7 @@ Return a promise or use the latest state:
 // Use functional setState and return the new value
 useWebMCP({
   name: 'increment',
-  handler: async () => {
+  execute: async () => {
     let newValue = 0;
     setCount(prev => {
       newValue = prev + 1;

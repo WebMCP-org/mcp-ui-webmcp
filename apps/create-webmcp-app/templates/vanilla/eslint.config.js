@@ -5,7 +5,7 @@ import tseslint from 'typescript-eslint';
 export default tseslint.config(
   { ignores: ['dist', 'public', 'node_modules', '.wrangler'] },
   {
-    files: ['worker/**/*.{ts}'],
+    files: ['worker/**/*.ts'],
     ignores: ['**/*.config.ts', '**/*.config.js'],
     extends: [js.configs.recommended, ...tseslint.configs.recommended],
     languageOptions: {

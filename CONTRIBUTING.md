@@ -131,16 +131,16 @@ src/
  * Register a tool with the MCP server dynamically
  *
  * @param name - Unique tool identifier (e.g., "tictactoe_move")
- * @param schema - Zod schema defining tool parameters
- * @param handler - Async function that executes the tool
+ * @param inputSchema - JSON Schema defining tool parameters
+ * @param execute - Async function that executes the tool
  * @returns Cleanup function to unregister the tool
  *
  * @example
  * ```ts
  * useWebMCP({
  *   name: "my_tool",
- *   schema: z.object({ value: z.string() }),
- *   handler: async (params) => ({ content: [{ type: "text", text: params.value }] })
+ *   inputSchema: { type: "object", properties: { value: { type: "string" } }, required: ["value"] },
+ *   execute: async ({ value }) => value
  * });
  * ```
  */
@@ -206,7 +206,7 @@ pnpm test      # Run E2E tests locally (REQUIRED before submitting PR)
 
 **IMPORTANT - Running E2E Tests Before PR Submission:**
 
-E2E tests require Cloudflare Workers runtime and do **NOT** run in CI due to network restrictions. You **MUST** run them locally before submitting a PR:
+E2E tests run in CI (`.github/workflows/e2e.yml`). You **MUST** also run them locally before submitting a PR:
 
 ```bash
 # Run all E2E tests (REQUIRED)
@@ -282,7 +282,7 @@ Before submitting changes, verify:
 - [ ] **Clean code**: JSDoc on public APIs, no inline comments
 - [ ] **Lint & typecheck pass**: `pnpm check` succeeds with no errors
 - [ ] **Build succeeds**: `pnpm build` completes without errors
-- [ ] **E2E tests pass**: `pnpm test` runs successfully (REQUIRED - the GitHub `e2e.yml` workflow is manual, so run locally and share the results)
+- [ ] **E2E tests pass**: `pnpm test` runs successfully (REQUIRED)
 - [ ] **Documentation updated**: If changing APIs or architecture
 - [ ] **Follows patterns**: Matches existing code style and structure
 
@@ -318,10 +318,10 @@ this.server.tool(
 useWebMCP({
   name: "tool_name",
   description: "What the tool does",
-  schema: z.object({ /* Zod schema */ }),
-  handler: async (params) => {
-    // Type-safe params from schema
-    return { content: [{ type: "text", text: "Result" }] };
+  inputSchema: { type: "object", properties: { /* JSON Schema */ } },
+  execute: async (params) => {
+    // Type-safe params inferred from inputSchema
+    return "Result";
   }
 });
 ```

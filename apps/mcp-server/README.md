@@ -211,15 +211,16 @@ In your React component:
 
 ```typescript
 import { useWebMCP } from '@mcp-b/react-webmcp';
-import { z } from 'zod';
 
 useWebMCP({
   name: "my_tool",
   description: "What this tool does",
   inputSchema: {
-    param: z.string().describe("Parameter description")
+    type: "object",
+    properties: { param: { type: "string", description: "Parameter description" } },
+    required: ["param"]
   },
-  handler: async (params) => {
+  execute: async (params) => {
     // Your logic here
     return `Processed: ${params.param}`;
   }
@@ -259,8 +260,12 @@ The TicTacToe app registers tools dynamically:
 useWebMCP({
   name: "tictactoe_ai_move",
   description: "Make a move as the AI player",
-  inputSchema: { position: z.number().min(0).max(8) },
-  handler: async ({ position }) => {
+  inputSchema: {
+    type: "object",
+    properties: { position: { type: "integer", minimum: 0, maximum: 8 } },
+    required: ["position"]
+  },
+  execute: async ({ position }) => {
     // Game logic executes in iframe
     // Result sent back to AI
     return formatMoveMarkdown(...);

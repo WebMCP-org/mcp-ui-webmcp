@@ -99,6 +99,7 @@ Tests both apps running together:
 - Both apps load in parallel
 - No cross-app errors
 - Both apps remain responsive
+- chat-ui lists and calls the WebMCP tools registered by the cross-origin tic-tac-toe iframe (runs on the polyfill, since Playwright Chromium has no native WebMCP)
 
 ## Configuration
 

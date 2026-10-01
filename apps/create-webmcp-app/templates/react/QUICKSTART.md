@@ -69,7 +69,7 @@ export default function App() {
   useWebMCP({
     name: 'counter_get_value',
     description: 'Get the current counter value',
-    handler: async () => {
+    execute: async () => {
       return `Current count: ${count}`;
     },
   });
@@ -78,7 +78,7 @@ export default function App() {
   useWebMCP({
     name: 'counter_increment',
     description: 'Increment the counter by 1',
-    handler: async () => {
+    execute: async () => {
       setCount(prev => prev + 1);
       return `Counter incremented! New value: ${count + 1}`;
     },
@@ -88,7 +88,7 @@ export default function App() {
   useWebMCP({
     name: 'counter_decrement',
     description: 'Decrement the counter by 1',
-    handler: async () => {
+    execute: async () => {
       setCount(prev => prev - 1);
       return `Counter decremented! New value: ${count - 1}`;
     },
@@ -190,7 +190,7 @@ pnpm dev
 useWebMCP({
   name: 'my_tool',
   description: 'A simple tool with no parameters',
-  handler: async () => {
+  execute: async () => {
     // Your logic here
     return 'Tool executed successfully!';
   },
@@ -200,15 +200,17 @@ useWebMCP({
 ### Tool with Parameters
 
 ```typescript
-import { z } from 'zod';
-
 useWebMCP({
   name: 'set_value',
   description: 'Set a custom value',
   inputSchema: {
-    value: z.number().describe('The value to set'),
+    type: 'object',
+    properties: {
+      value: { type: 'number', description: 'The value to set' },
+    },
+    required: ['value'],
   },
-  handler: async ({ value }) => {
+  execute: async ({ value }) => {
     setValue(value);
     return `Value set to ${value}`;
   },
@@ -222,12 +224,16 @@ useWebMCP({
   name: 'draw_shape',
   description: 'Draw a shape on the canvas',
   inputSchema: {
-    shape: z.enum(['circle', 'square', 'triangle']).describe('Shape type'),
-    x: z.number().describe('X coordinate'),
-    y: z.number().describe('Y coordinate'),
-    size: z.number().min(10).max(100).describe('Size in pixels'),
+    type: 'object',
+    properties: {
+      shape: { type: 'string', enum: ['circle', 'square', 'triangle'], description: 'Shape type' },
+      x: { type: 'number', description: 'X coordinate' },
+      y: { type: 'number', description: 'Y coordinate' },
+      size: { type: 'number', minimum: 10, maximum: 100, description: 'Size in pixels' },
+    },
+    required: ['shape', 'x', 'y', 'size'],
   },
-  handler: async ({ shape, x, y, size }) => {
+  execute: async ({ shape, x, y, size }) => {
     drawShape(shape, x, y, size);
     return `Drew ${shape} at (${x}, ${y}) with size ${size}`;
   },
@@ -245,7 +251,7 @@ useWebMCP({
     idempotentHint: false,     // Can't be safely retried
     readOnlyHint: false,       // Modifies state
   },
-  handler: async () => {
+  execute: async () => {
     clearAllData();
     return 'All data deleted';
   },
@@ -277,7 +283,7 @@ Add logging to your tools:
 ```typescript
 useWebMCP({
   name: 'my_tool',
-  handler: async () => {
+  execute: async () => {
     console.log('[WebMCP] my_tool called');
     const result = doSomething();
     console.log('[WebMCP] Result:', result);
@@ -310,8 +316,12 @@ function App() {
   // WebMCP tool calls the same logic
   useWebMCP({
     name: 'set_value',
-    inputSchema: { value: z.number() },
-    handler: async ({ value }) => updateValue(value),
+    inputSchema: {
+      type: 'object',
+      properties: { value: { type: 'number' } },
+      required: ['value'],
+    },
+    execute: async ({ value }) => updateValue(value),
   });
 }
 ```
@@ -344,7 +354,7 @@ useWebMCP({
     readOnlyHint: true,
     idempotentHint: true,
   },
-  handler: async () => data,
+  execute: async () => data,
 });
 
 // Mutating tool (changes state)
@@ -354,7 +364,7 @@ useWebMCP({
     readOnlyHint: false,
     idempotentHint: false,
   },
-  handler: async () => {
+  execute: async () => {
     setData(newData);
     return 'Updated';
   },
@@ -367,9 +377,13 @@ useWebMCP({
 useWebMCP({
   name: 'make_move',
   inputSchema: {
-    position: z.number().min(0).max(8),
+    type: 'object',
+    properties: {
+      position: { type: 'integer', minimum: 0, maximum: 8 },
+    },
+    required: ['position'],
   },
-  handler: async ({ position }) => {
+  execute: async ({ position }) => {
     // Validate game state
     if (gameOver) {
       throw new Error('Game is over');

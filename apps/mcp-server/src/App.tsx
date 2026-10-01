@@ -14,7 +14,6 @@
 
 import { useWebMCP } from '@mcp-b/react-webmcp';
 import { useCallback, useEffect, useState } from 'react';
-import { z } from 'zod';
 import {
   GameBoard,
   GameHeader,
@@ -163,7 +162,7 @@ export default function App({ animated = true }: AppProps) {
       readOnlyHint: true,
       idempotentHint: true,
     },
-    handler: async () =>
+    execute: async () =>
       formatGameStateMarkdown(
         game.board,
         game.currentPlayer,
@@ -183,17 +182,21 @@ export default function App({ animated = true }: AppProps) {
     name: 'tictactoe_ai_move',
     description: `Play as Player ${game.aiPlayer} (Clankers 🤖). Provide a board position (0-8) to place your ${game.aiPlayer}.`,
     inputSchema: {
-      position: z
-        .number()
-        .int()
-        .min(0)
-        .max(8)
-        .describe('Cell position (0-8) in row-major order where Clankers 🤖 should move.'),
+      type: 'object',
+      properties: {
+        position: {
+          type: 'integer',
+          minimum: 0,
+          maximum: 8,
+          description: 'Cell position (0-8) in row-major order where Clankers 🤖 should move.',
+        },
+      },
+      required: ['position'],
     },
     annotations: {
       idempotentHint: false,
     },
-    handler: async ({ position }) => {
+    execute: async ({ position }) => {
       if (showRoleModal) {
         throw new Error('Cannot move yet: waiting for the human to start a new game.');
       }
@@ -230,7 +233,7 @@ export default function App({ animated = true }: AppProps) {
       destructiveHint: true,
       idempotentHint: true,
     },
-    handler: async () => {
+    execute: async () => {
       game.reset();
       setIsAIThinking(false);
       setShowRoleModal(true);

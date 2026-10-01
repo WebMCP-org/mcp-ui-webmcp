@@ -27,15 +27,14 @@
     "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
-    "@mcp-b/global": "4.0.0",
-    "@mcp-b/react-webmcp": "4.0.0",
+    "@mcp-b/global": "6.0.0-beta.20261001010549",
+    "@mcp-b/react-webmcp": "6.0.0-beta.20261001010549",
     "@mcp-ui/server": "^5.13.1",
     "@modelcontextprotocol/sdk": "^1.22.0",
     "@tailwindcss/vite": "^4.1.17",
-    "agents": "^0.2.23",
+    "agents": "0.2.23",
     "clsx": "^2.1.1",
     "hono": "^4.10.6",
-    "hono-agents": "^2.0.5",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "tailwind-merge": "^3.3.1",

@@ -182,7 +182,7 @@ const makeMove = useCallback((position: number) => {
 // Tool calls it
 useWebMCP({
   name: 'make_move',
-  handler: async ({ position }) => makeMove(position),
+  execute: async ({ position }) => makeMove(position),
 });
 ```
 
@@ -201,7 +201,7 @@ Make tool responses informative:
 ```typescript
 useWebMCP({
   name: 'game_make_move',
-  handler: async ({ position }) => {
+  execute: async ({ position }) => {
     const result = makeMove(position);
 
     return `# Move Result
