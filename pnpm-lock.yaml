@@ -48,11 +48,11 @@ importers:
         specifier: ^5.2.2
         version: 5.2.2(react-hook-form@7.66.0(react@19.2.0))
       '@mcp-b/transports':
-        specifier: 6.0.0-beta.20261001010549
-        version: 6.0.0-beta.20261001010549
+        specifier: 6.0.0
+        version: 6.0.0
       '@mcp-b/webmcp-polyfill':
-        specifier: 6.0.0-beta.20261001010549
-        version: 6.0.0-beta.20261001010549
+        specifier: 6.0.0
+        version: 6.0.0
       '@mcp-ui/client':
         specifier: ^5.14.1
         version: 5.14.1(@cfworker/json-schema@4.1.1)(@preact/signals-core@1.12.1)(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
@@ -236,11 +236,11 @@ importers:
   apps/mcp-server:
     dependencies:
       '@mcp-b/global':
-        specifier: 6.0.0-beta.20261001010549
-        version: 6.0.0-beta.20261001010549
+        specifier: 6.0.0
+        version: 6.0.0
       '@mcp-b/react-webmcp':
-        specifier: 6.0.0-beta.20261001010549
-        version: 6.0.0-beta.20261001010549(react@19.2.0)
+        specifier: 6.0.0
+        version: 6.0.0(react@19.2.0)
       '@mcp-ui/server':
         specifier: ^5.13.1
         version: 5.13.1(@cfworker/json-schema@4.1.1)
@@ -1323,26 +1323,26 @@ packages:
   '@jsdevtools/ono@7.1.3':
     resolution: {integrity: sha512-4JQNk+3mVzK3xh2rqd6RB4J46qUR19azEHBneZyTZM+c456qOrbbM/5xcR8huNCCcbVt7+UmizG6GuUvPvKUYg==}
 
-  '@mcp-b/global@6.0.0-beta.20261001010549':
-    resolution: {integrity: sha512-sBZMhbzFWsUAUB5YO2yxmhtyZTK6R7NkrieV0AqDiEvbWSOosarJerkVUNSvbhT6e6Jokb7RR2kzUXcoxp25sA==}
+  '@mcp-b/global@6.0.0':
+    resolution: {integrity: sha512-+hEFkUK4km6cFwUXZfbotZRKLVI4CkFkWjeRYn2fUtM5TY7mSq0GL2eAAGJbr978CjgrMQ7SudoA/6WA3nLOFg==}
     engines: {node: '>=20'}
 
-  '@mcp-b/react-webmcp@6.0.0-beta.20261001010549':
-    resolution: {integrity: sha512-aUW2Jn5Ua2jrEychOEfE4yz8QbAbcrfZFihWa72Ga3QjM4jHqX66xv+t4e50WUGjnnP8LOEghfjD2SaqG3X5ug==}
+  '@mcp-b/react-webmcp@6.0.0':
+    resolution: {integrity: sha512-QWDdKxhh1EA6HhnbGemxsqa9YwHrOivea8nxk/cc2FCCfkL30TmveVIthLxCdBp7HT8eNEBr0TEpWGCfnm+1+w==}
     engines: {node: '>=20'}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
 
-  '@mcp-b/transports@6.0.0-beta.20261001010549':
-    resolution: {integrity: sha512-y6i9SU8o2UYi6URXlR7Fzdj6DG/nW7lxuNyCiVd+laty6xcUi85nu64ilO2IITHVW/EAvq2bc9RjwEKNDqaPKg==}
+  '@mcp-b/transports@6.0.0':
+    resolution: {integrity: sha512-bifpmIr9zf2b6CvgNlZEntMGANapfaMY1lbcY2Wxa/Fd6jWhui14AjEvKuZNykIzYp3+18JV2XBcrCE9xxCw7w==}
     engines: {node: '>=20'}
 
-  '@mcp-b/webmcp-polyfill@6.0.0-beta.20261001010549':
-    resolution: {integrity: sha512-xIFrgRBXfVEK0vThMYqcTUilX51hKV4oX5M13WpYJOg8FwScJwLWQYaBavtY2MrVNnPu8gmyVDvvO5wC8mrPhg==}
+  '@mcp-b/webmcp-polyfill@6.0.0':
+    resolution: {integrity: sha512-Z1wYbaYjwEM1FjxHFyw1oRgDAuLCjcQYeAOHtNNlqZ3n1aVA44Ci0kQrnpi7gySZbeiva2zMEU8XO6EG5MS8FA==}
     engines: {node: '>=20'}
 
-  '@mcp-b/webmcp-ts-sdk@6.0.0-beta.20261001010549':
-    resolution: {integrity: sha512-RV5HjhQqXC+CA+oG1L6k5AKTgoA1RwWVgJTdC5tPoNkrNoPC1SV6lz5GE3hK2RTViI1pTcGA/wYonqKw3p2pkQ==}
+  '@mcp-b/webmcp-ts-sdk@6.0.0':
+    resolution: {integrity: sha512-vpdxaIE2cdf4S6xCrTVENW/d9ixycASF/AhXRnOCMk+0GvKGHjkiMgrmYUPT8+qoXjMM9Mr9oKGnTh4kR2WoIA==}
     engines: {node: '>=20'}
 
   '@mcp-ui/client@5.14.1':
@@ -3003,6 +3003,7 @@ packages:
   eslint@9.39.1:
     resolution: {integrity: sha512-BhHmn2yNOFA9H9JmmIVKJmd288g9hrVRDkdoIgRCRuSySRUHH7r/DI6aAXW9T1WwUuY3DFgrcaqB+deURBLR5g==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
     peerDependencies:
       jiti: '*'
@@ -4497,8 +4498,8 @@ packages:
     peerDependencies:
       react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  usewebmcp@6.0.0-beta.20261001010549:
-    resolution: {integrity: sha512-n/tqWCnM0toZQ6XC2paP1fP0V54kaccmLyJH8PT9yGefAhMU59bqNQ4q1Gi45uW62ZHPaKDgYgHp0464zTeV7A==}
+  usewebmcp@6.0.0:
+    resolution: {integrity: sha512-Ycv8TccAH8mPd9SBIwIOkD1hyDkz1NjQrKkMDBthzCGVrxpu90h82wCyMtoUJvycL8zwuOkknVYugObw2lCp1A==}
     engines: {node: '>=20'}
     peerDependencies:
       react: ^18.0.0 || ^19.0.0
@@ -5598,33 +5599,33 @@ snapshots:
 
   '@jsdevtools/ono@7.1.3': {}
 
-  '@mcp-b/global@6.0.0-beta.20261001010549':
+  '@mcp-b/global@6.0.0':
     dependencies:
-      '@mcp-b/transports': 6.0.0-beta.20261001010549
-      '@mcp-b/webmcp-polyfill': 6.0.0-beta.20261001010549
-      '@mcp-b/webmcp-ts-sdk': 6.0.0-beta.20261001010549
+      '@mcp-b/transports': 6.0.0
+      '@mcp-b/webmcp-polyfill': 6.0.0
+      '@mcp-b/webmcp-ts-sdk': 6.0.0
       '@modelcontextprotocol/server': 2.0.0
 
-  '@mcp-b/react-webmcp@6.0.0-beta.20261001010549(react@19.2.0)':
+  '@mcp-b/react-webmcp@6.0.0(react@19.2.0)':
     dependencies:
-      '@mcp-b/webmcp-ts-sdk': 6.0.0-beta.20261001010549
+      '@mcp-b/webmcp-ts-sdk': 6.0.0
       '@modelcontextprotocol/client': 2.0.0
       '@standard-schema/spec': 1.1.0
       react: 19.2.0
-      usewebmcp: 6.0.0-beta.20261001010549(react@19.2.0)
+      usewebmcp: 6.0.0(react@19.2.0)
 
-  '@mcp-b/transports@6.0.0-beta.20261001010549':
+  '@mcp-b/transports@6.0.0':
     dependencies:
       '@modelcontextprotocol/core': 2.0.0
       '@modelcontextprotocol/server': 2.0.0
 
-  '@mcp-b/webmcp-polyfill@6.0.0-beta.20261001010549':
+  '@mcp-b/webmcp-polyfill@6.0.0':
     dependencies:
       webmcp-types: 0.1.9
 
-  '@mcp-b/webmcp-ts-sdk@6.0.0-beta.20261001010549':
+  '@mcp-b/webmcp-ts-sdk@6.0.0':
     dependencies:
-      '@mcp-b/webmcp-polyfill': 6.0.0-beta.20261001010549
+      '@mcp-b/webmcp-polyfill': 6.0.0
       '@modelcontextprotocol/server': 2.0.0
       '@standard-schema/spec': 1.1.0
       webmcp-types: 0.1.9
@@ -9100,7 +9101,7 @@ snapshots:
     dependencies:
       react: 19.2.0
 
-  usewebmcp@6.0.0-beta.20261001010549(react@19.2.0):
+  usewebmcp@6.0.0(react@19.2.0):
     dependencies:
       react: 19.2.0
       webmcp-types: 0.1.9
